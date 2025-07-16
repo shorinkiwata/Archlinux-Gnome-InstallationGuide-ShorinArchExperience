@@ -1,6 +1,6 @@
 [Archlinux+Gnome安装与配置.md](https://github.com/user-attachments/files/21246919/Archlinux%2BGnome.md)
 
-本文档是主要是btrfs文件系统的archlinux+Gnome环境的搭建
+本文档是主要是btrfs文件系统的archlinux+Gnome环境的搭建，内容涉及archlinux的手动安装、脚本安装、swap文件、gnome精简安装、桌面配置、美化、kvm虚拟机、显卡直通、笔记本显卡切换、性能优化、电源管理
 
 # 安装系统
 ## 手动安装
