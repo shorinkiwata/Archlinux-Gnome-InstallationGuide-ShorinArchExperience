@@ -3,6 +3,7 @@
 
 ## 双系统安装后时间错乱，windwos开机磁盘检查
 https://blog.csdn.net/zhouchen1998/article/details/108893660
+
 管理员打开powershell 运行
 ```
 Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsUniversal /t REG_DWORD /d 1
