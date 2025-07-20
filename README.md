@@ -1,6 +1,12 @@
-[Archlinux+Gnome安装与配置.md](https://github.com/user-attachments/files/21246919/Archlinux%2BGnome.md)
+本文档是主要是btrfs文件系统的archlinux+Gnome环境的搭建
 
-本文档是主要是btrfs文件系统的archlinux+Gnome环境的搭建，内容涉及archlinux的手动安装、脚本安装、swap文件、gnome精简安装、桌面配置、美化、kvm虚拟机、显卡直通、笔记本显卡切换、性能优化、电源管理
+
+## 双系统安装后时间错乱，windwos开机磁盘检查
+https://blog.csdn.net/zhouchen1998/article/details/108893660
+管理员打开powershell 运行
+```
+Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsUniversal /t REG_DWORD /d 1
+```
 
 # 安装系统
 ## 手动安装
@@ -486,6 +492,7 @@ sudo pacman -S mission-center gnome-text-editor gnome-disk-utility gnome-clocks 
 #zen-browser zen-browser-i18n-cn 基于firefox的浏览器和cn语言包
 #gst-plugin-pipewire gst-plugins-good gnome截图工具自带的录屏，需登出
 #pacman-contrib 是pacman的一些小工具
+#amberol 音乐播放器
 ```
 - qq、微信、wps
 ```
@@ -648,81 +655,12 @@ sudo pacman -S dconf-editor
 nautilus -q 
 ```
 
-## 休眠
-*参考链接 https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate*
-休眠分为四种，休眠到内存（deep suspend）、休眠到idle(s2idle suspend)，休眠到硬盘（hibernate）、同时休眠到内存和硬盘（hybrid sleep）。
-suspend是暂时挂起。s2idle是微软提供的一种唤醒速度极快的挂起，缺点是耗电。deep比s2idle更省电，唤醒速度稍慢。hibernate完全不耗电，但是唤醒慢。
-
-### 休眠到内存
-最新的电脑通常只支持s2idle,所以不需要修改
-- 查看支持的suspend方式
-```
-cat /sys/power/mem_sleep
-```
-通常输出结果是s2idle shallow deep
-- 临时修改suspend方式
-```
-echo deep > /sys/power/mem_sleep
-```
-- 永久修改
-```
-sudo vim /etc/systemd/sleep.conf.d/mem-deep.conf
-```
-```
-[Sleep]
-MemorySleepMode=deep
-```
-
-### 休眠到硬盘
-- 添加hook
-```
-sudo vim /etc/mkinitcpio.conf
-```
-```
-在HOOKS()内添加resume,注意需要添加在udev的后面,建议加在末尾
-```
-- 重新生成initramfs
-```
-sudo mkinitcpio -P
-```
-- reboot
-```
-reboot
-```
-- 尝试hibernate
-```
-systemctl hibernate
-```
- 如果成功hibernate的话电脑在一小会儿的磁盘写入后会进入关机状态。开机后进到锁屏界面而不是登入界面，输入密码后休眠前的窗口仍然在原位。
- - 查看hibernate过程中的日志
-```
- journalctl -b 0 | grep -i -e "hibernation" -e "resume"
-```
-
-#### 如果失败的话尝试指定交换空间
-- 获取swap分区的UUID：ctrl+shift+c复制
- ```
-lsblk -o name,mountpoint,size,uuid 
- ```
-- 编辑grub
-```
-sudo nano /etc/default/grub 
-```
-- 在GRUB_CMDLINE_LINUX_DEFAULT里添加
-```
-resume=UUID=刚才复制的UUID
-```
-- 重新生成grub.cfg
-```
-sudo grub-mkconfig -o /boot/grub/grub.cfg
-```
-
 ## 可变刷新率和分数缩放
 商店安装refine修改
 
 ## 配置系统快捷键
 ### 交换大写锁定键和esc键
-- - 安装gnome-tweaks
+- 安装gnome-tweaks
 ```
 sudo pacman -S gnome-tweaks
 ```
@@ -868,7 +806,7 @@ sudo pacman -S nvidia-prime
 prime-run firefox 
 ```
 
-- 使用menulibre修改.desktop文件，在command的最前面加上 prime-run 
+- 使用pinapp修改.desktop文件，在command的最前面加上 prime-run 
 
 #### 在gnome桌面环境下右键快捷方式选择使用独显运行
 
@@ -881,6 +819,28 @@ sudo systemctl enable --now switcheroo-control
 ```
 
 ## 电源管理
+*参考链接 https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate*
+### 休眠到硬盘
+硬盘上必须有交换空间才能休眠到硬盘
+- 添加hook
+```
+sudo vim /etc/mkinitcpio.conf
+```
+```
+在HOOKS()内添加resume,注意需要添加在udev的后面,建议加在末尾
+```
+- 重新生成initramfs
+```
+sudo mkinitcpio -P
+```
+- reboot
+```
+reboot
+```
+- 使用命令进行休眠
+```
+systemctl hibernate
+```
 
 ### 内核参数
 
@@ -1161,8 +1121,6 @@ HOOKS=(... modconf ...)
 - 重新生成
 ```
 sudo mkinitcpio -P
-
-#此处要是自己的内核，例如zen的话是linux-zen
 ```
 - 重启电脑
 
@@ -1214,22 +1172,6 @@ sudo pacman -S moonlight-qt
 sunshine在web设置pin码添加设备之后就可以连接了。
 
 # 性能优化
-## 内存压缩
-zram
-```
-sudo pacman -S zram-generator
-```
-```
-sudo vim  /etc/systemd/zram-generator.conf
-```
-```
-[zram0]
-zram-size = "ram*0.25"
-compression-algorithm = zstd
-```
-```
-reboot
-```
 
 ## cpu资源优先级
 ```
@@ -1243,7 +1185,67 @@ sudo systemctl enable --now ananicy-cpp.service
 ```
 sudo systemctl enable --now nvidia-powerd.service
 ```
+## LACT进行显卡offset
 
+## 交换空间
+关于交换空间大小：
+[Swap - Manjaro --- Swap - Manjaro](https://wiki.manjaro.org/index.php?title=Swap)
+[电源管理/挂起与休眠 - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/%E7%94%B5%E6%BA%90%E7%AE%A1%E7%90%86/%E6%8C%82%E8%B5%B7%E4%B8%8E%E4%BC%91%E7%9C%A0#%E7%A6%81%E7%94%A8_zswap_%E5%86%99%E5%9B%9E%E4%BB%A5%E4%BB%85%E5%B0%86%E4%BA%A4%E6%8D%A2%E7%A9%BA%E9%97%B4%E7%94%A8%E4%BA%8E%E4%BC%91%E7%9C%A0)
+[zswap - ArchWiki](https://wiki.archlinux.org/title/Zswap)
+[zram - ArchWiki](https://wiki.archlinux.org/title/Zram)
+[Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
+### 不需要休眠的话
+如果不需要休眠功能可以禁用swap，然后开启zram
+```
+sudo swapoff /swap/swapfile
+```
+```
+sudo rm /swap/swapfile
+```
+- 编辑fstab
+```
+sudo vim /etc/fstab
+```
+```
+删除与swap相关的挂载
+
+```
+### zram内存压缩
+
+```
+sudo pacman -S zram-generator
+```
+```
+sudo vim  /etc/systemd/zram-generator.conf
+```
+```
+[zram0]
+zram-size = "ram*0.5"
+compression-algorithm = zstd #重视cpu开销和速度选择lz4
+```
+- 禁用zswap
+```
+sudo vim /etc/default/grub
+```
+```
+编辑GRUB_CMDLINE_LINUX_DEFAULT=""
+写入zswap.enabled=0
+```
+- 重新生成grub的配置文件
+```
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+```
+- reboot
+- 验证zswap是否关闭
+```
+sudo grep -R . /sys/kernel/debug/zswap/
+```
+- 验证zram是否开启
+```
+sudo zramctl
+或者
+swapon
+```
 ## 安装zen内核
 ps：会导致功耗略微增加
 * 安装内核
@@ -1264,7 +1266,7 @@ reboot #重启时在grub的arch advance启动项里选择zen
 ```
 * 确认正常运行后删除stable内核
 ```
-sudo pacman -R linux 
+sudo pacman -R linux linux-headers
 ```
 * 重新生成grub
 ```
@@ -1305,6 +1307,7 @@ diskpart选中efi分区后输入：
  SET ID=ebd0a0a2-b9e5-4433-87c0-68b6b72699c7
 ```
 即可在磁盘管理工具里面删除分区
+或者使用diskgeniux，图吧工具箱里面有
 
 ---
 # issuses
@@ -1314,7 +1317,6 @@ https://blog.csdn.net/zhouchen1998/article/details/108893660
 管理员打开powershell 运行
 ```
 Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsUniversal /t REG_DWORD /d 1
-
 ```
 
 ## nautilus创建文件的symlinks符号链接
@@ -1355,6 +1357,8 @@ NIUBI partition Editor free edition
 n卡的锅，没辙
 
 # 附录
+
+
 ## pacman常用指令
 
 * 删除包，同时删除不再被其他包需要的依赖和配置文件,-R删除包，s删除依赖，n删除配置文件
