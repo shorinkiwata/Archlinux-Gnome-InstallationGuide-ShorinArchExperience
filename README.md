@@ -522,7 +522,14 @@ zen浏览器一定要在设置>zen模组里面安装transparent zen模组，可�
 ```
 yay -S linuxqq wechat wps-office-cn  
 ```
+- markdown编辑器
+
+```
+yay -S typora-free
+```
+
 - flathub
+
 ```
 flatpak install flathub be.alexandervanhee.gradia io.github.Predidit.Kazumi io.gitlab.theevilskeleton.Upscaler com.github.unrud.VideoDownloader io.github.ilya_zlobintsev.LACT xyz.ketok.Speedtest com.geeks3d.furmark com.rafaelmardojai.Blanket
 ```
@@ -1303,7 +1310,7 @@ sudo waydroid init -s GAPPS
 ```
 systemctl enable --now waydroid-container
 ```
-- 安装兼容层
+- 安装arm转移
 [GitHub - casualsnek/waydroid_script: Python Script to add OpenGapps, Magisk, libhoudini translation library and libndk translation library to waydroid !](https://github.com/casualsnek/waydroid_script)
 我们的cpu架构是x86_64,要运行arm应用需要安装arm转译, amd装libndk, intel装libhoudini
 ```
@@ -1320,14 +1327,12 @@ sudo venv/bin/python3 main.py
 ```
 waydroid session start
 ```
-
 然后应该就能在桌面看到一大堆图标了
-
 - 安装软件
-
 ```
 waydroid app install /apk/的/路径
 ```
+- 软件默认是全屏打开，可以设置窗口化打开软件
 
 #### 卸载waydroid
 
