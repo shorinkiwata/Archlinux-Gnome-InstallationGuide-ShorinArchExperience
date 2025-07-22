@@ -1,7 +1,21 @@
 本文档是主要是btrfs文件系统的archlinux+Gnome环境的搭建
 
+1. [手动安装](##手动安装)
+2. [脚本安装](##脚本安装)
+3. [配置系统](#配置系统)
+4. [美化](#美化)
+5. [笔记本显卡切换和电源管理](#显卡切换)
+6. [KVM虚拟机](#KVM虚拟机)
+7. [显卡直通](##显卡直通)
+8. [在linux上玩游戏](#在linux上玩游戏)
+9. [性能优化](#性能优化)
+10. [删除linux](#删除linux)
+11. [issues](#issues)
+12. [附录](#附录)
+13. [参考资料](#参考资料)
 
 ## 双系统安装后时间错乱，windwos开机磁盘检查
+
 参考链接：
 [双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)
 
@@ -501,6 +515,8 @@ sudo pacman -S mission-center gnome-text-editor gnome-disk-utility gnome-clocks 
 #gst-plugin-pipewire gst-plugins-good gnome截图工具自带的录屏，需登出
 #pacman-contrib 是pacman的一些小工具
 #amberol 音乐播放器
+
+zen浏览器一定要在设置>zen模组里面安装transparent zen模组，可以获得特别流畅的动画效果
 ```
 - qq、微信、wps
 ```
@@ -527,21 +543,6 @@ Blanket 白噪音播放器
 flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
 ```
 我设置了两个截图快捷键，ctrl+alt+a普通系统截图（仿qq截图快捷键），super+shift+s截图并进入编辑界面（仿win截图快捷键）。
-
-###  游戏和wine运行exe程序
-[Steam - ArchWiki](https://wiki.archlinux.org/title/Steam)
-[Download · Wiki · wine / wine · GitLab](https://gitlab.winehq.org/wine/wine/-/wikis/zh_CN/Download)
-[Lutris - Open Gaming Platform](https://lutris.net/)
-
-```
-sudo pacman -S steam wine lutris
-```
-
-```
-winecfg
-```
-
-lutris官网有大量游戏安装脚本，steam要开启32位源后才能安装
 
 ### appimage
 appimage是一个下载即用、无需安装的文件。需要确认安装了fuse才能运行appimage。
@@ -601,10 +602,69 @@ export XMODIFIERS=@im=fcitx
 export QT_IM_MODULE=fcitx 
 export GTK_IM_MODULE=fcitx
 ```
+### ibus-rime
+
+[Rime - Arch Linux 中文维基](https://wiki.archlinuxcn.org/zh-hant/Rime)
+
+[可选配置（基础篇） | archlinux 简明指南](https://arch.icekylin.online/guide/advanced/optional-cfg-1#%F0%9F%8D%80%EF%B8%8F-%E8%BE%93%E5%85%A5%E6%B3%95)
+
+[RIME · GitHub](https://github.com/rime)
+
+ibus输入法在gnome的兼容性极佳，无须配置环境变量即可使用，rime可以解决ibus-libpinyin词库垃圾的问题
+
+- 删除fcitx5输入法（记得关闭fcitx5的扩展)
+
+```
+sudo pacman -Rns fcitx5-im fcitx5-chinese-addons fcitx5-mozc
+```
+
+- 安装ibus-rime
+
+```
+sudo pacman -S ibus ibus-rime ice-rime
+yay -S ibus-mozc #日语输入法
+```
+
+- 在gnome的设置中心 > 键盘 里面搜索rime添加输入法
+- 如果之前禁用过系统设置里的打字快捷键的记得恢复
+
+- 编辑配置文件设置输入法为ice
+
+```
+vim ~/.config/ibus/rime/default.custom.yaml
+```
+
+如果没有的自己创建，mkdir命令创建文件夹，touch命令创建文件
+
+```
+patch:
+  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
+  __include: rime_ice_suggestion:/
+```
+- 编辑环境变量
+```
+sudo vim /etc/environment
+```
+删除或者注释fcitx5相关的环境变量，gnome使用ibus输入法在正常情况下不需要设置环境变量，如果出了问题可以把fcitx5替换为ibus
+
+- 第一次切换至rime输入法需要等待部署完成
+- 出现异常可以登出一次
+- 可选：添加萌娘百科词库
+
+```
+yay -S rime-pinyin-moegirl
+
+vim /usr/share/rime-data/rime_ice.dict.yaml 
+按照指引在合适的位置添加
+- moegirl
+```
+
 ## 快照
+
 **快照相当于存档，每次试验什么之前最好都存个档**
 **！！！警告！！！**
 **删除已创建快照必须一个一个删除，否则大概率崩盘。**
+
 - 安装timeshift
 ```
 sudo pacman -S timeshift 
@@ -1205,15 +1265,108 @@ sudo pacman -S moonlight-qt
 ```
 sunshine在web设置pin码添加设备之后就可以连接了。
 
+# 在linux上玩游戏
+这一节不仅适用于windows的游戏程序，还适用于windows的软件。
+首选用steam玩游戏，steam没有的游戏通过lutris管理，使用proton或者wine运行。安卓手游用waydroid运行。如果都不行，用配置了显卡直通的win11虚拟机玩
+
+## 玩steam游戏
+
+[Steam - ArchWiki](https://wiki.archlinux.org/title/Steam)
+
+```
+sudo pacman -S steam
+```
+在设置→兼容性里面选择默认兼容性工具即可运行大部分无反作弊的游戏
+## 玩安卓手游
+### waydroid
+[Install Instructions | Waydroid](https://docs.waydro.id/usage/install-on-desktops)
+[Waydroid - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/Waydroid)
+安卓系统也是linux内核，那linux发行版自然也能运行安卓，并且性能还是接近原生的。waydroid是linux上的安卓容器，相当于一个完整的安卓系统。
+
+- 安装
+```
+yay -S waydroid
+```
+可选：从archlinuxcn安装waydroid-image（要求添加cn仓库，按照流程，在本文档的yay安装部分已经添加）
+```
+sudo pacman -S waydroid-image
+#带谷歌play的
+sudo pacman -S waydroid-image-gapps
+```
+- 初始化
+```
+sudo waydroid init
+#带谷歌的
+sudo waydroid init -s GAPPS
+```
+- 启动服务
+```
+systemctl enable --now waydroid-container
+```
+- 安装兼容层
+[GitHub - casualsnek/waydroid_script: Python Script to add OpenGapps, Magisk, libhoudini translation library and libndk translation library to waydroid !](https://github.com/casualsnek/waydroid_script)
+我们的cpu架构是x86_64,要运行arm应用需要安装arm转译, amd装libndk, intel装libhoudini
+```
+sudo pacman -S lzip
+git clone https://github.com/casualsnek/waydroid_script
+cd waydroid_script
+python3 -m venv venv
+venv/bin/pip install -r requirements.txt
+sudo venv/bin/python3 main.py
+按照窗口的指引进行安装
+```
+- 开启
+
+```
+waydroid session start
+```
+
+然后应该就能在桌面看到一大堆图标了
+
+- 安装软件
+
+```
+waydroid app install /apk/的/路径
+```
+
+#### 卸载waydroid
+
+```
+waydroid session stop
+sudo systemctl disable --now waydroid-container.service
+yay -Rns waydroid #如果下载了waydroid-image的话需要一并删除
+sudo rm -rf /var/lib/waydroid ~/.local/share/waydroid ~/.local/share/applications/waydroid*
+
+```
+
+## wine/proton 兼容层运行
+wine是在linux下运行windows程序的兼容层，proton是steam的母公司v社基于wine开发的专门用来玩游戏的兼容层。原理是把window程序发出的请求翻译成linux系统下的等效请求。通常使用最新的wine或者proton版本即可。
+
+### lutris
+[Download Lutris](https://lutris.net/downloads)
+lutris是一个专为玩游戏设计的工具，可以很方便地管理需要用wine或者proton兼容层运行的软件。lutris可以完全取代，steam的“添加非steam游戏”功能。
+
+- 安装
+```
+sudo pacman -S lutris
+```
+- 第一次打开会自动下载各种需要的组件
+- 卸载
+```
+sudo pacman -Rns lutris
+```
+```
+sudo rm -rfv ~/.config/lutris ~/.cache/lutris ~/.local/share/lutris ~/.local/share/applications/net.lutris.Lutris.desktop ~/.local/share/applications/lutris-game-*.desktop
+```
+steam下载proton之后可以在lutris里面设置wine版本为proton
+
+## 用显卡直通玩游戏
+经过前面显卡直通的操作，我已经有了一台4060显卡的win11, 理论上所有win11能干的事情我都能在这台虚拟机上干。具体的就不用再往下说了吧🤓☝️
+至于为什么显卡直通虚拟机win11而不是重启到真的win11里面。
+因为just for fun，想双系统就重启，想直通就直通，想wsl就wsl，还要追问为什么的话我祝你万事如意身体健康。
+
 # 性能优化
 
-## cpu资源优先级
-```
-sudo pacman -S ananicy-cpp
-```
-```
-sudo systemctl enable --now ananicy-cpp.service
-```
 ## N卡动态功耗调节 
 
 ```
@@ -1353,7 +1506,7 @@ diskpart选中efi分区后输入：
 或者使用diskgeniux，图吧工具箱里面有
 
 ---
-# issuses
+# issues
 
 ## 时间错乱，windwos开机磁盘检查
 [双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)
@@ -1435,7 +1588,14 @@ sudo pacman -Qdt
 ```
 sudo pacman -Rns $(pacman -Qdt)
 ```
-
+## cpu资源优先级
+因为影响steam下载速度已弃用（这是已知问题，估计还有其它问题）
+```
+sudo pacman -S ananicy-cpp
+```
+```
+sudo systemctl enable --now ananicy-cpp.service
+```
 ## TLP相关
 ```
 sudo pacman -S tlp tlp-rdw 
@@ -1510,7 +1670,11 @@ sudo pacman -Syyu
 （由于词库和联想实在远不如fctix5,换掉了）
 ibpinyin是中文拼音输入法，anthy是日文输入法登出一次，设置里找到键盘，添加输入源
 ```
-sudo pacman -S ibus ibus-libpinyin ibus-anthy
+sudo pacman -S ibus ibus-pinyin
+更好用的中文输入法：
+sudo pacman -S ibus-rime 
+日语输入法：
+yay -S ibus-mozc
 ```
 - 配置输入法
 常规里勾选候选词，设置候选词排序为词频
@@ -1590,7 +1754,6 @@ font_size 14
 [手把手教你给笔记本重装系统（Windows篇）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV16h4y1B7md/?spm_id_from=333.337.search-card.all.click)
 [太突然！Win11 LTSC 官方精简版，终于来了 - 知乎](https://zhuanlan.zhihu.com/p/1000648759)
 [PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF)
-[如何在 Linux 主机和 KVM 中的 Windows 客户机之间共享文件夹 | Linux 中国 - 知乎](https://zhuanlan.zhihu.com/p/645234144)
 [GitHub - LizardByte/Sunshine: Self-hosted game stream host for Moonlight.](https://github.com/LizardByte/Sunshine)
 [Swap - Manjaro --- Swap - Manjaro](https://wiki.manjaro.org/index.php?title=Swap)
 [电源管理/挂起与休眠 - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/%E7%94%B5%E6%BA%90%E7%AE%A1%E7%90%86/%E6%8C%82%E8%B5%B7%E4%B8%8E%E4%BC%91%E7%9C%A0#%E7%A6%81%E7%94%A8_zswap_%E5%86%99%E5%9B%9E%E4%BB%A5%E4%BB%85%E5%B0%86%E4%BA%A4%E6%8D%A2%E7%A9%BA%E9%97%B4%E7%94%A8%E4%BA%8E%E4%BC%91%E7%9C%A0)
@@ -1611,3 +1774,8 @@ font_size 14
 [Settings — TLP 1.8.0 documentation](https://linrunner.de/tlp/settings/index.html)
 [ALHP：优化你的archlinux性能 - 哔哩哔哩](https://www.bilibili.com/opus/745324585822453908?from=search&spm_id_from=333.337.0.0%2a)
 [kitty.conf - kitty](https://sw.kovidgoyal.net/kitty/conf/)
+[Steam - ArchWiki](https://wiki.archlinux.org/title/Steam)
+[Install Instructions | Waydroid](https://docs.waydro.id/usage/install-on-desktops)
+[Waydroid - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/Waydroid)
+[GitHub - casualsnek/waydroid_script: Python Script to add OpenGapps, Magisk, libhoudini translation library and libndk translation library to waydroid !](https://github.com/casualsnek/waydroid_script)
+[Download Lutris](https://lutris.net/downloads)
