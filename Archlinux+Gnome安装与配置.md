@@ -54,19 +54,19 @@ timedatectl set-ntp true
 
 ### 硬盘分区
 ```
-lsblk -p  查看当前分区情况
+lsblk -pf  查看当前分区情况
 fdisk -l 小写字母l，查看详细分区信息
 ```
 ```
 cfdisk /dev/nvme0n1 选择自己要使用的硬盘进行分区
 ```
-创建512MB efi system
+创建512MB或者1g efi system
 其余全部分到一个分区里，类型linux filesystem 
 
 
 #### 格式化分区
 ```
-lsblk -p 查看分区情况
+lsblk -pf 查看分区情况
 ```
 
 - 格式化efi启动分区
@@ -92,7 +92,7 @@ btrfs subvolume create /mnt/@home
 btrfs subvolume create /mnt/@swap
 ```
 
-- 确认
+- 可选：确认
 ```
 btrfs subvolume list -p /mnt
 ```
@@ -151,7 +151,8 @@ sudo 和权限管理有关
 amd-ucode 是微码，用来修复和优化cpu
 ```
 
-##设置swap
+## 设置swap
+
 参考链接：[Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
 
 创建swap文件
@@ -178,6 +179,12 @@ arch-chroot /mnt
 
 ### 主机名
 
+```
+vim /etc/hostname
+```
+
+
+
 
 ### 设置时间和时区
 ```
@@ -191,7 +198,7 @@ hwclock --systohc
 ```
 vim /etc/locale.gen
 
-取消en_US.UTF-8 UTF-8的注释
+取消en_US.UTF-8 UTF-8和zh_CN.UTF-8的注释
 ```
 ```
 locale-gen
@@ -214,15 +221,16 @@ efibootmgr 管理uefi启动项
 os-prober 用来搜索win11
 ```
 ```
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=ARCH
+grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=ARCH #此处的id可以自取
 ```
 
 - 编辑grub的源文件
 ```
 vim /etc/default/grub
-去掉quiet， loglevel改成5，添加nowatchdog modprobe.blacklist=sp5100_tco，intelcpu用户把sp5100_tco换成iTCO_wdt
-手动写入或者取消GRUB_DISABLE_OS_PROBER=false的注释
 ```
+
+去掉quiet， loglevel改成5，添加nowatchdog modprobe.blacklist=sp5100_tco，intelcpu用户把sp5100_tco换成iTCO_wdt
+手动写入或者取消GRUB_DISABLE_OS_PROBER=false的注释让grub生成其他系统的启动项
 
 - 生成配置文件
 ```
@@ -244,12 +252,16 @@ systemctl enable --now NetworkManager
 nmcli dev wifi connect <wifiname> password <password>
 ```
 
-##放松一下吧
+### 放松一下吧
+
 ```
 pacman -S fastfetch lolcat cmatrix
 ```
 
+使用示例： fastfetch | lolcat
+
 ## 脚本安装
+
 ### 确认网络连接
 - ip a 查看网络连接
 - ping 一个网址确认网络正常
@@ -278,7 +290,7 @@ pacman -S archinstall
 
 ### 磁盘分区 disk configuration
 #### 启动分区
-wiki推荐是1GB，所以填入1024MB，类型fat32,挂载点是/boot
+wiki推荐是1GB，所以填入1024MB，小点也行，类型fat32,挂载点是/boot
 #### swap交换空间
 swap与虚拟内存和休眠有关，可以创建swap分区或者swap文件，二选一，前者配置更简单，后者配置稍复杂，但是更加灵活。
 ###### swap分区
@@ -360,7 +372,7 @@ sudo pacman -S nvidia nvidia-utils nvidia-settings
 ```
 非stable内核要安装的驱动不一样，具体看wiki，zen内核装nvidia-dkms
 命令行使用 sudo nvidia-settings可以对显卡进行超频
-#### AMD核显建议检查是否安装vulkan驱动
+#### AMD显卡建议检查是否安装vulkan驱动
 ```
 sudo pacman -S vulkan-radeon 
 ```
@@ -411,6 +423,9 @@ reboot
 sudo systemctl start gdm #即使出了问题重启也能恢复，避免进不了tty的情况
 ```
 * 设置gdm开机自启
+
+桌面环境正常开启后设置开机自启
+
 ```
 sudo systemctl enable gdm
 ```
@@ -428,6 +443,8 @@ xdg-user-dirs-update
 ```
 flatpak install flathub io.github.fabrialberio.pinapp
 ```
+也可以用menulibre，使用pacman安装
+
 想隐藏的图标激活invisible，然后保存
 
 ## 安装声音固件和声音服务
@@ -669,7 +686,9 @@ vim /usr/share/rime-data/rime_ice.dict.yaml
 ## 快照
 
 **快照相当于存档，每次试验什么之前最好都存个档**
+
 **！！！警告！！！**
+
 **删除已创建快照必须一个一个删除，否则大概率崩盘。**
 
 - 安装timeshift
@@ -710,13 +729,16 @@ sudo sed -i -E 's/(subvolid=[0-9]+,)|(,subvolid=[0-9]+)//g' /etc/fstab
 ```
 
 ## open in any terminal
+
 [GitHub - Stunkymonkey/nautilus-open-any-terminal](https://github.com/Stunkymonkey/nautilus-open-any-terminal)
+
+这是一个在文件管理器“右键在此处打开终端”的功能
+
 - 如果用的是ghostty
 ```
 sudo pacman -S nautilus-python
 ```
 - 其他终端仿真器
-这是一个在文件管理器“右键在此处打开终端”的功能
 ```
 yay -S nautilus-open-any-terminal 
 ```
@@ -815,10 +837,7 @@ GNOME Fuzzy App Search #模糊搜索
 
 steal my focus window #如果打开窗口时窗口已经被打开则置顶
 
-tiling shell#窗口平铺，tilingshell是用布局平铺,另一个叫forge是hyprland那种自动平铺但是很卡。推荐用tilingshell，记得自定义快捷键，我快捷键是super+w/a/s/d对应上下左右移动窗口，Super+Alt+w/a/s/d对应上下左右扩展窗口，super+c取消平铺。
-#其他建议开启的设置选项
-#启用自动平铺
-#聚焦2）
+tiling shell #窗口平铺，tilingshell是用布局平铺,另一个叫forge是hyprland那种自动平铺但是很卡。推荐用tilingshell，记得自定义快捷键，我快捷键是super+w/a/s/d对应上下左右移动窗口，Super+Alt+w/a/s/d对应上下左右扩展窗口，super+c取消平铺。
 
 color picker #对自定义非常有用
 vitals #右上角显示当前资源使用情况
@@ -956,8 +975,6 @@ power tracker #显示电池充放电
 auto power profile #配合powerProfilesDaemon使用，可以自动切换模式
 power profile indicator # 配合powerProfilesDaemon使用，顶栏显示当前模式
 ```
-
-# 
 
 ---
 
@@ -1112,19 +1129,24 @@ sudo systemctl restart libvirtd
 ```
 ### 嵌套虚拟化
 intel的话用 kvm_intel
-临时生效
+
+- 临时生效
+
 ```
 modprobe kvm_amd nested=1
 ```
-永久生效
+- 永久生效
+
 ```
 sudo vim /etc/modprobe.d/kvm_amd.conf
 ```
-写入
+- 写入
+
 ```
 options kvm_amd nested=1
 ```
-重新生成
+- 重新生成
+
 ```
 sudo mkinitcpio -P
 ```
@@ -1158,9 +1180,7 @@ https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/
 ```
 根据视频指引安装
 ```
-- 
-显示协议里监听类型选无，OpenGL，选择AMD显卡（N卡暂时不支持3d加速，可以用vmware），显卡里选virtio，勾选3d加速
-
+- 显示协议里监听类型选无，OpenGL，选择AMD显卡（N卡暂时不支持3d加速，可以用vmware），显卡里选virtio，勾选3d加速
 - 跳过联网
 确保机器没有连接到网络，按下shift+f10 ，鼠标点选窗口，输入
 ```
@@ -1254,7 +1274,7 @@ sudo mkinitcpio -P
 重启
 ```
 ## 远程桌面
-两种方案，parsec和sunshine+moonlight，前者安装即用，后者需要一些配置但是上限最高，可以做到原生的效果。
+两种方案，parsec和sunshine+moonlight，前者安装即用，后者需要一些配置但是上限最高，可以做到原生的效果。有兴趣的也可以自己研究一下looking glass。
 ### sunshine+moonlight
 [GitHub - LizardByte/Sunshine: Self-hosted game stream host for Moonlight.](https://github.com/LizardByte/Sunshine)
 虚拟机win11内安装sunshine
@@ -1274,7 +1294,7 @@ sunshine在web设置pin码添加设备之后就可以连接了。
 
 # 在linux上玩游戏
 这一节不仅适用于windows的游戏程序，还适用于windows的软件。
-首选用steam玩游戏，steam没有的游戏通过lutris管理，使用proton或者wine运行。安卓手游用waydroid运行。如果都不行，用配置了显卡直通的win11虚拟机玩
+首选用steam玩游戏，steam没有的游戏通过lutris管理，使用proton或者wine运行。安卓手游用waydroid运行。如果都不行，用配置了显卡直通的win11虚拟机。
 
 ## 玩steam游戏
 
@@ -1284,6 +1304,15 @@ sunshine在web设置pin码添加设备之后就可以连接了。
 sudo pacman -S steam
 ```
 在设置→兼容性里面选择默认兼容性工具即可运行大部分无反作弊的游戏
+
+## 玩minecraft
+- 从aur安装
+```
+yay -S minecraft-launcher #官方启动器
+yay -S hmcl-bin
+```
+安装时选择最新的jdk
+
 ## 玩安卓手游
 ### waydroid
 [Install Instructions | Waydroid](https://docs.waydro.id/usage/install-on-desktops)
@@ -1310,7 +1339,7 @@ sudo waydroid init -s GAPPS
 ```
 systemctl enable --now waydroid-container
 ```
-- 安装arm转移
+- 安装arm转译
 [GitHub - casualsnek/waydroid_script: Python Script to add OpenGapps, Magisk, libhoudini translation library and libndk translation library to waydroid !](https://github.com/casualsnek/waydroid_script)
 我们的cpu架构是x86_64,要运行arm应用需要安装arm转译, amd装libndk, intel装libhoudini
 ```
@@ -1321,18 +1350,41 @@ python3 -m venv venv
 venv/bin/pip install -r requirements.txt
 sudo venv/bin/python3 main.py
 按照窗口的指引进行安装
-```
-- 开启
 
+```
+- 开启会话
 ```
 waydroid session start
 ```
 然后应该就能在桌面看到一大堆图标了
+- 软件默认是全屏打开，可以设置窗口化打开软件，f11切换全屏和窗口化
+```
+waydroid prop set persist.waydroid.multi_windows true
+```
+然后用命令重启会话
+```
+waydroid session stop
+waydroid session start 
+```
 - 安装软件
 ```
 waydroid app install /apk/的/路径
 ```
-- 软件默认是全屏打开，可以设置窗口化打开软件
+
+#### 软件渲染
+n卡用户用不了waydroid，可以用软件渲染，但是性能很差，勉强玩2d游戏。
+- 编辑配置文件
+```
+/var/lib/waydroid/waydroid.cfg
+```
+- 本地更新应用一下更改后的配置
+```
+sudo waydroid upgrade --offline
+```
+- 重启服务
+```
+systemctl restart waydroid-container
+```
 
 #### 卸载waydroid
 
@@ -1345,18 +1397,18 @@ sudo rm -rf /var/lib/waydroid ~/.local/share/waydroid ~/.local/share/application
 ```
 
 ## wine/proton 兼容层运行
-wine是在linux下运行windows程序的兼容层，proton是steam的母公司v社基于wine开发的专门用来玩游戏的兼容层。原理是把window程序发出的请求翻译成linux系统下的等效请求。通常使用最新的wine或者proton版本即可。
+wine是在linux下运行windows程序的兼容层，proton是steam的母公司v社基于wine开发的专门用来玩游戏的兼容层。原理是把window程序发出的请求翻译成linux系统下的等效请求。通常使用最新的wine或者proton版本即可。steam添加非steam游戏的proton路径。r
 
 ### lutris
 [Download Lutris](https://lutris.net/downloads)
-lutris是一个专为玩游戏设计的工具，可以很方便地管理需要用wine或者proton兼容层运行的软件。lutris可以完全取代，steam的“添加非steam游戏”功能。
+lutris是一个专为玩游戏设计的工具，可以很方便地管理需要用wine或者proton兼容层运行的软件。lutris可以完全取代steam的“添加非steam游戏”功能。
 
 - 安装
 ```
 sudo pacman -S lutris
 ```
-- 第一次打开会自动下载各种需要的组件
-- 卸载
+- 第一次打开会自动下载各种需要的组件，点击左上角的加号可以看到主要功能
+- 卸载lutris
 ```
 sudo pacman -Rns lutris
 ```
@@ -1364,6 +1416,7 @@ sudo pacman -Rns lutris
 sudo rm -rfv ~/.config/lutris ~/.cache/lutris ~/.local/share/lutris ~/.local/share/applications/net.lutris.Lutris.desktop ~/.local/share/applications/lutris-game-*.desktop
 ```
 steam下载proton之后可以在lutris里面设置wine版本为proton
+
 
 ## 用显卡直通玩游戏
 经过前面显卡直通的操作，我已经有了一台4060显卡的win11, 理论上所有win11能干的事情我都能在这台虚拟机上干。具体的就不用再往下说了吧🤓☝️
@@ -1409,7 +1462,6 @@ sudo vim /etc/fstab
 ```
 ```
 删除与swap相关的挂载
-
 ```
 ### zram内存压缩
 
@@ -1512,6 +1564,12 @@ diskpart选中efi分区后输入：
 
 ---
 # issues
+
+## 磁盘占用异常
+
+明明没有多少文件，磁盘占用却很高。可以试试删除btrfs快照。
+
+
 
 ## 时间错乱，windwos开机磁盘检查
 [双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)
