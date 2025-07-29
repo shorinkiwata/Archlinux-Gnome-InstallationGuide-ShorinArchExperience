@@ -815,7 +815,7 @@ nautilus -q
 商店安装refine修改
 
 ## 配置系统快捷键
-### 交换大写锁定键和esc键
+### 可选：交换大写锁定键和esc键
 - 安装gnome-tweaks
 ```
 sudo pacman -S gnome-tweaks
