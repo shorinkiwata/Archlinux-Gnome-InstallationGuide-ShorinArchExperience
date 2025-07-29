@@ -1,5 +1,13 @@
 本文档是主要是btrfs文件系统的archlinux+Gnome环境的搭建
 
+```
+更新日志：
+2025.7.23 修改原本的fcitx5内容，添加fcitx5-rime和ibus-rime输入法相关内容
+2025.7.24 添加在linux上玩游戏（minecraft、steam、lutris、waydroid）相关的内容
+2025.7.26 添加looking glass相关内容
+```
+
+
 1. [手动安装](#手动安装)
 2. [脚本安装](#脚本安装)
 3. [配置系统](#配置系统)
