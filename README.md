@@ -663,10 +663,11 @@ patch:
 sudo vim /etc/environment
 ```
 ```
-XIM="fcitx"
+XIM="fcitx" #解决wechat用不了输入法的问题
 GTK_IM_MODULE=fcitx
 QT_IM_MODULE=fcitx
 XMODIFIERS=@im=fcitx
+XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
 ```
 #### wps用不了fcitx5
 由于wps自身的问题，我们需要手动设置变量：
