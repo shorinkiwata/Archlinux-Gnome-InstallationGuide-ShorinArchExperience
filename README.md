@@ -1009,12 +1009,10 @@ nowatchdog modprobe.blacklist=sp5100_tco
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-
-
 ### power-profiles-daemon
 
 性能模式切换，有三个档位，performance性能、balance平衡、powersave节电
-*不建议使用tlp或者auto-cpufreq，这个易用而且足够，如果想折腾的话可以自己试试*
+不建议使用tlp或者auto-cpufreq，意义不大。这个易用而且足够，如果想折腾的话可以自己试试tlp。
 
 ```
 sudo pacman -S power-profiles-daemon
@@ -1427,7 +1425,9 @@ sunshine在web设置pin码添加设备之后就可以连接了。
 
 [Installation — Looking Glass B7 documentation](https://looking-glass.io/docs/B7/install/)
 
-looking glass通过共享内存实现屏幕分享，也需要安装virtual-display-driver
+[PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF)
+
+looking glass通过共享内存实现屏幕分享，也需要安装[Virtual-Display-Driver](https://github.com/VirtualDrivers/Virtual-Display-Driver)
 
 - 计算需要的共享内存大小
 具体可以看官方档案，我是2560x1440@180hz 非HDR，需要大小是64M
@@ -2136,3 +2136,10 @@ font_size 14
 [GitHub - casualsnek/waydroid_script: Python Script to add OpenGapps, Magisk, libhoudini translation library and libndk translation library to waydroid !](https://github.com/casualsnek/waydroid_script)
 
 [Download Lutris](https://lutris.net/downloads)
+
+ [Looking Glass - Download Looking Glass](https://looking-glass.io/downloads)
+
+[Installation — Looking Glass B7 documentation](https://looking-glass.io/docs/B7/install/)
+
+[libvirt/QEMU Installation — Looking Glass B7 documentation](https://looking-glass.io/docs/B7/install_libvirt/#memballoon)
+
