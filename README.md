@@ -19,6 +19,7 @@ esc 退出编辑模式
 :q 冒号小写q，退出
 :w 冒号小写w，写入
 :wq 冒号小写wq保存并退出
+
 ## 双系统安装后时间错乱，windwos开机磁盘检查
 
 参考链接：
@@ -33,7 +34,10 @@ Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsU
 ## 手动安装
 参考链接：
 [archlinux 简明指南](https://arch.icekylin.online/)
+
 [安装指南 - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97)
+
+
 
 ### 确认网络
 ```
@@ -170,6 +174,8 @@ amd-ucode 是微码，用来修复和优化cpu
 ## 设置swap
 
 参考链接：[Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
+
+
 
 创建swap文件
 
@@ -313,9 +319,13 @@ swap与虚拟内存和休眠有关，可以创建swap分区或者swap文件，�
 ###### swap文件
 将所有剩余空间分到一个分区，类型选择btrfs,设置compress（透明压缩,可以节省磁盘空间），添加sub volume。
 - @ 对应 /
+
 - @home 对应 / 
+
 - @swap 对应 /swap
-交换文件的创建方法：[Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
+  交换文件的创建方法：[Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
+
+  
 ```
 btrfs filesystem mkswapfile --size 4g --uuid clear /swap/swapfile
 ```
@@ -374,6 +384,8 @@ EDITOR=vim visudo
 ## 安装N卡显卡驱动和硬件编解码
 参考链接：[NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)
 
+
+
 ### 检查头文件
 ```
 sudo pacman -S linux-headers
@@ -383,17 +395,13 @@ sudo pacman -S linux-headers
 
 N卡此时如果不安装显卡驱动，可能无法启动桌面环境，此处以4060为例
 ```
-sudo pacman -S nvidia nvidia-utils nvidia-settings 
+sudo pacman -S nvidia nvidia-utils
 ```
 非stable内核要安装的驱动不一样，具体看wiki，zen内核装nvidia-dkms
-命令行使用 sudo nvidia-settings可以对显卡进行超频
+
 #### AMD显卡建议检查是否安装vulkan驱动
 ```
 sudo pacman -S vulkan-radeon 
-```
-```
-sudo pacman -S vulkan-tools
-#测试工具，vulkaninfo --summary查看vulkan是否启用，vkcube测试vulkan渲染
 ```
 - 混合模式软件还是跑在N卡上的话检查有没有安装vulkan-mesa-layers
 参考链接：[gnome-shell uses dgpu instead of igpu : r/gnome](https://www.reddit.com/r/gnome/comments/1irvmki/gnomeshell_uses_dgpu_instead_of_igpu/)
@@ -404,11 +412,11 @@ sudo pacman -S vulkan-mesa-layers
 ### 硬件编解码
  - nvidia4060
 ```
-sudo pacman -S libva-nvidia-driver libva libva-utils
+sudo pacman -S libva-nvidia-driver
 ```
 - intel xe核显
 ```
-sudo pacman -S intel-media-driver libva libva-utils
+sudo pacman -S intel-media-driver libva
 ```
 * amd 780M
 确认安装了libva-mesa-driver
@@ -611,15 +619,39 @@ sudo locale-gen
 
 ## 安装输入法
 
-### fcitx5
+### fcitx5-rime 雾凇拼音
+
 ```
-sudo pacman -S fcitx5-im fcitx5-chinese-addons fcitx5-mozc
+sudo pacman -S fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
 ```
-mozc是g谷歌日语输入法的开源版本
-- 安装gnome扩展：input method panel
-https://extensions.gnome.org/extension/261/kimpanel/
-- 在fcitx5配置里面添加输入法，没有的话登出重新载入一次
+```
+fcitx5-im 包含了fcitx5的基本包
+fcitx5-mozc是开源谷歌日语输入法
+fcitx5-rime是输入法引擎
+rime-ice-pinyin-git是雾凇拼音输入法
+```
+
+- 打开fcitx 5 configuration添加rime和mozc输入法，没有的话登出一次
+
+- 编辑rime的配置文件设置输入法方案为雾凇拼音，如果没有文件夹和文件的话自己创建文件夹，然后运行如下命令
+
+```
+vim ~/.local/share/fcitx5/rime/default.custom.yaml 
+```
+
+```
+写入：
+
+patch:
+  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
+  __include: rime_ice_suggestion:/
+```
+
+- 商店搜索extension，安装蓝色的extensionmanager
+- 安装扩展：input method panel
+  https://extensions.gnome.org/extension/261/kimpanel/
 - 编辑环境变量
+
 ```
 sudo vim /etc/environment
 ```
@@ -627,9 +659,6 @@ sudo vim /etc/environment
 GTK_IM_MODULE=fcitx 
 QT_IM_MODULE=fcitx 
 XMODIFIERS=@im=fcitx
-```
-```
-重启电脑
 ```
 #### wps用不了fcitx5
 由于wps自身的问题，我们需要手动设置变量：
@@ -641,25 +670,6 @@ export XMODIFIERS=@im=fcitx
 export QT_IM_MODULE=fcitx 
 export GTK_IM_MODULE=fcitx
 ```
-### fcitx5-rime加雾凇拼音
-
-```
-sudo pacman -S fcitx5-rime rime-ice-pinyin-git
-```
-fcitx5配置里面添加rime
-
-```
-sudo vim $HOME/.loacl/share/fcitx5/rime/default.custom.yaml
-```
-
-```
-写入
-
-patch:
-  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
-  __include: rime_ice_suggestion:/
-```
-
 
 
 ### ibus-rime
@@ -670,12 +680,13 @@ patch:
 
 [RIME · GitHub](https://github.com/rime)
 
+
 ibus输入法在gnome的兼容性极佳，无须配置环境变量即可使用，rime可以解决ibus-libpinyin词库垃圾的问题
 
 - 删除fcitx5输入法（记得关闭fcitx5的扩展)
 
 ```
-sudo pacman -Rns fcitx5-im fcitx5-chinese-addons fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
+sudo pacman -Rns fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
 ```
 
 - 安装ibus-rime
@@ -851,7 +862,9 @@ super+shift+S   flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
 
 ## 功能性扩展
 [arch + gnome美化教程_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1ym4y1G76s/?share_source=copy_web&vd_source=1c6a132d86487c8c4a29c7ff5cd8ac50)
+
 [the best tiling extension](https://www.reddit.com/r/gnome/comments/1ei9bj0/the_best_tiling_extension/)
+
 ```
 flatpak install flathub com.mattjakeman.ExtensionManager
 ```
@@ -913,6 +926,7 @@ AsusMuxDgpu supergfxctl --mode AsusMuxDgpu
 
 #### envycontrol
 [GitHub - bayasdev/envycontrol: Easy GPU switching for Nvidia Optimus laptops under Linux](https://github.com/bayasdev/envycontrol)
+
 * 笔记本BIOS内切换为混合模式
 
 ```
@@ -1028,6 +1042,7 @@ power profile indicator # 配合powerProfilesDaemon使用，顶栏显示当前�
 ## 扩展美化
 
 [arch + gnome美化教程_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1ym4y1G76s/?share_source=copy_web&vd_source=1c6a132d86487c8c4a29c7ff5cd8ac50)
+
 ```
 #安装扩展
 lock screen background #更换锁屏背景
@@ -1046,10 +1061,12 @@ gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:'
 
 ### 光标主题
 主题下载网站 https://www.gnome-look.org/browse?cat=107&ord=latest
+
 将下载的.tar.gz文件里面的文件夹放到～/.local/share/icons/目录下，没有icons文件夹的话自己创建一个
 
 ### gnome主题
 https://www.gnome-look.org/browse?cat=134&ord=latest
+
 通常下载页面都有指引，文件路径是~/.themes/，放进去之后在user themes扩展的设置里面改可以改
 
 ## 终端美化
@@ -1075,6 +1092,7 @@ chsh -s /usr/bin/zsh
 
 ### starship
 [Starship](https://starship.rs/)
+
 ```
 sudo pacman -S starship
 ```
@@ -1136,8 +1154,11 @@ font-size = 15
 
 # KVM虚拟机
 [[已解决] KVM Libvirt 中无法访问存储文件，权限被拒绝错误](https://cn.linux-terminal.com/?p=4593)
+
 [How to Install KVM on Ubuntu | phoenixNAP KB](https://phoenixnap.com/kb/ubuntu-install-kvm)
+
 [如何在 Linux 主机和 KVM 中的 Windows 客户机之间共享文件夹 | Linux 中国 - 知乎](https://zhuanlan.zhihu.com/p/645234144)
+
 
 * 安装qemu，图形界面， TPM
 ```
@@ -1194,6 +1215,7 @@ sudo mkinitcpio -P
 ```
 
 ### 配置桥接网络
+
 * 启动高级网络配置工具
 ```
 nm-connection-editor
@@ -1209,6 +1231,7 @@ nm-connection-editor
 ```
 ### 安装win11 LTS虚拟机
 [手把手教你给笔记本重装系统（Windows篇）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV16h4y1B7md/?spm_id_from=333.337.search-card.all.click)
+
 [太突然！Win11 LTSC 官方精简版，终于来了 - 知乎](https://zhuanlan.zhihu.com/p/1000648759)
 
 * 下载win11 iot LTS iso 镜像
@@ -1230,6 +1253,7 @@ oobe\bypassnro
 ```
 * 和本机进行文件分享
 [如何在 Linux 主机和 KVM 中的 Windows 客户机之间共享文件夹 | Linux 中国 - 知乎](https://zhuanlan.zhihu.com/p/645234144)
+
 ```
 确认开启共享内存
 ```
@@ -1248,6 +1272,7 @@ https://winfsp.dev/rel/
 ```
 ### 显卡直通
 [PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF)
+
 - 确认iommu是否开启，有输出说明开启
 ```
 sudo dmesg | grep -e DMAR -e IOMMU
@@ -1315,11 +1340,74 @@ sudo mkinitcpio -P
 ```
 重启
 ```
+#### 虚拟机性能优化
+我在使用的过程中，最大的感受就是cpu和gpu反倒以近乎原生的性能在运行，但是内存性能很差、非常差、难以置信的差。在研究looking glass的时候偶然解决了这个问题。元凶是memballoon
+
+#####  memballoon
+
+[libvirt/QEMU Installation — Looking Glass B7 documentation](https://looking-glass.io/docs/B7/install_libvirt/#memballoon)
+
+memlbaloon的目的是提高内存的利用率，但是由于它会不停地“取走”“归还”虚拟机内存，导致显卡 直通时虚拟机内存性能极差。
+
+将虚拟机xml里面的memballoon改为none，这将极大极大极大地！！！提高显卡直通虚拟机的性能。总体可以达到9成原生的性能。
+
+```
+<memballoon model="none"/>
+```
+##### 可选：内存大页
+[KVM - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/KVM#%E5%BC%80%E5%90%AF%E5%86%85%E5%AD%98%E5%A4%A7%E9%A1%B5)
+
+没感觉到有提升，wiki说有，那姑且设置一下
+
+- 计算大页大小
+
+1g 虚拟机内存对应550，以16GB为例，大页需要8800（粗略计算，具体可以看wiki）
+
+- 临时（重启失效）
+```
+echo 8800 > /proc/sys/vm/nr_hugepages
+```
+- 编辑虚拟机xml
+
+在virt-manager的g首选项里开启xml编辑，找到```<memoryBacking>```并添加```<hugepages/>```：
+```
+  <memoryBacking>
+    <hugepages/>
+  </memoryBacking>
+```
+- 永久生效
+
+```
+sudo vim /etc/sysctl.d/40-hugepage.conf
+
+vm.nr_hugepages = 8800
+```
+
+- 查看大页使用情况
+
+```
+grep HugePages /proc/meminfo
+```
+
+
+
 ## 远程桌面
-两种方案，parsec和sunshine+moonlight，前者安装即用，后者需要一些配置但是上限最高，可以做到原生的效果。有兴趣的也可以自己研究一下looking glass。
+三种方案，parsec、sunshineo+moonlight、looking glass，配置难度和最终效果逐级上升
+
+### parsec
+- windows上浏览器搜索安装
+- linux上安装
+```
+yay -S parsec-bin
+```
+- 登录相同账号
+
+
 ### sunshine+moonlight
 [GitHub - LizardByte/Sunshine: Self-hosted game stream host for Moonlight.](https://github.com/LizardByte/Sunshine)
+
 虚拟机win11内安装sunshine
+
 ```
 https://github.com/LizardByte/Sunshine
 ```
@@ -1329,12 +1417,98 @@ https://github.com/VirtualDrivers/Virtual-Display-Driver
 ```
 客机安装moonlight
 https://moonlight-stream.org/
+
 ```
 sudo pacman -S moonlight-qt
 ```
 sunshine在web设置pin码添加设备之后就可以连接了。
 
+### looking glass
+
+[Installation — Looking Glass B7 documentation](https://looking-glass.io/docs/B7/install/)
+
+looking glass通过共享内存实现屏幕分享，也需要安装virtual-display-driver
+
+- 计算需要的共享内存大小
+具体可以看官方档案，我是2560x1440@180hz 非HDR，需要大小是64M
+- 设置共享内存设备
+打开virt-manager，点击编辑 > 首选项，勾选启用xml编辑。
+打开虚拟机配置，找到xml底部的  ```</devices>```，在  ```</devices>```的上面添加设备，就是这种感觉：
+```
+<devices>
+    ...
+  <shmem name='looking-glass'>
+    <model type='ivshmem-plain'/>
+    <size unit='M'>64</size>
+  </shmem>
+</devices>
+```
+64改为自己需要的大小
+
+- 开启终端，添加kvm组
+```
+sudo gpasswd -a $USER kvm 
+
+#添加自己到kvm组里面， 需要重启，重启后用groups确认自己的组
+```
+- 每次开机检查文件，不存在的话创建并编辑权限
+
+```
+sudo vim /etc/tmpfiles.d/10-looking-glass.conf
+
+写入（user改为自己的用户名）：
+
+f	/dev/shm/looking-glass	0660	user	kvm	-
+
+f是创建文件
+/dev/shm/looking-glass是共享内存文件的路径
+0660设置拥有者和组拥有读写权限
+user设置拥有者
+kvm设置组
+- 代表不进行清理
+```
+- 无须重启，现在手动创建文件
+
+```
+sudo systemd-tmpfiles --create /etc/tmpfiles.d/10-looking-glass.conf
+```
+
+- 回到虚拟机设置
+  确认有spicei显示协议
+  显卡设置为none
+  添加virtio键盘和virtio鼠标（要在xml里面更改bus=“ps2”为bus=“virtio”）
+  添加通道，设备类型选择spice
+  里面找到下面这段，把type从none 改成spice
+
+```
+<sound model='ich9'>
+  <audio id='1'/>
+</sound>
+<audio id='1' type='spice'/>
+```
+
+- 开启虚拟机，安装looking glass 服务端
+
+ [Looking Glass - Download Looking Glass](https://looking-glass.io/downloads)
+
+浏览器搜索 looking glass，点击download，下载最新的stable版本，解压后安装
+
+- linux安装客户端
+
+ 服务端和客户端的版本要匹配，looking-glass包对应最新的stable版本，looking-glass-git包对应bleeding-edge版本
+
+```
+yay -S looking-glass
+```
+- 桌面打开即可连接
+- 可选:
+
+由于这样连接不会捕获快捷方式，无法在win里面 使用win键，可以微软商店下载powertoys重新映射快捷键解决这个问题。或者买3模键鼠。
+
+关于虚拟机性能优化，见[虚拟机性能优化](#虚拟机性能优化)
+
 # 在linux上玩游戏
+
 这一节不仅适用于windows的游戏程序，还适用于windows的软件。
 首选用steam玩游戏，steam没有的游戏通过lutris管理，使用proton或者wine运行。安卓手游用waydroid运行。如果都不行，用配置了显卡直通的win11虚拟机。
 
@@ -1358,7 +1532,9 @@ yay -S hmcl-bin
 ## 玩安卓手游
 ### waydroid
 [Install Instructions | Waydroid](https://docs.waydro.id/usage/install-on-desktops)
+
 [Waydroid - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/Waydroid)
+
 安卓系统也是linux内核，那linux发行版自然也能运行安卓，并且性能还是接近原生的。waydroid是linux上的安卓容器，相当于一个完整的安卓系统。
 
 - 安装
@@ -1379,10 +1555,11 @@ sudo waydroid init -s GAPPS
 ```
 - 启动服务
 ```
-systemctl enable --now waydroid-container
+sudo systemctl enable --now waydroid-container
 ```
 - 安装arm转译
 [GitHub - casualsnek/waydroid_script: Python Script to add OpenGapps, Magisk, libhoudini translation library and libndk translation library to waydroid !](https://github.com/casualsnek/waydroid_script)
+
 我们的cpu架构是x86_64,要运行arm应用需要安装arm转译, amd装libndk, intel装libhoudini
 ```
 sudo pacman -S lzip
@@ -1403,7 +1580,7 @@ waydroid session start
 ```
 waydroid prop set persist.waydroid.multi_windows true
 ```
-然后用命令重启会话
+然后用命令重启会话，这一步会隐藏桌面的waydroid图标，可以设置显示。如果开启不了的话可以stop之后在尝试用桌面快捷方式开启
 ```
 waydroid session stop
 waydroid session start 
@@ -1443,6 +1620,7 @@ wine是在linux下运行windows程序的兼容层，proton是steam的母公司v�
 
 ### lutris
 [Download Lutris](https://lutris.net/downloads)
+
 lutris是一个专为玩游戏设计的工具，可以很方便地管理需要用wine或者proton兼容层运行的软件。lutris可以完全取代steam的“添加非steam游戏”功能。
 
 - 安装
@@ -1461,7 +1639,7 @@ steam下载proton之后可以在lutris里面设置wine版本为proton
 
 
 ## 用显卡直通玩游戏
-经过前面显卡直通的操作，我已经有了一台4060显卡的win11, 理论上所有win11能干的事情我都能在这台虚拟机上干。具体的就不用再往下说了吧🤓☝️
+经过前面显卡直通的操作，我已经有了一台4060显卡的win11，并且配置了looking glass，理论上所有win11能干的事情我都能在这台虚拟机上干。具体的就不用再往下说了吧🤓☝️
 至于为什么显卡直通虚拟机win11而不是重启到真的win11里面。
 因为just for fun，想双系统就重启，想直通就直通，想wsl就wsl，还要追问为什么的话我祝你万事如意身体健康。
 
@@ -1477,18 +1655,31 @@ sudo systemctl enable --now nvidia-powerd.service
 ## 交换空间
 关于交换空间大小：
 [Swap - Manjaro --- Swap - Manjaro](https://wiki.manjaro.org/index.php?title=Swap)
+
 [电源管理/挂起与休眠 - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/%E7%94%B5%E6%BA%90%E7%AE%A1%E7%90%86/%E6%8C%82%E8%B5%B7%E4%B8%8E%E4%BC%91%E7%9C%A0#%E7%A6%81%E7%94%A8_zswap_%E5%86%99%E5%9B%9E%E4%BB%A5%E4%BB%85%E5%B0%86%E4%BA%A4%E6%8D%A2%E7%A9%BA%E9%97%B4%E7%94%A8%E4%BA%8E%E4%BC%91%E7%9C%A0)
+
 [zswap - ArchWiki](https://wiki.archlinux.org/title/Zswap)
+
 [zram - ArchWiki](https://wiki.archlinux.org/title/Zram)
+
 [Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
+
 [Zram vs zswap vs swap? : r/archlinux](https://www.reddit.com/r/archlinux/comments/1ivwv1l/zram_vs_zswap_vs_swap/)
-[Zswap vs zram in 2023, what's the actual practical difference? : r/linux](https://www.reddit.com/r/linux/comments/11dkhz7/zswap_vs_zram_in_2023
-[linux - ZRAM vs ZSWAP for lower end hardware? - Super User](https://superuser.com/questions/1727160/zram-vs-zswap-for-lower-end-hardware)_whats_the_actual_practical/)
+
+[Zswap vs zram in 2023, what's the actual practical difference? : r/linux](https://www.reddit.com/r/linux/comments/11dkhz7/zswap_vs_zram_in_2023)
+
+[linux - ZRAM vs ZSWAP for lower end hardware? - Super User](https://superuser.com/questions/1727160/zram-vs-zswap-for-lower-end-hardware)
+
 [Zswap or Zram: at this time, which one is more efficient? : r/archlinux](https://www.reddit.com/r/archlinux/comments/13ujemv/zswap_or_zram_at_this_time_which_one_is_more/)
+
 [Zram, zswap and hibernation - Support - Manjaro Linux Forum](https://forum.manjaro.org/t/zram-zswap-and-hibernation/82348)
+
 [kernel - zram vs zswap vs zcache Ultimate guide: when to use which one - Ask Ubuntu](https://askubuntu.com/questions/471912/zram-vs-zswap-vs-zcache-ultimate-guide-when-to-use-which-one/472227#472227)
+
 [zswap — The Linux Kernel documentation](https://www.kernel.org/doc/html/v4.18/vm/zswap.html)
+
 [zram: Compressed RAM-based block devices — The Linux Kernel documentation](https://docs.kernel.org/admin-guide/blockdev/zram.html)
+
 
 ### 不需要休眠的话
 如果不需要休眠功能可以禁用swap，然后开启zram
@@ -1571,10 +1762,12 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
 # 删除linux
 ## 和windows共用efi分区时
 [(重制)彻底删除Linux卸载后的无用引导项_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV14p4y1n7rJ/?spm_id_from=333.1387.favlist.content.click)
+
 win+x 选择磁盘管理，找到efi在第几个磁盘的第几个分区
 
 win+R 输入 diskpart 回车
 select disk 命令选择efi分区所在磁盘，从0开始，第一个磁盘是数字0
+
 ```
 select disk 0
 ```
@@ -1597,7 +1790,9 @@ remove letter p
 
 ## 单独efi分区时
 [windows10删除EFI分区(绝对安全)-CSDN博客](https://blog.csdn.net/sinat_29957455/article/details/88726797)
+
 diskpart选中efi分区后输入：
+
 ```
  SET ID=ebd0a0a2-b9e5-4433-87c0-68b6b72699c7
 ```
@@ -1615,13 +1810,17 @@ diskpart选中efi分区后输入：
 
 ## 时间错乱，windwos开机磁盘检查
 [双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)
+
 管理员打开powershell 运行
+
 ```
 Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsUniversal /t REG_DWORD /d 1
 ```
 
 ## nautilus创建文件的symlinks符号链接
 [Creating Symlinks in Files under Wayland : r/gnome](https://www.reddit.com/r/gnome/comments/10qayrs/creating_symlinks_in_files_under_wayland/)
+
+
 
 ctrl+c复制文件后ctrl+m
 
@@ -1633,6 +1832,9 @@ sudo pacman -S gvfs-smb
 
 ## 域名解析出现暂时性错误
 [解决 Ubuntu 系统中 “Temporary Failure in Name Resolution“ 错误-CSDN博客](https://blog.csdn.net/qq_15603633/article/details/141032652)
+
+
+
 ```
 sudo vim /etc/resolv.conf
 ```
@@ -1714,7 +1916,9 @@ sudo pacman -S tlp tlp-rdw
 yay -S tlpui
 ```
 设置方法参考官方文档[Settings — TLP 1.8.0 documentation](https://linrunner.de/tlp/settings/index.html)
+
 这里给一个现代电脑的通用设置：
+
 ```
 processor选项卡中
 
@@ -1749,6 +1953,8 @@ sudo systemctl enable --now tlp
 ## 安装alhp 
 （下载太慢，容易下载失败，我不建议使用，遂删除）
 *参考链接: [ALHP：优化你的archlinux性能 - 哔哩哔哩](https://www.bilibili.com/opus/745324585822453908?from=search&spm_id_from=333.337.0.0%2a)
+
+
 
 * 检查芯片支持,记住结果里是x86-64-v几
 ```
@@ -1840,52 +2046,93 @@ font_size 14
 ```
 
 # 特别鸣谢
-##[Google Gemini](https://gemini.google.com/app)
+[Google Gemini](https://gemini.google.com/app)
+
 
 ### 参考资料：
 [archlinux 简明指南](https://arch.icekylin.online/)
+
 [安装指南 - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97)
+
 [双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)
+
 [Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
+
 [gnome-shell uses dgpu instead of igpu : r/gnome](https://www.reddit.com/r/gnome/comments/1irvmki/gnomeshell_uses_dgpu_instead_of_igpu/)
+
 [NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)
+
 [GitHub - Jguer/yay: Yet another Yogurt - An AUR Helper written in Go](https://github.com/Jguer/yay)
+
 [Steam - ArchWiki](https://wiki.archlinux.org/title/Steam)
+
 [Download · Wiki · wine / wine · GitLab](https://gitlab.winehq.org/wine/wine/-/wikis/zh_CN/Download)
+
 [Lutris - Open Gaming Platform](https://lutris.net/)
+
 [GitHub - Stunkymonkey/nautilus-open-any-terminal](https://github.com/Stunkymonkey/nautilus-open-any-terminal)
+
 [arch + gnome美化教程_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1ym4y1G76s/?share_source=copy_web&vd_source=1c6a132d86487c8c4a29c7ff5cd8ac50)
+
 [the best tiling extension](https://www.reddit.com/r/gnome/comments/1ei9bj0/the_best_tiling_extension/)
+
 [Linux for ROG Notebooks](https://asus-linux.org/)
+
 [GitHub - bayasdev/envycontrol: Easy GPU switching for Nvidia Optimus laptops under Linux](https://github.com/bayasdev/envycontrol)
+
 [[已解决] KVM Libvirt 中无法访问存储文件，权限被拒绝错误](https://cn.linux-terminal.com/?p=4593)
+
 [How to Install KVM on Ubuntu | phoenixNAP KB](https://phoenixnap.com/kb/ubuntu-install-kvm)
+
 [如何在 Linux 主机和 KVM 中的 Windows 客户机之间共享文件夹 | Linux 中国 - 知乎](https://zhuanlan.zhihu.com/p/645234144)
+
 [手把手教你给笔记本重装系统（Windows篇）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV16h4y1B7md/?spm_id_from=333.337.search-card.all.click)
+
 [太突然！Win11 LTSC 官方精简版，终于来了 - 知乎](https://zhuanlan.zhihu.com/p/1000648759)
+
 [PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF)
+
 [GitHub - LizardByte/Sunshine: Self-hosted game stream host for Moonlight.](https://github.com/LizardByte/Sunshine)
+
 [Swap - Manjaro --- Swap - Manjaro](https://wiki.manjaro.org/index.php?title=Swap)
+
 [电源管理/挂起与休眠 - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/%E7%94%B5%E6%BA%90%E7%AE%A1%E7%90%86/%E6%8C%82%E8%B5%B7%E4%B8%8E%E4%BC%91%E7%9C%A0#%E7%A6%81%E7%94%A8_zswap_%E5%86%99%E5%9B%9E%E4%BB%A5%E4%BB%85%E5%B0%86%E4%BA%A4%E6%8D%A2%E7%A9%BA%E9%97%B4%E7%94%A8%E4%BA%8E%E4%BC%91%E7%9C%A0)
+
 [zswap - ArchWiki](https://wiki.archlinux.org/title/Zswap)
-[zram - ArchWiki](https://wiki.archlinux.org/title/Zram)
-[Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
+
 [Zram vs zswap vs swap? : r/archlinux](https://www.reddit.com/r/archlinux/comments/1ivwv1l/zram_vs_zswap_vs_swap/)
-[Zswap vs zram in 2023, what's the actual practical difference? : r/linux](https://www.reddit.com/r/linux/comments/11dkhz7/zswap_vs_zram_in_2023
-[linux - ZRAM vs ZSWAP for lower end hardware? - Super User](https://superuser.com/questions/1727160/zram-vs-zswap-for-lower-end-hardware)_whats_the_actual_practical/)
+
+[Zswap vs zram in 2023, what's the actual practical difference? : r/linux](https://www.reddit.com/r/linux/comments/11dkhz7/zswap_vs_zram_in_2023)
+
+[linux - ZRAM vs ZSWAP for lower end hardware? - Super User](https://superuser.com/questions/1727160/zram-vs-zswap-for-lower-end-hardware)
+
 [Zswap or Zram: at this time, which one is more efficient? : r/archlinux](https://www.reddit.com/r/archlinux/comments/13ujemv/zswap_or_zram_at_this_time_which_one_is_more/)
+
 [Zram, zswap and hibernation - Support - Manjaro Linux Forum](https://forum.manjaro.org/t/zram-zswap-and-hibernation/82348)
+
 [kernel - zram vs zswap vs zcache Ultimate guide: when to use which one - Ask Ubuntu](https://askubuntu.com/questions/471912/zram-vs-zswap-vs-zcache-ultimate-guide-when-to-use-which-one/472227#472227)
+
 [zswap — The Linux Kernel documentation](https://www.kernel.org/doc/html/v4.18/vm/zswap.html)
+
 [zram: Compressed RAM-based block devices — The Linux Kernel documentation](https://docs.kernel.org/admin-guide/blockdev/zram.html)
+
 [windows10删除EFI分区(绝对安全)-CSDN博客](https://blog.csdn.net/sinat_29957455/article/details/88726797)
+
 [Creating Symlinks in Files under Wayland : r/gnome](https://www.reddit.com/r/gnome/comments/10qayrs/creating_symlinks_in_files_under_wayland/)
+
 [解决 Ubuntu 系统中 “Temporary Failure in Name Resolution“ 错误-CSDN博客](https://blog.csdn.net/qq_15603633/article/details/141032652)
+
 [Settings — TLP 1.8.0 documentation](https://linrunner.de/tlp/settings/index.html)
 [ALHP：优化你的archlinux性能 - 哔哩哔哩](https://www.bilibili.com/opus/745324585822453908?from=search&spm_id_from=333.337.0.0%2a)
+
 [kitty.conf - kitty](https://sw.kovidgoyal.net/kitty/conf/)
+
 [Steam - ArchWiki](https://wiki.archlinux.org/title/Steam)
+
 [Install Instructions | Waydroid](https://docs.waydro.id/usage/install-on-desktops)
+
 [Waydroid - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/Waydroid)
+
 [GitHub - casualsnek/waydroid_script: Python Script to add OpenGapps, Magisk, libhoudini translation library and libndk translation library to waydroid !](https://github.com/casualsnek/waydroid_script)
+
 [Download Lutris](https://lutris.net/downloads)
