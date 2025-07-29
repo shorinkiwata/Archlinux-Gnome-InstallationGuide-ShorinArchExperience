@@ -1,10 +1,9 @@
 本文档是主要是btrfs文件系统的archlinux+Gnome环境的搭建
-
 ```
 更新日志：
 2025.7.23 修改原本的fcitx5内容，添加fcitx5-rime和ibus-rime输入法相关内容
 2025.7.24 添加在linux上玩游戏（minecraft、steam、lutris、waydroid）相关的内容
-2025.7.26 添加looking glass相关内容
+2025.7.26 添加looking glass相关内容。修改了输入法的环境变量。
 ```
 
 
@@ -664,8 +663,9 @@ patch:
 sudo vim /etc/environment
 ```
 ```
-GTK_IM_MODULE=fcitx 
-QT_IM_MODULE=fcitx 
+XIM="fcitx"
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
 XMODIFIERS=@im=fcitx
 ```
 #### wps用不了fcitx5
@@ -724,7 +724,7 @@ patch:
 ```
 sudo vim /etc/environment
 ```
-删除或者注释fcitx5相关的环境变量，gnome使用ibus输入法在正常情况下不需要设置环境变量，如果出了问题可以把fcitx5替换为ibus
+删除或者注释fcitx5相关的环境变量，gnome使用ibus输入法在正常情况下不需要设置环境变量，如果出了问题可以把fcitx替换为ibus
 
 - 第一次切换至rime输入法需要等待部署完成
 - 出现异常可以登出一次
