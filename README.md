@@ -1,9 +1,12 @@
-本文档是主要是btrfs文件系统的archlinux+Gnome环境的搭建
+本文档是主要是btrfs文件系统的archlinux+Gnome（wayland）环境的搭建
 ```
 更新日志：
 2025.7.23 修改原本的fcitx5内容，添加fcitx5-rime和ibus-rime输入法相关内容
 2025.7.24 添加在linux上玩游戏（minecraft、steam、lutris、waydroid）相关的内容
 2025.7.26 添加looking glass相关内容。修改了输入法的环境变量。
+2025.7.30 添加了flatpak更换上海交大源的内容
+2025.7.30 添加了fcitx5美化相关内容
+2025.7.30 移除fcitx5相关内容，转而使用ibus-rime，用gnome扩展解决ibus美化问题
 ```
 
 
@@ -20,17 +23,22 @@
 11. [issues](#issues)
 12. [附录](#附录)
 13. [参考资料](#参考资料)
+
 ## vim基础操作
 i 键进入编辑模式
+
 esc 退出编辑模式
+
 :q 冒号小写q，退出
+
 :w 冒号小写w，写入
+
 :wq 冒号小写wq保存并退出
 
 ## 双系统安装后时间错乱，windwos开机磁盘检查
 
 参考链接：
-[双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)
+[双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)s
 
 管理员打开powershell 运行
 ```
@@ -40,11 +48,10 @@ Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsU
 # 安装系统
 ## 手动安装
 参考链接：
+
 [archlinux 简明指南](https://arch.icekylin.online/)
 
 [安装指南 - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97)
-
-
 
 ### 确认网络
 ```
@@ -70,19 +77,20 @@ timedatectl set-ntp true
 ### 硬盘分区
 ```
 lsblk -pf  查看当前分区情况
-fdisk -l 小写字母l，查看详细分区信息
+fdisk -l /dev/想要查询详细情况的硬盘  小写字母l，查看详细分区信息
 ```
 ```
 cfdisk /dev/nvme0n1 选择自己要使用的硬盘进行分区
 ```
-创建512MB或者1g efi system
+创建512MB或者1g的分区，类型（type）选择efi system
+
 其余全部分到一个分区里，类型linux filesystem 
 
 
 #### 格式化分区
 ```
 lsblk -pf 查看分区情况
-fdisk -l 小写字母l，查看详细分区信息
+fdisk -l /dev/想要查询详细情况的硬盘  小写字母l，查看详细分区信息
 ```
 
 - 格式化efi启动分区
@@ -92,6 +100,8 @@ mkfs.fat -F 32 /dev/efi_system_partition
 - 格式化btrfs根分区
 ```
 mkfs.btrfs /dev/root_partition
+
+#加上-f参数可以强制格式化
 ```
 
 #### btrfs子卷
@@ -135,18 +145,17 @@ df -h 复查挂载情况
 #### 设置镜像源
 ##### reflector自动设置
 ```
-reflector -a 48 -c cn -f 10 --sort rate --save /etc/pacman.d/mirrorlist --v
+reflector -a 24 -c cn -f 10 --sort score --save /etc/pacman.d/mirrorlist --v
 
--a（age） 48 指定最近48小时更新过的源
--c（country） cn 指定国家为中国
--f（fastest） 10 筛选出最快的10个
---sort rate 按照下载速度排顺序
+-a（age） 24 指定最近24小时更新过的源
+-c（country） cn 指定国家为中国（可以增加邻国）
+-f（fastest） 10 筛选出下载速度最快的10个
+--sort score 按照下载速度和同步时间综合评分并排序，比单纯按照下载速度排序更可靠
 --save /etc/pacman.d/mirrorlist 将结果保存到/etc/pacman.d/mirrorlist
 --v（verbose） 过程可视化
 ```
 ##### 手动设置
 ```
-
 vim /etc/pacman.d/mirrorlist
 
 拿出手机，浏览器搜索 archlinux中国镜像源，找一个镜像源添加
@@ -172,17 +181,15 @@ btrfs-progs是btrfs文件系统的管理工具
 ```
 pacstrap /mnt networkmanager vim sudo amd-ucode
 
-networkmanager 是联网用的
-vim 是文本编辑器
+networkmanager 是联网用的，和kde和gnome深度集成，也可以换成别的
+vim 是文本编辑器，也可以换成别的，比如nano
 sudo 和权限管理有关
-amd-ucode 是微码，用来修复和优化cpu
+amd-ucode 是微码，用来修复和优化cpu，intel用户安装intel-ucode
 ```
 
 ## 设置swap
 
 参考链接：[Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
-
-
 
 创建swap文件
 
@@ -215,6 +222,8 @@ vim /etc/hostname
 ### 设置时间和时区
 ```
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+#ln 是link的缩写，-s代表跨文件系统的软链接，-f代表强制执行，所以这条命令的意思是创建一个Shanghai的链接，取名为localtime。zoneinfo里面包含了所有可用时区的文件，localtime是系统确认时间的依据。
 ```
 ```
 hwclock --systohc
@@ -255,8 +264,13 @@ grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=ARCH #此
 vim /etc/default/grub
 ```
 
-去掉quiet， loglevel改成5，添加nowatchdog modprobe.blacklist=sp5100_tco，intelcpu用户把sp5100_tco换成iTCO_wdt
-手动写入或者取消GRUB_DISABLE_OS_PROBER=false的注释让grub生成其他系统的启动项
+GRUB_DEFAULT=0改成saved，再取消GRUB_SAVEDEFAULT=true的注释，或者手动写入。这可以记住开机的选择。
+
+GRUB_CMDLINE_LINUX_DEFAULT里面去掉quiet以显示开机日志，loglevel设置日志等级为5，loglevel共7级，5级是一个信息量的平衡点。再添加nowatchdog modprobe.blacklist=sp5100_tco，禁用watchdog，intelcpu用户把sp5100_tco换成iTCO_wdt。
+
+watchdog的目的是在系统死机的时候自动重启系统。这在服务器或者嵌入式上有用，但是对个人用户来说没有意义，禁用以节省系统资源、提高开机和关机速度
+
+手动写入或者取消最后一行GRUB_DISABLE_OS_PROBER=false的注释让grub使用os-prober生成其他系统的启动项
 
 - 生成配置文件
 ```
@@ -269,16 +283,37 @@ exit 退出changeroot
 reboot 重启，会自动取消所有的挂载
 ```
 ## 启动网络
+
+登录root账号
+
 ```
-systemctl enable --now NetworkManager
+systemctl enable --now NetworkManager #enbale代表开机自启，--now代表现在启动，开启networkmanager服务，注意大小写
 ```
 
 连接wifi
+
+- nmcli
+
 ```
 nmcli dev wifi connect <wifiname> password <password>
-
-或者使用nmtui这个工具进行连接
 ```
+
+- nmtui
+
+```
+nmtui开启工具
+选择activate a connection
+选择自己的wifi，回车，，输入密码，回车，esc退出软件
+clear清屏，或者ctrl+L清屏
+```
+
+- 确认网络连接
+
+```
+方法手动安装的时候学过了
+```
+
+
 
 ### 放松一下吧
 
@@ -286,7 +321,9 @@ nmcli dev wifi connect <wifiname> password <password>
 pacman -S fastfetch lolcat cmatrix
 ```
 
-使用示例： fastfetch | lolcat
+使用示例： fastfetch | lolcat，竖线代表把左边程序的输出结果输入到右边的程序里
+
+
 
 ## 脚本安装
 
@@ -321,18 +358,22 @@ pacman -S archinstall
 wiki推荐是1GB，所以填入1024MB，小点也行，类型fat32,挂载点是/boot
 #### swap交换空间
 swap与虚拟内存和休眠有关，可以创建swap分区或者swap文件，二选一，前者配置更简单，后者配置稍复杂，但是更加灵活。
-###### swap分区
+##### swap分区
+
   创建一个和内存大小相同的硬盘分区，类型选择swap
-###### swap文件
-将所有剩余空间分到一个分区，类型选择btrfs,设置compress（透明压缩,可以节省磁盘空间），添加sub volume。
+##### btrfs根分区
+
+将所有剩余空间分到一个分区，类型选择btrfs,设置compress（透明压缩,可以节省磁盘空间），添加子卷（subvolume）。
 - @ 对应 /
 
 - @home 对应 / 
 
-- @swap 对应 /swap
+
+##### 可选：swap文件
+
+  创建一个@swap子卷对应 /swap
   交换文件的创建方法：[Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
 
-  
 ```
 btrfs filesystem mkswapfile --size 4g --uuid clear /swap/swapfile
 ```
@@ -349,32 +390,26 @@ vim /etc/fstab
 * bootloader 选择grub，因为主流发行版用的都是grub,配置简单，遇到问题时网上帖子多
 * 设置root密码
 * 设置普通用户，添加管理员权限
-* profile可以预装桌面环境，有需要的自行选择，选择桌面之后还可以选择安装显卡驱动
-* 内核（kernel）台式机选zen,笔记本用linux
+* profile可以预装桌面环境，有需要的自行选择，选择桌面之后还可以选择安装显卡驱动（驱动选择看：[AMDGPU](https://wiki.archlinux.org/title/AMDGPU)、[NVIDIAGPU](https://wiki.archlinux.org/title/NVIDIA)）
+* 内核（kernel）台式机选zen,笔记本用linux（注意不同内核的显卡驱动不一样）
 * networ configuration选择第三项networkmanager，因为主流桌面环境默认与这个集成
-* additional pakages 里面选vim和os-prober, zen内核的话这里再选个linux-zen-headers
+* additional pakages 里面选一个文本编辑器（通常用vim）和os-prober（双系统相关）
 * 设置时区
+* install安装
 
 ---
 
 # 配置系统
 
-## 安装桌面环境及必要组件
-```
-pacman -S gnome-desktop gdm ghostty gnome-control-center gnome-software flatpak
-```
-```
-#gnome-desktop最小化安装gnome
-#gdm是显示管理器(gnome display manager)
-#ghostty是一个可高度自定义的终端模拟器（terminal emulator)
-#gnome-control-center是设置中心
-#software和flatpak是软件商城
-```
+## 创建普通用户
+没有普通用户无法登入桌面环境，有些软件会拒绝再root权限下运行，所以普通用户是必须的。
 
-## 创建用户
 (archinstall安装的可以跳过)
+
 ```
 useradd -m -g wheel <username> #不需要输入<>符号
+
+#-m代表创建用户的时候创建home目录，-g代表设置组
 ```
 * 设置密码
 ```
@@ -388,35 +423,42 @@ EDITOR=vim visudo
 ```
 %wheel ALL=（ALL：ALL） ALL
 ```
-## 安装N卡显卡驱动和硬件编解码
-参考链接：[NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)
+## 安装显卡驱动和硬件编解码
 
+我的配置是4060+7940h，所以以4060和780m为例子
 
+参考链接：[NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)、[AMDGPU](https://wiki.archlinux.org/title/AMDGPU)
 
 ### 检查头文件
 ```
 sudo pacman -S linux-headers
-#linux替换为自己的内核
+#linux替换为自己的内核，比如zen内核是linux-zen-headers
 ```
 ### 安装显卡驱动 
 
-N卡此时如果不安装显卡驱动，可能无法启动桌面环境，此处以4060为例
+N卡此时如果不安装显卡驱动，可能无法启动桌面环境
 ```
-sudo pacman -S nvidia nvidia-utils
+sudo pacman -S nvidia
 ```
-非stable内核要安装的驱动不一样，具体看wiki，zen内核装nvidia-dkms
+nvidia包里面已经包含了nvidia-utils包。非stable内核要安装的驱动不一样，具体看wiki，例如zen内核装nvidia-dkms。
 
 #### AMD显卡建议检查是否安装vulkan驱动
 ```
 sudo pacman -S vulkan-radeon 
 ```
-- 混合模式软件还是跑在N卡上的话检查有没有安装vulkan-mesa-layers
+- 可选：混合模式软件还是跑在N卡上
+
+检查有没有安装vulkan-mesa-layers
+
 参考链接：[gnome-shell uses dgpu instead of igpu : r/gnome](https://www.reddit.com/r/gnome/comments/1irvmki/gnomeshell_uses_dgpu_instead_of_igpu/)
 
 ```
 sudo pacman -S vulkan-mesa-layers
 ```
 ### 硬件编解码
+
+- 可选：libva-utils包提供了测试硬件编解码的工具，比如vainfo命令可以显示当前硬件编解码支持
+
  - nvidia4060
 ```
 sudo pacman -S libva-nvidia-driver
@@ -429,10 +471,6 @@ sudo pacman -S intel-media-driver libva
 确认安装了libva-mesa-driver
 ```
 sudo pacman -Q libva-mesa-driver
-```
-* 使用vainfo确认是否安装完成
-```
-vainfo
 ```
 * 环境变量名（不需要手动设置，只在指定某块gpu时使用）
 ```
@@ -448,6 +486,26 @@ sudo pacman -S wqy-zenhei noto-fonts noto-fonts-emoji
 ```
 reboot 
 ```
+### 开启32位源 (archinstall可以跳过)
+
+建议开启，因为steam需要，wine运行exe也需要
+```
+sudo vim /etc/pacman.conf #编辑pacman配置文件
+去掉[multilib]两行的注释
+sudo pacman -Sy #刷新源
+```
+## Gnome桌面环境
+
+```
+pacman -S gnome-desktop gdm ghostty gnome-control-center gnome-software flatpak
+```
+```
+#gnome-desktop最小化安装gnome
+#gdm是显示管理器(gnome display manager)
+#ghostty是一个可高度自定义的终端模拟器（terminal emulator)
+#gnome-control-center是设置中心
+#software和flatpak是软件商城
+```
 * 临时开启GDM
 ```
 sudo systemctl start gdm #即使出了问题重启也能恢复，避免进不了tty的情况
@@ -459,16 +517,37 @@ sudo systemctl start gdm #即使出了问题重启也能恢复，避免进不了
 ```
 sudo systemctl enable gdm
 ```
-* 可选：开启32位源 (archinstall可以跳过)
+
+### 可选：更换flatpak上海交大源
+
 ```
-sudo vim /etc/pacman.conf #编辑pacman配置文件
-去掉[multilib]两行的注释
-sudo pacman -Syyu #刷新源
+sudo flatpak remote-modify flathub --url=https://mirror.sjtu.edu.cn/flathub
 ```
+
+
 ## 生成home下目录（如果没有的话）
+
 ```
 xdg-user-dirs-update
 ```
+
+## 设置系统语言
+
+右键桌面选择setting，选择system，选择region&language
+
+如果是archinstall安装，这里只有英文选项，解决办法：
+
+* 本地化设置
+```
+sudo vim /etc/locale.gen 
+```
+```
+取消zh_CN.UTF-8的注释
+```
+```
+sudo locale-gen
+```
+
 ## 删除或隐藏不必要的快捷方式
 ```
 flatpak install flathub io.github.fabrialberio.pinapp
@@ -490,13 +569,13 @@ sudo pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber
 ```
 * 启用服务
 ```
-systemctl --user enable pipewire pipewire-pulse wireplumber
-systemctl --user start pipewire pipewire-pulse wireplumber
+systemctl --user enable --now pipewire pipewire-pulse wireplumber
 ```
 * 可选：安装GUI
 ```
 sudo pacman -S pavucontrol 
 ```
+
 ## 安装高级网络配置工具nm-connection-editor
 ```
 sudo pacman -S network-manager-applet dnsmasq
@@ -506,7 +585,10 @@ sudo pacman -S network-manager-applet dnsmasq
 启动安装的软件或输入nm-connection-editor
 跃点需手动设置为100,默认的-999会导致网络速率异常
 ```
+
+
 ## 安装yay
+
 - 编辑pacman配置文件
 ```
 sudo vim /etc/pacman.conf
@@ -535,6 +617,64 @@ sudo pacman -S yay
 sudo pacman -S git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
 ```
 
+## 安装输入法
+
+### ibus-rime
+
+[Rime - Arch Linux 中文维基](https://wiki.archlinuxcn.org/zh-hant/Rime)
+
+[可选配置（基础篇） | archlinux 简明指南](https://arch.icekylin.online/guide/advanced/optional-cfg-1#%F0%9F%8D%80%EF%B8%8F-%E8%BE%93%E5%85%A5%E6%B3%95)
+
+[RIME · GitHub](https://github.com/rime)
+
+ibus输入法在gnome的兼容性极佳，无须配置环境变量即可使用，rime可以解决ibus-libpinyin词库垃圾的问题，扩展可以解决ibus自定义的问题，故弃用fcitx5。如果一定要使用fcitx5的话，看附录的[fcitx5-rime 雾凇拼音](#fcitx5-rime 雾凇拼音)
+
+- 安装ibus-rime
+
+```
+sudo pacman -S ibus ibus-rime rime-ice-pinyin-git
+
+yay -S ibus-mozc #日语输入法
+```
+
+- 在gnome的设置中心 > 键盘 里面搜索rime添加输入法，如果没有的话登出一次
+
+- 编辑配置文件设置输入法为ice雾凇拼音
+
+```
+vim ~/.config/ibus/rime/default.custom.yaml
+```
+
+如果没有文件夹的话自己创建，mkdir命令创建文件夹，touch命令创建文件
+
+```
+patch:
+  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
+  __include: rime_ice_suggestion:/
+```
+
+- 第一次切换至rime输入法需要等待部署完成
+- 出现异常可以登出一次
+- 可选：添加萌娘百科词库
+
+```
+yay -S rime-pinyin-moegirl
+
+sudo vim /usr/share/rime-data/rime_ice.dict.yaml 
+按照指引在合适的位置添加
+- moegirl
+```
+- 安装扩展自定义ibus
+- 
+商店搜索安装蓝色的扩展管理器，搜索安装
+
+ibus tweaker，设置里激活“隐藏页按钮”和“切换输入模式”
+
+Customize IBus，设置里，常规页面取消“候选框调页按钮”，指示页面勾选“开启输入源指示器”和”仅当切换输入源指示“。主题页面可导入css自定义主题，[GitHub - openSUSE/IBus-Theme-Hub: This is the hub for IBus theme that can be used by Customize IBus GNOME Shell Extension.(可被自定义IBus GNOME Shell 扩展使用的IBus主题集合)](https://github.com/openSUSE/IBus-Theme-Hub)，这个网站有一些预设。背景页面可以自定义背景（这个无敌了，什么美化都比不过gtk默认加一张合适的自定义背景）。其他的就自己探索吧。
+
+
+
+
 ## 自定义安装软件
 
 ### 我安装的软件
@@ -558,7 +698,8 @@ sudo pacman -S mission-center gnome-text-editor gnome-disk-utility gnome-clocks 
 #fragments是符合gnome设计理念的种子下载器
 #file-roller解压
 #foliate 电子书阅读器
-#zen-browser zen-browser-i18n-cn 基于firefox的浏览器和cn语言包
+#zen-browser zen浏览器，也可以安装firefox或者discover商店搜索chrome或edge，linux上表现最好的浏览器是firefox
+#zen-browser-i18n-zh-cn zen的中文语言包
 #gst-plugin-pipewire gst-plugins-good gnome截图工具自带的录屏，需登出
 #pacman-contrib 是pacman的一些小工具
 #amberol 音乐播放器
@@ -569,6 +710,20 @@ zen浏览器一定要在设置>zen模组里面安装transparent zen模组，可�
 ```
 yay -S linuxqq-appimage wechat-appimage wps-office-cn  
 ```
+
+#### 可选：如果wps用不了fcitx5
+
+由于wps自身的问题，我们需要手动设置变量：
+- 文字 (Writer): `/usr/bin/wps`
+- 表格 (Spreadsheets): `/usr/bin/et`
+- 演示 (Presentation): `/usr/bin/wpp`
+
+```
+export XMODIFIERS=@im=fcitx 
+export QT_IM_MODULE=fcitx 
+export GTK_IM_MODULE=fcitx
+```
+
 - markdown编辑器
 
 ```
@@ -599,6 +754,7 @@ flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
 我设置了两个截图快捷键，ctrl+alt+a普通系统截图（仿qq截图快捷键），super+shift+s截图并进入编辑界面（仿win截图快捷键）。
 
 ### appimage
+
 appimage是一个下载即用、无需安装的文件。需要确认安装了fuse才能运行appimage。
 
 安装appimagelauncher管理appimage软件
@@ -608,136 +764,8 @@ yay -S appimagelauncher
 安装后启动appimage时会弹出appimagelauncher的窗口，第一次启动会让你设置安装路径，默认是home目录下的Applications目录。然后让你选择运行一次还是集成到系统。不过有时候会安装失败或者安装之后无法运行。
 - 卸载appimage软件
 右键快捷方式，点击remove appimage from system，或者手动删除~/.local/share/Applications下的destop文件和安装目录下的appimage文件。
-## 设置系统语言
-右键桌面选择setting，选择system，选择region&language
-
-如果是archinstall安装，这里只有英文选项，解决办法：
-
-* 本地化设置
-```
-sudo vim /etc/locale.gen 
-```
-```
-取消zh_CN.UTF-8的注释
-```
-```
-sudo locale-gen
-```
-
-## 安装输入法
-
-### fcitx5-rime 雾凇拼音
-
-```
-sudo pacman -S fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
-```
-```
-fcitx5-im 包含了fcitx5的基本包
-fcitx5-mozc是开源谷歌日语输入法
-fcitx5-rime是输入法引擎
-rime-ice-pinyin-git是雾凇拼音输入法
-```
-
-- 打开fcitx 5 configuration添加rime和mozc输入法，没有的话登出一次
-
-- 编辑rime的配置文件设置输入法方案为雾凇拼音，如果没有文件夹和文件的话自己创建文件夹，然后运行如下命令
-
-```
-vim ~/.local/share/fcitx5/rime/default.custom.yaml 
-```
-
-```
-写入：
-
-patch:
-  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
-  __include: rime_ice_suggestion:/
-```
-
-- 商店搜索extension，安装蓝色的extensionmanager
-- 安装扩展：input method panel
-  https://extensions.gnome.org/extension/261/kimpanel/
-- 编辑环境变量
-
-```
-sudo vim /etc/environment
-```
-```
-XIM="fcitx" #解决wechat用不了输入法的问题
-GTK_IM_MODULE=fcitx
-QT_IM_MODULE=fcitx
-XMODIFIERS=@im=fcitx
-XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
-```
-#### wps用不了fcitx5
-由于wps自身的问题，我们需要手动设置变量：
-- 文字 (Writer): `/usr/bin/wps`
-- 表格 (Spreadsheets): `/usr/bin/et`
-- 演示 (Presentation): `/usr/bin/wpp`
-```
-export XMODIFIERS=@im=fcitx 
-export QT_IM_MODULE=fcitx 
-export GTK_IM_MODULE=fcitx
-```
 
 
-### ibus-rime
-
-[Rime - Arch Linux 中文维基](https://wiki.archlinuxcn.org/zh-hant/Rime)
-
-[可选配置（基础篇） | archlinux 简明指南](https://arch.icekylin.online/guide/advanced/optional-cfg-1#%F0%9F%8D%80%EF%B8%8F-%E8%BE%93%E5%85%A5%E6%B3%95)
-
-[RIME · GitHub](https://github.com/rime)
-
-
-ibus输入法在gnome的兼容性极佳，无须配置环境变量即可使用，rime可以解决ibus-libpinyin词库垃圾的问题
-
-- 删除fcitx5输入法（记得关闭fcitx5的扩展)
-
-```
-sudo pacman -Rns fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
-```
-
-- 安装ibus-rime
-
-```
-sudo pacman -S ibus ibus-rime ice-rime-pinyin-git
-yay -S ibus-mozc #日语输入法
-```
-
-- 在gnome的设置中心 > 键盘 里面搜索rime添加输入法
-- 如果之前禁用过系统设置里的打字快捷键的记得恢复
-
-- 编辑配置文件设置输入法为ice
-
-```
-vim ~/.config/ibus/rime/default.custom.yaml
-```
-
-如果没有的自己创建，mkdir命令创建文件夹，touch命令创建文件
-
-```
-patch:
-  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
-  __include: rime_ice_suggestion:/
-```
-- 编辑环境变量
-```
-sudo vim /etc/environment
-```
-删除或者注释fcitx5相关的环境变量，gnome使用ibus输入法在正常情况下不需要设置环境变量，如果出了问题可以把fcitx替换为ibus
-
-- 第一次切换至rime输入法需要等待部署完成
-- 出现异常可以登出一次
-- 可选：添加萌娘百科词库
-
-```
-yay -S rime-pinyin-moegirl
-
-vim /usr/share/rime-data/rime_ice.dict.yaml 
-按照指引在合适的位置添加
-- moegirl
-```
 
 ## 快照
 
@@ -813,7 +841,12 @@ nautilus -q
 ```
 
 ## 可变刷新率和分数缩放
+
 商店安装refine修改
+
+```
+flatpak install flathub page.tesk.Refine
+```
 
 ## 配置系统快捷键
 ### 可选：交换大写锁定键和esc键
@@ -859,6 +892,7 @@ super+alt+F #切换全屏
 ```
 ctrl+super+S #打开快速设置菜单
 super+G #显示全部应用
+ctrl+空格 #显示运行命令提示符 
 ```
 * 自定义快捷键<快捷键>   <命令>
 ```
@@ -877,9 +911,13 @@ super+shift+S   flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
 ```
 flatpak install flathub com.mattjakeman.ExtensionManager
 ```
+
 ```
 #安装扩展
-input method panel #fcitx需要的扩展
+
+ibus tweaker #ibus自定义相关
+ 
+Customize IBus #ibus自定义相关
 
 AppIndicator and KStatusNotifierItem Support #右上角显示后台应用
 
@@ -1127,10 +1165,34 @@ vim ~/.zshrc
 #语法检查和高亮
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+
 #开启tab上下左右选择补全
 zstyle ':completion:*' menu select
 autoload -Uz compinit
 compinit
+
+# 所有命令历史都会被保存在用户主目录下的 .zsh_history 文件中
+HISTFILE=~/.zsh_history
+
+# 设置在当前会话（内存）中保留的历史记录条数
+HISTSIZE=100
+
+# 设置在历史文件中永久保存的条数
+SAVEHIST=100
+
+# 新的命令会追加到文件末尾，而不是覆盖整个文件
+setopt APPEND_HISTORY
+
+# 每执行一条命令后，立即将其写入历史文件 
+# 这样即使终端意外关闭，历史也不会丢失
+setopt INC_APPEND_HISTORY
+
+# 在多个打开的终端之间实时共享历史记录 
+# 在A终端输入的命令，可以立刻在B终端按“上箭头”找到
+setopt SHARE_HISTORY
+
+# 删除历史记录中的连续重复命令
+setopt HIST_IGNORE_DUPS
 ```
 ```
 source ~/.zshrc
@@ -1159,7 +1221,12 @@ font-family = "Adwaita Mono"
 font-size = 15
 ```
 
+
+
+  
+
 # KVM虚拟机
+
 [[已解决] KVM Libvirt 中无法访问存储文件，权限被拒绝错误](https://cn.linux-terminal.com/?p=4593)
 
 [How to Install KVM on Ubuntu | phoenixNAP KB](https://phoenixnap.com/kb/ubuntu-install-kvm)
@@ -1220,6 +1287,8 @@ options kvm_amd nested=1
 ```
 sudo mkinitcpio -P
 ```
+
+- 重启电脑
 
 ### 配置桥接网络
 
@@ -1316,8 +1385,6 @@ HOOKS=(... modconf ...)
 ```
 sudo mkinitcpio -P
 ```
-- 重启电脑
-
 - 安装ovmf
 ```
 sudo pacman -S edk2-ovmf
@@ -1331,10 +1398,8 @@ nvram = [
 	"/usr/share/ovmf/x64/OVMF_CODE.fd:/usr/share/ovmf/x64/OVMF_VARS.fd"
 ]
 ```
-重启服务
-```
-sudo systemctl restart libvirtd
-```
+- 重启电脑
+
 virt-manager的虚拟机页面内添加设备，PCI Host Device里找到要直通的显卡。 然后USB hostDevice里面把鼠标键盘也直通进去。
 - 取消显卡直通
 ```
@@ -1390,7 +1455,7 @@ sudo vim /etc/sysctl.d/40-hugepage.conf
 vm.nr_hugepages = 8800
 ```
 
-- 查看大页使用情况
+- 虚拟机开启后查看大页使用情况
 
 ```
 grep HugePages /proc/meminfo
@@ -1442,19 +1507,19 @@ looking glass通过共享内存实现屏幕分享，也需要安装[Virtual-Disp
 具体可以看官方档案，我是2560x1440@180hz 非HDR，需要大小是64M
 - 设置共享内存设备
 打开virt-manager，点击编辑 > 首选项，勾选启用xml编辑。
-打开虚拟机配置，找到xml底部的  ```</devices>```，在  ```</devices>```的上面添加设备，就是这种感觉：
+打开虚拟机配置，找到xml底部的  ```</devices>```，在  ```</devices>```的上面添加设备，size记得该成自己需要的，就是这种感觉：
 ```
 <devices>
     ...
   <shmem name='looking-glass'>
     <model type='ivshmem-plain'/>
-    <size unit='M'>64</size>
+    <size unit='M'>64</size> 
   </shmem>
 </devices>
 ```
 64改为自己需要的大小
 
-- 开启终端，添加kvm组
+- 开启终端，添加kvm组，记得重启
 ```
 sudo gpasswd -a $USER kvm 
 
@@ -1465,9 +1530,9 @@ sudo gpasswd -a $USER kvm
 ```
 sudo vim /etc/tmpfiles.d/10-looking-glass.conf
 
-写入（user改为自己的用户名）：
+写入（shorin改为自己的用户名）：
 
-f	/dev/shm/looking-glass	0660	user	kvm	-
+f /dev/shm/looking-glass 0660 shorin kvm -
 
 f是创建文件
 /dev/shm/looking-glass是共享内存文件的路径
@@ -1486,13 +1551,10 @@ sudo systemd-tmpfiles --create /etc/tmpfiles.d/10-looking-glass.conf
   确认有spicei显示协议
   显卡设置为none
   添加virtio键盘和virtio鼠标（要在xml里面更改bus=“ps2”为bus=“virtio”）
-  添加通道，设备类型选择spice
-  里面找到下面这段，把type从none 改成spice
+  确认有spice信道设备，没有的话添加，设备类型为spice，开启剪贴板同步
+  里面找到下面这段，把type从none 改成spice，开启声音传输
 
 ```
-<sound model='ich9'>
-  <audio id='1'/>
-</sound>
 <audio id='1' type='spice'/>
 ```
 
@@ -1500,19 +1562,19 @@ sudo systemd-tmpfiles --create /etc/tmpfiles.d/10-looking-glass.conf
 
  [Looking Glass - Download Looking Glass](https://looking-glass.io/downloads)
 
-浏览器搜索 looking glass，点击download，下载最新的stable版本，解压后安装
+浏览器搜索 looking glass，点击download，下载bleeding-edge的windows host binary，解压后双击exe安装
 
 - linux安装客户端
 
- 服务端和客户端的版本要匹配，looking-glass包对应最新的stable版本，looking-glass-git包对应bleeding-edge版本
+ 服务端和客户端的版本要匹配，最容易出错的就是这个地方。如果出现问题可以去aur搜索一下looking glass的包，多试一试，或者从[GitHub - gnif/LookingGlass: An extremely low latency KVMFR (KVM FrameRelay) implementation for guests with VGA PCI Passthrough.](https://github.com/gnif/LookingGlass)自己编译。
 
 ```
-yay -S looking-glass
+yay -S looking-glass-git
 ```
-- 桌面打开即可连接
+- 桌面快捷方式打开lookingglass即可连接
 - 可选:
 
-由于这样连接不会捕获快捷方式，无法在win里面 使用win键，可以微软商店下载powertoys重新映射快捷键解决这个问题。或者买3模键鼠。
+由于这样连接不会捕获快捷方式，无法在win里面 使用win键，可以微软商店下载powertoys重新映射快捷键解决这个问题。或者干脆去掉virtio的键鼠，接上第二套物理键鼠然后直通进去。或者把蓝牙直通/ 2.4G接收器直通进去，配合三模键鼠进行切换。
 
 关于虚拟机性能优化，见[虚拟机性能优化](#虚拟机性能优化)
 
@@ -1842,8 +1904,6 @@ sudo pacman -S gvfs-smb
 ## 域名解析出现暂时性错误
 [解决 Ubuntu 系统中 “Temporary Failure in Name Resolution“ 错误-CSDN博客](https://blog.csdn.net/qq_15603633/article/details/141032652)
 
-
-
 ```
 sudo vim /etc/resolv.conf
 ```
@@ -1909,6 +1969,79 @@ sudo pacman -Qdt
 ```
 sudo pacman -Rns $(pacman -Qdt)
 ```
+- 无视依赖关系强制删除某个包
+```
+sudo pacman -Rdd
+```
+
+## fcitx5-rime 雾凇拼音
+
+（ 因为ibus-rime的表现优于fcitx5-rime，扩展解决了ibus的自定义问题，故弃用。）
+
+```
+sudo pacman -S fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
+```
+```
+fcitx5-im 包含了fcitx5的基本包
+fcitx5-mozc是开源谷歌日语输入法
+fcitx5-rime是输入法引擎
+rime-ice-pinyin-git是雾凇拼音输入法
+```
+
+- 打开fcitx 5 configuration添加rime和mozc输入法，没有的话登出一次
+
+- 编辑rime的配置文件设置输入法方案为雾凇拼音，如果没有文件夹和文件的话自己创建文件夹，然后运行如下命令
+
+```
+vim ~/.local/share/fcitx5/rime/default.custom.yaml 
+```
+
+```
+写入：
+
+patch:
+  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
+  __include: rime_ice_suggestion:/
+```
+
+- 商店搜索extension，安装蓝色的extensionmanager
+
+- 安装扩展：input method panel
+  https://extensions.gnome.org/extension/261/kimpanel/
+  
+- 编辑环境变量
+
+```
+sudo vim /etc/environment
+```
+```
+XIM="fcitx" #解决wechat用不了输入法的问题
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
+```
+### fcitx5输入法美化
+
+- 关闭“Input Method Panel”扩展
+
+- 浏览器搜索fcitx5 themes，下载自己喜欢的，存放路径为：~/.local/share/fcitx5/themes
+
+- 打开fcitx配置 选择附组件，点击经典用户界面右边的扳手螺丝刀图标，设置主题。还可以设置字体大小
+
+### 卸载fcitx5
+
+```
+sudo pacman -Rns fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
+```
+- 编辑环境变量
+```
+sudo vim /etc/environment
+```
+删除或者注释fcitx5相关的环境变量
+
+- 如果之前禁用过系统设置里的打字快捷键记得恢复
+
 ## cpu资源优先级
 因为影响steam下载速度已弃用（这是已知问题，估计还有其它问题）
 ```
@@ -1919,7 +2052,7 @@ sudo systemctl enable --now ananicy-cpp.service
 ```
 ## TLP相关
 ```
-sudo pacman -S tlp tlp-rdw 
+sudo pacman -S tlp tlp-rdw //////
 ```
 ```
 yay -S tlpui
@@ -1963,8 +2096,6 @@ sudo systemctl enable --now tlp
 （下载太慢，容易下载失败，我不建议使用，遂删除）
 *参考链接: [ALHP：优化你的archlinux性能 - 哔哩哔哩](https://www.bilibili.com/opus/745324585822453908?from=search&spm_id_from=333.337.0.0%2a)
 
-
-
 * 检查芯片支持,记住结果里是x86-64-v几
 ```
 /lib/ld-linux-x86-64.so.2 --help
@@ -1990,23 +2121,6 @@ sudo vim /etc/pacman.conf
 ```
 sudo pacman -Syyu
 ```
-
-## ibus输入法
-（由于词库和联想实在远不如fctix5,换掉了）
-ibpinyin是中文拼音输入法，anthy是日文输入法登出一次，设置里找到键盘，添加输入源
-```
-sudo pacman -S ibus ibus-pinyin
-更好用的中文输入法：
-sudo pacman -S ibus-rime 
-日语输入法：
-yay -S ibus-mozc
-```
-- 配置输入法
-常规里勾选候选词，设置候选词排序为词频
-拼音模式里启用云输入
-辞典里勾选辞典
-用户数据里取消所有勾选
-*登出，测试输入是否正常
 
 ## ranger预览图片
 ```
