@@ -1578,6 +1578,8 @@ yay -S looking-glass-git
 
 关于虚拟机性能优化，见[虚拟机性能优化](#虚拟机性能优化)
 
+- 可选： 配置完looking glass之后可以克隆虚拟机之后使用克隆机，好处不用多说了吧🤓
+
 # 在linux上玩游戏
 
 这一节不仅适用于windows的游戏程序，还适用于windows的软件。
