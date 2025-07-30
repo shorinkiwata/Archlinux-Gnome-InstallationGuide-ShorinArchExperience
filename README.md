@@ -670,7 +670,7 @@ sudo vim /usr/share/rime-data/rime_ice.dict.yaml
 
 ibus tweaker，设置里激活“隐藏页按钮”和“切换输入模式”
 
-Customize IBus，设置里，常规页面取消“候选框调页按钮”，指示页面勾选“开启输入源指示器”和”仅当切换输入源指示“。主题页面可导入css自定义主题，[GitHub - openSUSE/IBus-Theme-Hub: This is the hub for IBus theme that can be used by Customize IBus GNOME Shell Extension.(可被自定义IBus GNOME Shell 扩展使用的IBus主题集合)](https://github.com/openSUSE/IBus-Theme-Hub)，这个网站有一些预设。背景页面可以自定义背景（这个无敌了，什么美化都比不过gtk默认加一张合适的自定义背景）。其他的就自己探索吧。
+Customize IBus，设置里，常规页面取消“候选框调页按钮”。主题页面可导入css自定义主题，[GitHub - openSUSE/IBus-Theme-Hub: This is the hub for IBus theme that can be used by Customize IBus GNOME Shell Extension.(可被自定义IBus GNOME Shell 扩展使用的IBus主题集合)](https://github.com/openSUSE/IBus-Theme-Hub)，这个网站有一些预设。背景页面可以自定义背景（这个无敌了，什么美化都比不过gtk默认加一张合适的自定义背景）。其他的就自己探索吧。
 
 
 
