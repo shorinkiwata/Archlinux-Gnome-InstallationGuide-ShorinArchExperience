@@ -7,6 +7,7 @@
 2025.7.30 添加了flatpak更换上海交大源的内容
 2025.7.30 添加了fcitx5美化相关内容
 2025.7.30 移除fcitx5相关内容，转而使用ibus-rime，用gnome扩展解决ibus美化问题
+2025.7.31 更新looking glass使用技巧，包括键鼠捕获
 ```
 
 
@@ -1305,7 +1306,10 @@ nm-connection-editor
 ```
 #保存后将网络连接改为刚才创建的以太网网桥连接
 ```
+已知问题：使用桥接网络的配置进行连接会导致steam下载速度缓慢
+
 ### 安装win11 LTS虚拟机
+
 [手把手教你给笔记本重装系统（Windows篇）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV16h4y1B7md/?spm_id_from=333.337.search-card.all.click)
 
 [太突然！Win11 LTSC 官方精简版，终于来了 - 知乎](https://zhuanlan.zhihu.com/p/1000648759)
@@ -1572,13 +1576,28 @@ sudo systemd-tmpfiles --create /etc/tmpfiles.d/10-looking-glass.conf
 yay -S looking-glass-git
 ```
 - 桌面快捷方式打开lookingglass即可连接
-- 可选:
+- 使用技巧
 
-由于这样连接不会捕获快捷方式，无法在win里面 使用win键，可以微软商店下载powertoys重新映射快捷键解决这个问题。或者干脆去掉virtio的键鼠，接上第二套物理键鼠然后直通进去。或者把蓝牙直通/ 2.4G接收器直通进去，配合三模键鼠进行切换。
+具体可以看这个页面：https://looking-glass.io/docs/B6-rc1/usage/
 
-关于虚拟机性能优化，见[虚拟机性能优化](#虚拟机性能优化)
+开启looking-glass后使用scroll lock键有很多功能，包括最重要的键鼠捕获。长按会显示可用功能的列表.如果你的键盘没有scroll lock键，可以修改配置文件更改。
 
-- 可选： 配置完looking glass之后可以克隆虚拟机之后使用克隆机，好处不用多说了吧🤓
+```
+ vim ~/.config/looking-glass/client.ini
+ 
+ 写入： 
+ 
+ [input]
+escapeKey=KEY_F9
+
+把F9换成自己想要的键，可用的键可以在终端输入 looking-glass-client -m KEY 查看
+```
+
+- 关于虚拟机性能优化，见[虚拟机性能优化](#虚拟机性能优化)
+
+- 可选： 配置完looking glass之后可以克隆虚拟机之后使用克隆机，好处不用多说了吧👆🤓
+
+  
 
 # 在linux上玩游戏
 
@@ -1593,6 +1612,19 @@ yay -S looking-glass-git
 sudo pacman -S steam
 ```
 在设置→兼容性里面选择默认兼容性工具即可运行大部分无反作弊的游戏
+
+- 可选：下载速度慢的话
+
+```
+vim ~/.steam/steam/steam_dev.cfg
+
+写入：
+@nClientDownloadEnableHTTP2PlatformLinux 0
+@fDownloadRateImprovementToAddAnotherConnection 1.0
+
+```
+
+已知问题：使用桥接网络的配置进行连接会导致steam下载速度缓慢
 
 ## 玩minecraft
 - 从aur安装
@@ -2047,7 +2079,7 @@ sudo vim /etc/environment
 ## cpu资源优先级
 因为影响steam下载速度已弃用（这是已知问题，估计还有其它问题）
 ```
-sudo pacman -S ananicy-cpp
+ yay -S ananicy-cpp cachyos-ananicy-rules
 ```
 ```
 sudo systemctl enable --now ananicy-cpp.service
