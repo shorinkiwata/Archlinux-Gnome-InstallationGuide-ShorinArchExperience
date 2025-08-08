@@ -1,4 +1,3 @@
-本文档是主要是btrfs文件系统的archlinux+Gnome（wayland）环境的搭建
 ```
 更新日志：
 2025.7.23 修改原本的fcitx5内容，添加fcitx5-rime和ibus-rime输入法相关内容
@@ -8,22 +7,26 @@
 2025.7.30 添加了fcitx5美化相关内容
 2025.7.30 移除fcitx5相关内容，转而使用ibus-rime，用gnome扩展解决ibus美化问题
 2025.7.31 更新looking glass使用技巧，包括键鼠捕获
+2025.8.1  新增安装前准备
+2025.8.4  新增小黄鸭 Lossless Scaling相关内容
+2025.8.5  修复了错误，优化了排版
 ```
 
 
-1. [手动安装](#手动安装)
-2. [脚本安装](#脚本安装)
-3. [配置系统](#配置系统)
-4. [美化](#美化)
-5. [笔记本显卡切换和电源管理](#显卡切换)
-6. [KVM虚拟机](#KVM虚拟机)
-7. [显卡直通](#显卡直通)
-8. [在linux上玩游戏](#在linux上玩游戏)
-9. [性能优化](#性能优化)
-10. [删除linux](#删除linux)
-11. [issues](#issues)
-12. [附录](#附录)
-13. [参考资料](#参考资料)
+1. [安装前的准备](#安装前的准备)
+2. [手动安装](#手动安装)
+3. [脚本安装](#脚本安装)
+4. [配置系统](#配置系统)
+5. [美化](#美化)
+6. [笔记本显卡切换和电源管理](#显卡切换)
+7. [KVM虚拟机](#KVM虚拟机)
+8. [显卡直通](#显卡直通)
+9. [在linux上玩游戏](#在linux上玩游戏)
+10. [性能优化](#性能优化)
+11. [删除linux](#删除linux)
+12. [issues](#issues)
+13. [附录](#附录)
+14. [参考资料](#参考资料)
 
 ## vim基础操作
 i 键进入编辑模式
@@ -36,7 +39,9 @@ esc 退出编辑模式
 
 :wq 冒号小写wq保存并退出
 
-## 双系统安装后时间错乱，windwos开机磁盘检查
+# 安装前的准备
+
+## 解决双系统安装后时间错乱
 
 参考链接：
 [双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)s
@@ -45,8 +50,24 @@ esc 退出编辑模式
 ```
 Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsUniversal /t REG_DWORD /d 1
 ```
+这条命令修改注册表把时间从硬件时间改为UTC时间。
+
+## 下载iso文件
+
+[官网下载](https://archlinux.org/download/)
+
+[阿里云镜像站下载](https://mirrors.aliyun.com/archlinux/iso/)
+
+## 压缩卷
+
+windows系统内win+x键，选择磁盘管理。找到想安装archlinux的位置，选择压缩卷，空出磁盘空间。
+
+右击新增简单卷，大小设置为4096MB（足够装下iso文件就行），盘符随意，格式化选择FAT32。然后把iso文件里面的内容解压进刚刚新建的盘符里。
+
+重启选择bios启动项
 
 # 安装系统
+
 ## 手动安装
 参考链接：
 
@@ -439,9 +460,11 @@ sudo pacman -S linux-headers
 
 N卡此时如果不安装显卡驱动，可能无法启动桌面环境
 ```
-sudo pacman -S nvidia
+sudo pacman -S nvidia-open
 ```
-nvidia包里面已经包含了nvidia-utils包。非stable内核要安装的驱动不一样，具体看wiki，例如zen内核装nvidia-dkms。
+nvidia包里面已经包含了nvidia-utils包。非stable内核要安装的驱动不一样，具体看wiki，例如zen内核装nvidia-open-dkms。
+
+显卡驱动的选择在[CodeNames · freedesktop.org](https://nouveau.freedesktop.org/CodeNames.html)这个页面搜索自己的显卡，看看对应的family是什么。然后在[NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)这个页面查找对应的显卡驱动。nv160~最新的显卡用nvidia-open，nv110~190可以还可以用nvidia。nvidia-open是内核模块开源的驱动，不是完全的开源驱动。
 
 #### AMD显卡建议检查是否安装vulkan驱动
 ```
@@ -684,7 +707,7 @@ Customize IBus，设置里，常规页面取消“候选框调页按钮”。主
 - 安装后没显示图标的话登出一次
 - pacman
 ```
-sudo pacman -S mission-center gnome-text-editor gnome-disk-utility gnome-clocks gnome-calculator loupe snapshot baobab showtime fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib amberol 
+sudo pacman -S mission-center gnome-text-editor gnome-disk-utility gnome-clocks gnome-calculator loupe snapshot baobab mpv celluloid fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib amberol 
 ```
 ```
 #mission-center 类似win11的任务管理器
@@ -695,7 +718,7 @@ sudo pacman -S mission-center gnome-text-editor gnome-disk-utility gnome-clocks 
 #loupe图像查看
 #snapshot相机，摄像头
 #baobab磁盘使用情况分析工具，
-#showtime 极度简洁的视频播放器，要强大功能可以用MPV,不推荐使用VLC
+#mpv是功能强大的视频播放器，celluloid是mpv的gtk前端
 #fragments是符合gnome设计理念的种子下载器
 #file-roller解压
 #foliate 电子书阅读器
@@ -766,7 +789,20 @@ yay -S appimagelauncher
 - 卸载appimage软件
 右键快捷方式，点击remove appimage from system，或者手动删除~/.local/share/Applications下的destop文件和安装目录下的appimage文件。
 
+### mpv开启硬件编解码
 
+- 编辑配置文件
+
+  ```
+  vim ~/.config/mpv/mpv.confg
+  
+  #使用vulkan后端
+  gpu-api=vulkan
+  #通用自动模式硬解
+  hwdec=auto-safe
+  ```
+
+- celluloid首选项里设置读取mpv配置文件，手动指定一下路径
 
 ## 快照
 
@@ -1437,12 +1473,12 @@ memlbaloon的目的是提高内存的利用率，但是由于它会不停地“�
 
 - 计算大页大小
 
-1g 虚拟机内存对应550，以16GB为例，大页需要8800（粗略计算，具体可以看wiki）
+内存（GB）* 1024 / 2 = 需要的大小
 
-- 临时（重启失效）
-```
-echo 8800 > /proc/sys/vm/nr_hugepages
-```
+比如16GB内存就是16*1024/2=8192，wiki建议略大一些，那就8200。
+
+我通常给虚拟机分24GB内存，24*1024/2=12288，略大一些就是12300。
+
 - 编辑虚拟机xml
 
 在virt-manager的g首选项里开启xml编辑，找到```<memoryBacking>```并添加```<hugepages/>```：
@@ -1453,16 +1489,27 @@ echo 8800 > /proc/sys/vm/nr_hugepages
 ```
 - 永久生效
 
+记得把数字改成自己需要的
+
 ```
 sudo vim /etc/sysctl.d/40-hugepage.conf
 
 vm.nr_hugepages = 8800
 ```
 
+- reboot
 - 虚拟机开启后查看大页使用情况
 
 ```
 grep HugePages /proc/meminfo
+```
+
+- 取消大页
+
+```
+sudo rm /etc/sysctl.d/40-hugepage.conf
+
+reboot
 ```
 
 
@@ -1538,12 +1585,12 @@ sudo vim /etc/tmpfiles.d/10-looking-glass.conf
 
 f /dev/shm/looking-glass 0660 shorin kvm -
 
-f是创建文件
+f 代表定文件规则
 /dev/shm/looking-glass是共享内存文件的路径
-0660设置拥有者和组拥有读写权限
-user设置拥有者
-kvm设置组
-- 代表不进行清理
+0660 设置所有者和所属组的读写权限
+user 设置所有者
+kvm 设置所属组
+- 代表保留时间永久，不进行清理
 ```
 - 无须重启，现在手动创建文件
 
@@ -1552,11 +1599,11 @@ sudo systemd-tmpfiles --create /etc/tmpfiles.d/10-looking-glass.conf
 ```
 
 - 回到虚拟机设置
-  确认有spicei显示协议
+  确认有spice显示协议
   显卡设置为none
   添加virtio键盘和virtio鼠标（要在xml里面更改bus=“ps2”为bus=“virtio”）
   确认有spice信道设备，没有的话添加，设备类型为spice，开启剪贴板同步
-  里面找到下面这段，把type从none 改成spice，开启声音传输
+  确认有ich9声卡，点击概况，去到xml底部，在里面找到下面这段，把type从none 改成spice，开启声音传输
 
 ```
 <audio id='1' type='spice'/>
@@ -1589,13 +1636,19 @@ yay -S looking-glass-git
  
  [input]
 escapeKey=KEY_F9
-
+```
 把F9换成自己想要的键，可用的键可以在终端输入 looking-glass-client -m KEY 查看
+
+我是用gnome系统快捷键切换全屏和窗口的，你也可以选择设置以全屏模式开启，还是刚才那个配置文件，写入：
+
+```
+[win]
+fullScreen = yes 
 ```
 
 - 关于虚拟机性能优化，见[虚拟机性能优化](#虚拟机性能优化)
 
-- 可选： 配置完looking glass之后可以克隆虚拟机之后使用克隆机，好处不用多说了吧👆🤓
+- 推荐： 配置完looking glass之后克隆虚拟机，用克隆机而不是初号机，好处不用多说了吧👆🤓
 
   
 
@@ -1603,6 +1656,78 @@ escapeKey=KEY_F9
 
 这一节不仅适用于windows的游戏程序，还适用于windows的软件。
 首选用steam玩游戏，steam没有的游戏通过lutris管理，使用proton或者wine运行。安卓手游用waydroid运行。如果都不行，用配置了显卡直通的win11虚拟机。
+
+## 游玩前的准备
+
+- gamemode
+
+可以为游戏优化cpu资源使用的软件，有助于提高low帧
+
+```
+sudo pacman -S gamemode
+
+sudo systemctl --user enable --now gamemoded
+```
+
+steam启动参数： gamemoderun %command%
+
+- 32位显卡工具和驱动
+
+[docs/InstallingDrivers.md at master · lutris/docs](https://github.com/lutris/docs/blob/master/InstallingDrivers.md)
+
+n卡注意，驱动包要换成自己的
+
+```
+sudo pacman -S --needed nvidia-open-dkms nvidia-utils lib32-nvidia-utils vulkan-icd-loader lib32-vulkan-icd-loader #n卡
+sudo pacman -S --needed lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-icd-loader lib32-vulkan-icd-loader #a卡
+```
+## 小黄鸭 Lossless Scaling
+
+[Lossless Scaling Frame Generation for Linux hits 1.0 with a new UI making it easier than ever | GamingOnLinux](https://www.gamingonlinux.com/2025/08/lossless-scaling-frame-generation-for-linux-hits-1-0-with-a-new-ui-making-it-easier-than-ever/)
+
+注意，小黄鸭2025年7月31日刚发布1.0版本，运行遇到问题很正常。
+
+需要先下载steam正版的的小黄鸭。也许盗版也可以，但是正版就30块而已，我就不试盗版行不行了，有兴趣的可以自己试试，手动指定一下lossless.dll的路径说不定能运行。
+
+- 养成好习惯，做任何自己不了解的事情之前先创建一个快照
+
+- 从yay安装lsfg-vk，有lsfg-vk-bin、lsfg-vk、lsfg-vk-git三个包，随意装一个。
+```
+yay -S lsfg-vk-git
+```
+### 使用方法
+
+具体的使用方法可以去看官方文档[Home · PancakeTAS/lsfg-vk Wiki](https://github.com/PancakeTAS/lsfg-vk/wiki)
+
+我只演示一个方法。
+
+打开lsfg-vk-ui，新建一个profile，任意取一个名字（profile name），比如我取一个miyu。常见用途有两个，看视频和玩游戏。
+
+1. 看视频
+
+   mpv的兼容性最好。打开终端，使用LSFG_PROCESS环境变量指定profile，空格，mpv，空格，填入视频文件的绝对路径，回车运行。比如：
+
+   ```
+   LSFG_PROCESS="miyu" mpv /home/shorin/Videos/test.mkv
+   ```
+   
+2. 玩游戏
+
+   steam右键想要运行的游戏，启动参数填入刚刚的环境变量LSFG_PROCESS="miyu"，空格， %command%。比如：
+
+   ```
+   prime-run gamemoderun mangohud LSFG_PROCESS="miyu" %command%
+   ```
+
+3. 其他
+
+   同理，luris之类的也可以像steam那样设置启动参数。可以在终端输入```LSFG_PROCESS="miyu" 程序启动命令``尝试对启动任意程序开启补帧，但是不一定生效。
+
+lsfg一旦生效，就可以修改profile，实时更改补帧倍率。
+
+如果配置过程出错可以用快照恢复到操作前的状态，重新来过。
+
+flatpak程序使用补帧看这里[Using lsfg‐vk in Flatpak · PancakeTAS/lsfg-vk Wiki](https://github.com/PancakeTAS/lsfg-vk/wiki/Using-lsfg%E2%80%90vk-in-Flatpak)
 
 ## 玩steam游戏
 
@@ -1613,7 +1738,7 @@ sudo pacman -S steam
 ```
 在设置→兼容性里面选择默认兼容性工具即可运行大部分无反作弊的游戏
 
-- 可选：下载速度慢的话
+- 可选：下载速度慢的话试试
 
 ```
 vim ~/.steam/steam/steam_dev.cfg
@@ -1674,7 +1799,6 @@ python3 -m venv venv
 venv/bin/pip install -r requirements.txt
 sudo venv/bin/python3 main.py
 按照窗口的指引进行安装
-
 ```
 - 开启会话
 ```
@@ -1695,11 +1819,36 @@ waydroid session start
 waydroid app install /apk/的/路径
 ```
 
+#### 安装谷歌框架
+
+依旧是使用这个脚本安装[casualsnek/waydroid_script: Python Script to add OpenGapps, Magisk, libhoudini translation library and libndk translation library to waydroid !](https://github.com/casualsnek/waydroid_script)，安装完成后用以下命令获取设备id
+
+[Google Play Certification | Waydroid](https://docs.waydro.id/faq/google-play-certification)
+
+```
+sudo waydroid shell -- sh -c "sqlite3 /data/data/*/*/gservices.db 'select * from main where name = \"android_id\";'"
+```
+
+复制id之后去这个网站注册设备
+
+https://www.google.com/android/uncertified
+
+然后重启会话
+
+```
+waydroid session stop
+```
+
 #### 软件渲染
+
 n卡用户用不了waydroid，可以用软件渲染，但是性能很差，勉强玩2d游戏。
 - 编辑配置文件
 ```
-/var/lib/waydroid/waydroid.cfg
+sudo vim /var/lib/waydroid/waydroid.cfg
+
+[properties]
+ro.hardware.gralloc=default
+ro.hardware.egl=swiftshader
 ```
 - 本地更新应用一下更改后的配置
 ```
@@ -1721,12 +1870,16 @@ sudo rm -rf /var/lib/waydroid ~/.local/share/waydroid ~/.local/share/application
 ```
 
 ## wine/proton 兼容层运行
-wine是在linux下运行windows程序的兼容层，proton是steam的母公司v社基于wine开发的专门用来玩游戏的兼容层。原理是把window程序发出的请求翻译成linux系统下的等效请求。通常使用最新的wine或者proton版本即可。steam添加非steam游戏的proton路径。r
+wine是在linux下运行windows程序的兼容层，proton是steam的母公司v社基于wine开发的专门用来玩游戏的兼容层。原理是把window程序发出的请求翻译成linux系统下的等效请求。通常使用最新的wine或者proton版本即可，或者使用GE-proton，这是GE大佬修改的proton。
+
+wine、proton这些兼容层有一大特点叫prefix，相当于一个虚拟的c盘环境，程序的所有操作都在这个prefix中进行，完全不会影响到主机的linux。当你想卸载软件的时候，可以直接把这个prefix扬了，相当于用删除c盘的方式卸载软件，相当相当干净。
+
+为了更好地利用prefix的优势，可以选择给每个应用单独创建一个prefix，但用命令行创建会相当繁琐，于是就有了专门用来管理prefix的工具。
 
 ### lutris
 [Download Lutris](https://lutris.net/downloads)
 
-lutris是一个专为玩游戏设计的工具，可以很方便地管理需要用wine或者proton兼容层运行的软件。lutris可以完全取代steam的“添加非steam游戏”功能。
+lutris是一个专为玩游戏设计的管理工具，可以完全取代steam的“添加非steam游戏”功能。当然也可以用来管理普通软件。
 
 - 安装
 ```
@@ -1741,6 +1894,20 @@ sudo pacman -Rns lutris
 sudo rm -rfv ~/.config/lutris ~/.cache/lutris ~/.local/share/lutris ~/.local/share/applications/net.lutris.Lutris.desktop ~/.local/share/applications/lutris-game-*.desktop
 ```
 steam下载proton之后可以在lutris里面设置wine版本为proton
+
+#### 可选：类似微星小飞机的帧数、资源监控软件
+
+```
+yay -S gamescope mangohud mangojuice
+```
+
+gamescope可以对游戏的分辨率、窗口模式、缩放进行调节，mangohub是类似微星小飞机的监控软件，mangojuice用来配置mangohub。
+
+- 使用方法
+
+mangojuice设置要显示的项目，然后在lutris右键想要监控的软件 > 系统选项 > Display > 激活显示帧率（MangoHud）
+
+steam的话设置启动参数 mangohud %command%，可以和gamemode同时启用 gamemoderun mangohud %command%
 
 
 ## 用显卡直通玩游戏
@@ -1910,6 +2077,14 @@ diskpart选中efi分区后输入：
 ## 磁盘占用异常
 
 明明没有多少文件，磁盘占用却很高。可以试试删除btrfs快照。
+
+## 提示没有编解码器
+
+安装的时候应该自带了编解码器，可能是删除别的软件时不小心连带着删掉了，重新安装皆可
+
+```
+sudo pacman -S gst-plugins-good gst-libav libde265
+```
 
 
 
