@@ -4,11 +4,13 @@
 
 修改前打开一个记事本或者markdown，备份xml
 
+# 警告：每进行一步都要确认虚拟机能正常运行再进行下一步
+
 # 隐藏
 
-使用sata硬盘和e1000网卡
+1. 使用sata硬盘和e1000网卡
 
-在```</hyperv> ```下面：
+2. 在```</hyperv> ```下面：
 
 ```
 <kvm>
@@ -16,7 +18,7 @@
 </kvm> 
 ```
 
-在``` <os firmware="efi">```上面
+3. 在``` <os firmware="efi">```上面，这是伪装bios
 
 ```
 <sysinfo type="smbios">
@@ -42,7 +44,7 @@
   migratable是为服务器集群准备的“搬家”功能，无意义，关闭。
 ```
 
-在```    <topology sockets="1" dies="1" clusters="1" cores="8" threads="2"/>```底下：主要是为了伪装成一个友好的hyper-v，调整cpu时钟，修复cpu安全漏洞、设置高级指令集、隐藏cpu虚拟化
+4. 在```    <topology sockets="1" dies="1" clusters="1" cores="8" threads="2"/>```底下：主要是为了伪装成一个友好的hyper-v，调整cpu时钟，修复cpu安全漏洞、设置高级指令集、隐藏cpu虚拟化
 
 ```
     <cache mode="passthrough"/>
@@ -70,7 +72,7 @@
     <feature policy="require" name="xsaveerptr"/>
 ```
 
-隐藏时钟
+5. 时钟
 
 ```
   <clock offset="timezone" timezone="Asia/Japan">
