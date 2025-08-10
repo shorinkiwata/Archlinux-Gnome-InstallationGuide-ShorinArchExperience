@@ -10,7 +10,7 @@
 
 1. 使用sata硬盘和e1000网卡
 
-2. 在```</hyperv> ```下面：
+2. 在```</hyperv> ```下面一行插入：
 
 ```
 <kvm>
@@ -18,7 +18,7 @@
 </kvm> 
 ```
 
-3. 在``` <os firmware="efi">```上面，这是伪装bios
+3. 在``` <os firmware="efi">```上面一行插入，这是伪装bios
 
 ```
 <sysinfo type="smbios">
@@ -44,7 +44,9 @@
   migratable是为服务器集群准备的“搬家”功能，无意义，关闭。
 ```
 
-4. 在```    <topology sockets="1" dies="1" clusters="1" cores="8" threads="2"/>```底下：主要是为了伪装成一个友好的hyper-v，调整cpu时钟，修复cpu安全漏洞、设置高级指令集、隐藏cpu虚拟化
+4. 在```    <topology sockets="1" dies="1" clusters="1" cores="8" threads="2"/>```下面一行插入
+
+   主要是为了伪装成一个友好的hyper-v，调整cpu时钟，修复cpu安全漏洞、设置高级指令集、隐藏cpu虚拟化
 
 ```
     <cache mode="passthrough"/>
@@ -72,7 +74,7 @@
     <feature policy="require" name="xsaveerptr"/>
 ```
 
-5. 时钟
+5. 时钟，找到clock offset那段修改
 
 ```
   <clock offset="timezone" timezone="Asia/Japan">
