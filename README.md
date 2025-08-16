@@ -66,13 +66,21 @@ Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsU
 
 [阿里云镜像站下载](https://mirrors.aliyun.com/archlinux/iso/)
 
-## 压缩卷
+## 制作系统
+
+### 方法一 ：压缩卷（没有u盘使用这个方法）
 
 windows系统内win+x键，选择磁盘管理。找到想安装archlinux的位置，选择压缩卷，空出磁盘空间。
 
 右击新增简单卷，大小设置为4096MB（足够装下iso文件就行），盘符随意，格式化选择FAT32。然后把iso文件里面的内容解压进刚刚新建的盘符里。
 
 重启选择bios启动项
+
+### 方法二：ventoy
+
+[ventoy/Ventoy: A new bootable USB solution.](https://github.com/ventoy/Ventoy)
+
+ventoy制作的系统盘可以存放多个系统镜像，推荐。
 
 # 安装系统
 
