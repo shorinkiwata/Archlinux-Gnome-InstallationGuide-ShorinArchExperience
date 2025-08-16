@@ -1462,7 +1462,7 @@ sudo mkinitcpio -P
 
 [libvirt/QEMU Installation — Looking Glass B7 documentation](https://looking-glass.io/docs/B7/install_libvirt/#memballoon)
 
-memlbaloon的目的是提高内存的利用率，但是由于它会不停地“取走”“归还”虚拟机内存，导致显卡 直通时虚拟机内存性能极差。
+memlbaloon的目的是提高内存的利用率，但是由于它会不停地“取走”和“归还”虚拟机内存，导致显卡 直通时虚拟机内存性能极差。
 
 将虚拟机xml里面的memballoon改为none，这将显著提高low帧。
 
@@ -1485,7 +1485,7 @@ memlbaloon的目的是提高内存的利用率，但是由于它会不停地“�
 
 - 编辑虚拟机xml
 
-在virt-manager的g首选项里开启xml编辑，找到```<memoryBacking>```并添加```<hugepages/>```：
+在virt-manager的g首选项里开启xml编辑，找到```<memoryBacking>```并添加```<hugepages/>```
 ```
   <memoryBacking>
     <hugepages/>
@@ -1606,7 +1606,7 @@ reboot
 
 5. 在```    <topology sockets="1" dies="1" clusters="1" cores="8" threads="2"/>```下面一行插入
 
-主要是为了伪装成一个友好的hyper-v，调整cpu时钟，修复cpu安全漏洞、设置高级指令集、隐藏cpu虚拟化
+主要是为了伪装成一个友好的hyper-v，调整cpu时钟，修复cpu安全漏洞、设置高级指令集、隐藏cpu虚拟化。注意这里如果伪装成hyper-v的话就没法在虚拟机里面安装vmware了。
 
 ```
     <cache mode="passthrough"/>
@@ -1685,6 +1685,8 @@ sunshine在web设置pin码添加设备之后就可以连接了。
 [Installation — Looking Glass B7 documentation](https://looking-glass.io/docs/B7/install/)
 
 [PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF)
+
+视频教程：[两分钟学会looking glass使用方法_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1w6tDzKEn1?spm_id_from=333.788.videopod.sections&vd_source=65a8f230813d56660e48ae1afdfa4182)
 
 looking glass通过共享内存实现屏幕分享，也需要安装[Virtual-Display-Driver](https://github.com/VirtualDrivers/Virtual-Display-Driver)
 
@@ -1788,6 +1790,8 @@ fullScreen = yes
 
 # 在linux上玩游戏
 
+[「Linux游戏指南」关于Linux玩游戏的一切](https://www.bilibili.com/video/BV1zyttzPEmp/?spm_id_from=333.1387.homepage.video_card.click&vd_source=65a8f230813d56660e48ae1afdfa4182)
+
 这一节不仅适用于windows的游戏程序，还适用于windows的软件。
 首选用steam玩游戏，steam没有的游戏通过lutris管理，使用proton或者wine运行。安卓手游用waydroid运行。如果都不行，用配置了显卡直通的win11虚拟机。
 
@@ -1803,7 +1807,7 @@ sudo pacman -S gamemode
 sudo systemctl --user enable --now gamemoded
 ```
 
-steam启动参数： gamemoderun %command%
+启动参数： gamemoderun %command%
 
 - 32位显卡工具和驱动
 
@@ -1819,7 +1823,7 @@ sudo pacman -S --needed lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-icd-
 
 [Lossless Scaling Frame Generation for Linux hits 1.0 with a new UI making it easier than ever | GamingOnLinux](https://www.gamingonlinux.com/2025/08/lossless-scaling-frame-generation-for-linux-hits-1-0-with-a-new-ui-making-it-easier-than-ever/)
 
-注意，小黄鸭2025年7月31日刚发布1.0版本，运行遇到问题很正常。
+视频教程：[60秒学会在Linux上使用小黄鸭补帧_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1ABtDzqEcq?spm_id_from=333.788.videopod.sections&vd_source=65a8f230813d56660e48ae1afdfa4182)
 
 需要先下载steam正版的的小黄鸭。也许盗版也可以，但是正版就30块而已，我就不试盗版行不行了，有兴趣的可以自己试试，手动指定一下lossless.dll的路径说不定能运行。
 
@@ -1865,12 +1869,20 @@ flatpak程序使用补帧看这里[Using lsfg‐vk in Flatpak · PancakeTAS/lsfg
 
 ## 玩steam游戏
 
+[Proton (软件) - 维基百科，自由的百科全书](https://zh.wikipedia.org/wiki/Proton_(%E8%BB%9F%E9%AB%94))
+
 [Steam - ArchWiki](https://wiki.archlinux.org/title/Steam)
 
 ```
 sudo pacman -S steam
 ```
-在设置→兼容性里面选择默认兼容性工具即可运行大部分无反作弊的游戏
+在设置→兼容性里面选择默认兼容性工具为proton-experimental即可运行大部分游戏
+
+- 管理ge-proton
+ge-proton比proton更加强大
+```
+yay -S protonup-qt
+```
 
 - 可选：下载速度慢的话试试
 
@@ -1880,16 +1892,13 @@ vim ~/.steam/steam/steam_dev.cfg
 写入：
 @nClientDownloadEnableHTTP2PlatformLinux 0
 @fDownloadRateImprovementToAddAnotherConnection 1.0
-
 ```
-
-已知问题：使用桥接网络的配置进行连接会导致steam下载速度缓慢
 
 ## 玩minecraft
 - 从aur安装
-```
+``` 
 yay -S minecraft-launcher #官方启动器
-yay -S hmcl-bin
+yay -S hmcl-bin #hmcl
 ```
 安装时选择最新的jdk
 
@@ -1908,14 +1917,10 @@ yay -S waydroid
 可选：从archlinuxcn安装waydroid-image（要求添加cn仓库，按照流程，在本文档的yay安装部分已经添加）
 ```
 sudo pacman -S waydroid-image
-#带谷歌play的
-sudo pacman -S waydroid-image-gapps
 ```
 - 初始化
 ```
 sudo waydroid init
-#带谷歌的
-sudo waydroid init -s GAPPS
 ```
 - 启动服务
 ```
@@ -1955,7 +1960,7 @@ waydroid app install /apk/的/路径
 
 #### 安装谷歌框架
 
-依旧是使用这个脚本安装[casualsnek/waydroid_script: Python Script to add OpenGapps, Magisk, libhoudini translation library and libndk translation library to waydroid !](https://github.com/casualsnek/waydroid_script)，安装完成后用以下命令获取设备id
+依旧是使用这个脚本安装gapps [casualsnek/waydroid_script: Python Script to add OpenGapps, Magisk, libhoudini translation library and libndk translation library to waydroid !](https://github.com/casualsnek/waydroid_script)，安装完成后用以下命令获取设备id
 
 [Google Play Certification | Waydroid](https://docs.waydro.id/faq/google-play-certification)
 
@@ -2042,11 +2047,16 @@ mangojuice设置要显示的项目，然后在lutris右键想要监控的软件 
 
 steam的话设置启动参数 mangohud %command%，可以和gamemode同时启用 gamemoderun mangohud %command%
 
+### 如果要玩epic的游戏
+
+```
+yay -S heroic-games-launcher
+```
 
 ## 用显卡直通玩游戏
+
 经过前面显卡直通的操作，我已经有了一台4060显卡的win11，并且配置了looking glass，理论上所有win11能干的事情我都能在这台虚拟机上干。具体的就不用再往下说了吧🤓☝️
-至于为什么显卡直通虚拟机win11而不是重启到真的win11里面。
-因为just for fun，想双系统就重启，想直通就直通，想wsl就wsl，还要追问为什么的话我祝你万事如意身体健康。
+至于为什么显卡直通虚拟机win11而不是重启到真的win11里面。[「Linux游戏指南」关于Linux玩游戏的一切](https://www.bilibili.com/video/BV1zyttzPEmp/?spm_id_from=333.1387.homepage.video_card.click&vd_source=65a8f230813d56660e48ae1afdfa4182)这个视频后半表达得很清楚了。
 
 # 性能优化
 
