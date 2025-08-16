@@ -1,3 +1,9 @@
+【github】https://github.com/shorinkiwata/archlinuxinstall/tree/main 
+
+【度盘】https://pan.baidu.com/s/1QUzz10hxc7HIlRzhB0jVKg?pwd=arch
+
+一些上传不到git上的文件会在网盘里
+
 ```
 更新日志：
 2025.7.23 修改原本的fcitx5内容，添加fcitx5-rime和ibus-rime输入法相关内容
