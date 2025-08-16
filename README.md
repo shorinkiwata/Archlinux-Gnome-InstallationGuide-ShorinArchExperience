@@ -11,6 +11,7 @@
 2025.8.4  新增小黄鸭 Lossless Scaling相关内容
 2025.8.5  修复了错误，优化了排版
 2025.8.12 新增虚拟机性能优化和伪装相关内容
+2025.8.16 新增蓝牙配置、wps中文语言包、常用办公字体相关内容
 ```
 
 
@@ -22,13 +23,12 @@
 6. [笔记本显卡切换和电源管理](#显卡切换)
 7. [KVM虚拟机](#KVM虚拟机)
 8. [显卡直通](#显卡直通)
-8. [虚拟机性能优化](#虚拟机性能优化)
-9. [在linux上玩游戏](#在linux上玩游戏)
-10. [性能优化](#性能优化)
-11. [删除linux](#删除linux)
-12. [issues](#issues)
-13. [附录](#附录)
-14. [参考资料](#参考资料)
+9. [虚拟机性能优化](#虚拟机性能优化)
+10. [在linux上玩游戏](#在linux上玩游戏)
+11. [性能优化](#性能优化)
+12. [删除linux](#删除linux)
+13. [issues](#issues)
+14. [附录](#附录)
 
 ## vim基础操作
 i 键进入编辑模式
@@ -602,7 +602,17 @@ systemctl --user enable --now pipewire pipewire-pulse wireplumber
 sudo pacman -S pavucontrol 
 ```
 
+## 蓝牙
+
+```
+sudo pacman -S bluez
+```
+```
+sudo systemctl enable --now bluetooth
+```
+
 ## 安装高级网络配置工具nm-connection-editor
+
 ```
 sudo pacman -S network-manager-applet dnsmasq
 ```
@@ -732,28 +742,29 @@ sudo pacman -S mission-center gnome-text-editor gnome-disk-utility gnome-clocks 
 
 zen浏览器一定要在设置>zen模组里面安装transparent zen模组，可以获得特别流畅的动画效果
 ```
-- qq、微信、wps
-```
-yay -S linuxqq-appimage wechat-appimage wps-office-cn  
-```
+- 从aur安装常用软件
 
-#### 可选：如果wps用不了fcitx5
-
-由于wps自身的问题，我们需要手动设置变量：
-- 文字 (Writer): `/usr/bin/wps`
-- 表格 (Spreadsheets): `/usr/bin/et`
-- 演示 (Presentation): `/usr/bin/wpp`
+[WPS Office - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/WPS_Office)
 
 ```
-export XMODIFIERS=@im=fcitx 
-export QT_IM_MODULE=fcitx 
-export GTK_IM_MODULE=fcitx
+yay -S linuxqq-appimage wechat-appimage wps-office-cn wps-office-mui-zh-cn typora-free
+
+linuxqq-appimage是appimgae版qq
+wechat-appimage是appimage版微信
+wps-office-cn是wps
+wps-office-mui-zh-cn是wps的中文语言包
+typora-free是markdown编辑器
+
 ```
 
-- markdown编辑器
+- 关于字体
+
+从网上搜索常用办公字体，下载解压后存放到```~/.local/share/fonts```里面，可以新建文件夹整理。
+
+放进去之后记得刷新缓存 
 
 ```
-yay -S typora-free
+fc-cache --force
 ```
 
 - flathub
@@ -778,18 +789,6 @@ Blanket 白噪音播放器
 flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
 ```
 我设置了两个截图快捷键，ctrl+alt+a普通系统截图（仿qq截图快捷键），super+shift+s截图并进入编辑界面（仿win截图快捷键）。
-
-### appimage
-
-appimage是一个下载即用、无需安装的文件。需要确认安装了fuse才能运行appimage。
-
-安装appimagelauncher管理appimage软件
-```
-yay -S appimagelauncher
-```
-安装后启动appimage时会弹出appimagelauncher的窗口，第一次启动会让你设置安装路径，默认是home目录下的Applications目录。然后让你选择运行一次还是集成到系统。不过有时候会安装失败或者安装之后无法运行。
-- 卸载appimage软件
-右键快捷方式，点击remove appimage from system，或者手动删除~/.local/share/Applications下的destop文件和安装目录下的appimage文件。
 
 ### mpv开启硬件编解码
 
@@ -822,7 +821,7 @@ sudo pacman -S timeshift
 ```
 sudo systemctl enable --now cronie.service 
 ```
-### 自动生成快照启动项
+### 可选：创建快照时自动生成快照启动项
 - 安装必要组件
 ```
 sudo pacman -S grub-btrfs 
@@ -1135,6 +1134,7 @@ hide top bar #隐藏顶栏
 burn my windows #应用开启和打开的动画
 user themes #主题，浏览器搜索gnome shell theme下载主题
 logo menu # top bar的左上角显示一个logo,好玩
+hide activities button #隐藏左上角的activities按钮
 ```
 
 ## 主题美化
@@ -1464,16 +1464,16 @@ sudo mkinitcpio -P
 
 memlbaloon的目的是提高内存的利用率，但是由于它会不停地“取走”“归还”虚拟机内存，导致显卡 直通时虚拟机内存性能极差。
 
-将虚拟机xml里面的memballoon改为none，这将极大极大极大地！！！提高显卡直通虚拟机的性能。总体可以达到9成原生的性能。
+将虚拟机xml里面的memballoon改为none，这将显著提高low帧。
 
 ```
 <memballoon model="none"/>
 ```
-### 可选：内存大页
+### 内存大页
 
 [KVM - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/KVM#%E5%BC%80%E5%90%AF%E5%86%85%E5%AD%98%E5%A4%A7%E9%A1%B5)
 
-没感觉到有提升，wiki说有，那姑且设置一下
+可以大幅提高内存性能。用minecraft实测帧数提升了20%
 
 - 计算大页大小
 
@@ -1520,7 +1520,9 @@ reboot
 
 [PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#CPU_pinning)
 
-设置cpu拓扑和自己的cpu核心线程数对应。然后把虚拟机的cpu线程绑定到物理线程上，避免虚拟机cpu线程对应的物理cpu线程变化导致缓存性能下降。
+这一步提升不明显。
+
+设置cpu拓扑和自己的cpu核心线程数对应。然后把虚拟机的vcpu线程绑定到物理线程上，避免虚拟机cpu线程对应的物理cpu线程变化导致缓存性能下降。
 
 1. 查看物理cpu拓扑
 
@@ -1533,29 +1535,29 @@ reboot
 2. 修改xml，在```  <vcpu placement="static">16</vcpu>```下方插入
 
    ```
+     <iothreads>2</iothreads>
      <cputune>
-       <vcpupin vcpu="0" cpuset="0"/>
-       <vcpupin vcpu="1" cpuset="8"/>
-       <vcpupin vcpu="2" cpuset="1"/>
-       <vcpupin vcpu="3" cpuset="9"/>
-       <vcpupin vcpu="4" cpuset="2"/>
-       <vcpupin vcpu="5" cpuset="10"/>
-       <vcpupin vcpu="6" cpuset="3"/>
-       <vcpupin vcpu="7" cpuset="11"/>
-       <vcpupin vcpu="8" cpuset="4"/>
-       <vcpupin vcpu="9" cpuset="12"/>
-       <vcpupin vcpu="10" cpuset="5"/>
-       <vcpupin vcpu="11" cpuset="13"/>
-       <vcpupin vcpu="12" cpuset="6"/>
-       <vcpupin vcpu="13" cpuset="14"/>
-       <vcpupin vcpu="14" cpuset="7"/>
-       <vcpupin vcpu="15" cpuset="15"/>
+       <vcpupin vcpu="0" cpuset="2"/>
+       <vcpupin vcpu="1" cpuset="10"/>
+       <vcpupin vcpu="2" cpuset="3"/>
+       <vcpupin vcpu="3" cpuset="11"/>
+       <vcpupin vcpu="4" cpuset="4"/>
+       <vcpupin vcpu="5" cpuset="12"/>
+       <vcpupin vcpu="6" cpuset="5"/>
+       <vcpupin vcpu="7" cpuset="13"/>
+       <vcpupin vcpu="8" cpuset="6"/>
+       <vcpupin vcpu="9" cpuset="14"/>
+       <vcpupin vcpu="10" cpuset="7"/>
+       <vcpupin vcpu="11" cpuset="15"/>
+       <emulatorpin cpuset="0,1,8,9"/>
+       <iothreadpin iothread="1" cpuset="0,8"/>
+       <iothreadpin iothread="2" cpuset="1,9"/>
      </cputune>
    ```
 
-   数字需要修改成自己对应的。虚拟机有几个线程就写几行vcpu，0算第一个。上述这个配置声明了16个虚拟机cpu线程（vcpu）。cpuset设置vcpu对应的本机cpu线程，也就是```lscpu -e```输出结果里的cpu那一列。
+   虚拟机有几个线程就写几行vcpu，0算第一个。cpuset指定vcpu对应的主机cpu线程，也就是```lscpu -e```输出结果里的cpu那一列。
 
-   我的cpu支持超线程，cpu0和cpu8对应的是核心0。于是我把vcpu的0和1，绑定到cpu0和8上，以此类推。
+     ```<iothreads>2</iothreads>```设置iothreads的数量，建议至少设置一个，可以稳定low帧。```<iothreadpin iothread="1" cpuset="0,8"/>```指定专门用来做io相关的活的cpu。    ```<emulatorpin cpuset="0,8"/>```设置专门用来干和qemu相关工作的cpu，可以稳定low帧
 
 ### 伪装虚拟机
 
@@ -1565,7 +1567,7 @@ reboot
 
 ### 警告：每进行一步都要确认虚拟机能正常运行再进行下一步
 
-1. 使用sata硬盘和e1000网卡
+1. 使用sata硬盘和e1000网卡（可选）
 
 2. 在```</hyperv> ```下面一行插入：
 
@@ -2253,16 +2255,6 @@ nameserver 8.8.8.8
 nameserver 8.8.4.4
 ```
 
-## 自定义安装字体
-* 复制字体到该目录下（可以自由创建子目录）
-```
-～/local/share/fonts/
-```
-* 刷新字体缓存
-```
-fc-cache -fv
-```
-
 ## 扩展windwos的efi分区空间
 ```
 NIUBI partition Editor free edition
@@ -2390,6 +2382,20 @@ sudo vim /etc/environment
 ```
 sudo systemctl enable --now ananicy-cpp.service
 ```
+
+## 如果wps用不了fcitx5
+
+由于wps自身的问题，我们需要手动设置变量：
+- 文字 (Writer): `/usr/bin/wps`
+- 表格 (Spreadsheets): `/usr/bin/et`
+- 演示 (Presentation): `/usr/bin/wpp`
+
+```
+export XMODIFIERS=@im=fcitx 
+export QT_IM_MODULE=fcitx 
+export GTK_IM_MODULE=fcitx
+```
+
 ## TLP相关
 ```
 sudo pacman -S tlp tlp-rdw //////
@@ -2508,101 +2514,18 @@ font_size 14
 #重启终端
 ```
 
-# 特别鸣谢
-[Google Gemini](https://gemini.google.com/app)
+## appimage
+
+appimgae文件依旧足够方便了，故弃用
+
+appimage是一个下载即用、无需安装的文件。需要确认安装了fuse才能运行appimage。
 
 
-### 参考资料：
-[archlinux 简明指南](https://arch.icekylin.online/)
-
-[安装指南 - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97)
-
-[双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)
-
-[Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
-
-[gnome-shell uses dgpu instead of igpu : r/gnome](https://www.reddit.com/r/gnome/comments/1irvmki/gnomeshell_uses_dgpu_instead_of_igpu/)
-
-[NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)
-
-[GitHub - Jguer/yay: Yet another Yogurt - An AUR Helper written in Go](https://github.com/Jguer/yay)
-
-[Steam - ArchWiki](https://wiki.archlinux.org/title/Steam)
-
-[Download · Wiki · wine / wine · GitLab](https://gitlab.winehq.org/wine/wine/-/wikis/zh_CN/Download)
-
-[Lutris - Open Gaming Platform](https://lutris.net/)
-
-[GitHub - Stunkymonkey/nautilus-open-any-terminal](https://github.com/Stunkymonkey/nautilus-open-any-terminal)
-
-[arch + gnome美化教程_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1ym4y1G76s/?share_source=copy_web&vd_source=1c6a132d86487c8c4a29c7ff5cd8ac50)
-
-[the best tiling extension](https://www.reddit.com/r/gnome/comments/1ei9bj0/the_best_tiling_extension/)
-
-[Linux for ROG Notebooks](https://asus-linux.org/)
-
-[GitHub - bayasdev/envycontrol: Easy GPU switching for Nvidia Optimus laptops under Linux](https://github.com/bayasdev/envycontrol)
-
-[[已解决] KVM Libvirt 中无法访问存储文件，权限被拒绝错误](https://cn.linux-terminal.com/?p=4593)
-
-[How to Install KVM on Ubuntu | phoenixNAP KB](https://phoenixnap.com/kb/ubuntu-install-kvm)
-
-[如何在 Linux 主机和 KVM 中的 Windows 客户机之间共享文件夹 | Linux 中国 - 知乎](https://zhuanlan.zhihu.com/p/645234144)
-
-[手把手教你给笔记本重装系统（Windows篇）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV16h4y1B7md/?spm_id_from=333.337.search-card.all.click)
-
-[太突然！Win11 LTSC 官方精简版，终于来了 - 知乎](https://zhuanlan.zhihu.com/p/1000648759)
-
-[PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF)
-
-[GitHub - LizardByte/Sunshine: Self-hosted game stream host for Moonlight.](https://github.com/LizardByte/Sunshine)
-
-[Swap - Manjaro --- Swap - Manjaro](https://wiki.manjaro.org/index.php?title=Swap)
-
-[电源管理/挂起与休眠 - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/%E7%94%B5%E6%BA%90%E7%AE%A1%E7%90%86/%E6%8C%82%E8%B5%B7%E4%B8%8E%E4%BC%91%E7%9C%A0#%E7%A6%81%E7%94%A8_zswap_%E5%86%99%E5%9B%9E%E4%BB%A5%E4%BB%85%E5%B0%86%E4%BA%A4%E6%8D%A2%E7%A9%BA%E9%97%B4%E7%94%A8%E4%BA%8E%E4%BC%91%E7%9C%A0)
-
-[zswap - ArchWiki](https://wiki.archlinux.org/title/Zswap)
-
-[Zram vs zswap vs swap? : r/archlinux](https://www.reddit.com/r/archlinux/comments/1ivwv1l/zram_vs_zswap_vs_swap/)
-
-[Zswap vs zram in 2023, what's the actual practical difference? : r/linux](https://www.reddit.com/r/linux/comments/11dkhz7/zswap_vs_zram_in_2023)
-
-[linux - ZRAM vs ZSWAP for lower end hardware? - Super User](https://superuser.com/questions/1727160/zram-vs-zswap-for-lower-end-hardware)
-
-[Zswap or Zram: at this time, which one is more efficient? : r/archlinux](https://www.reddit.com/r/archlinux/comments/13ujemv/zswap_or_zram_at_this_time_which_one_is_more/)
-
-[Zram, zswap and hibernation - Support - Manjaro Linux Forum](https://forum.manjaro.org/t/zram-zswap-and-hibernation/82348)
-
-[kernel - zram vs zswap vs zcache Ultimate guide: when to use which one - Ask Ubuntu](https://askubuntu.com/questions/471912/zram-vs-zswap-vs-zcache-ultimate-guide-when-to-use-which-one/472227#472227)
-
-[zswap — The Linux Kernel documentation](https://www.kernel.org/doc/html/v4.18/vm/zswap.html)
-
-[zram: Compressed RAM-based block devices — The Linux Kernel documentation](https://docs.kernel.org/admin-guide/blockdev/zram.html)
-
-[windows10删除EFI分区(绝对安全)-CSDN博客](https://blog.csdn.net/sinat_29957455/article/details/88726797)
-
-[Creating Symlinks in Files under Wayland : r/gnome](https://www.reddit.com/r/gnome/comments/10qayrs/creating_symlinks_in_files_under_wayland/)
-
-[解决 Ubuntu 系统中 “Temporary Failure in Name Resolution“ 错误-CSDN博客](https://blog.csdn.net/qq_15603633/article/details/141032652)
-
-[Settings — TLP 1.8.0 documentation](https://linrunner.de/tlp/settings/index.html)
-[ALHP：优化你的archlinux性能 - 哔哩哔哩](https://www.bilibili.com/opus/745324585822453908?from=search&spm_id_from=333.337.0.0%2a)
-
-[kitty.conf - kitty](https://sw.kovidgoyal.net/kitty/conf/)
-
-[Steam - ArchWiki](https://wiki.archlinux.org/title/Steam)
-
-[Install Instructions | Waydroid](https://docs.waydro.id/usage/install-on-desktops)
-
-[Waydroid - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/Waydroid)
-
-[GitHub - casualsnek/waydroid_script: Python Script to add OpenGapps, Magisk, libhoudini translation library and libndk translation library to waydroid !](https://github.com/casualsnek/waydroid_script)
-
-[Download Lutris](https://lutris.net/downloads)
-
- [Looking Glass - Download Looking Glass](https://looking-glass.io/downloads)
-
-[Installation — Looking Glass B7 documentation](https://looking-glass.io/docs/B7/install/)
-
-[libvirt/QEMU Installation — Looking Glass B7 documentation](https://looking-glass.io/docs/B7/install_libvirt/#memballoon)
+安装appimagelauncher管理appimage软件
+```
+yay -S appimagelauncher
+```
+安装后启动appimage时会弹出appimagelauncher的窗口，第一次启动会让你设置安装路径，默认是home目录下的Applications目录。然后让你选择运行一次还是集成到系统。不过有时候会安装失败或者安装之后无法运行。
+- 卸载appimage软件
+右键快捷方式，点击remove appimage from system，或者手动删除~/.local/share/Applications下的destop文件和安装目录下的appimage文件。
 
