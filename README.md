@@ -2229,8 +2229,6 @@ diskpart选中efi分区后输入：
 sudo pacman -S gst-plugins-good gst-libav libde265
 ```
 
-
-
 ## 时间错乱，windwos开机磁盘检查
 [双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)
 
@@ -2267,7 +2265,7 @@ nameserver 8.8.4.4
 
 ## 扩展windwos的efi分区空间
 ```
-NIUBI partition Editor free edition
+NIUBI partition Editor free edition #使用这个工具
 ```
 
 ## grub卡顿
@@ -2384,16 +2382,7 @@ sudo vim /etc/environment
 
 - 如果之前禁用过系统设置里的打字快捷键记得恢复
 
-## cpu资源优先级
-因为影响steam下载速度已弃用（这是已知问题，估计还有其它问题）
-```
- yay -S ananicy-cpp cachyos-ananicy-rules
-```
-```
-sudo systemctl enable --now ananicy-cpp.service
-```
-
-## 如果wps用不了fcitx5
+### 如果wps用不了fcitx5
 
 由于wps自身的问题，我们需要手动设置变量：
 - 文字 (Writer): `/usr/bin/wps`
@@ -2406,9 +2395,21 @@ export QT_IM_MODULE=fcitx
 export GTK_IM_MODULE=fcitx
 ```
 
-## TLP相关
+## cpu资源优先级
+（没感觉到区别，故遵循奥卡姆剃刀原则弃用。）
 ```
-sudo pacman -S tlp tlp-rdw //////
+ yay -S ananicy-cpp cachyos-ananicy-rules
+```
+```
+sudo systemctl enable --now ananicy-cpp.service
+```
+
+## TLP相关
+
+（power-profiles-daemon已经足够了，故弃用）
+
+```
+sudo pacman -S tlp tlp-rdw 
 ```
 ```
 yay -S tlpui
@@ -2449,7 +2450,7 @@ sudo systemctl enable --now tlp
 ```
 
 ## 安装alhp 
-（下载太慢，容易下载失败，我不建议使用，遂删除）
+（下载太慢，容易下载失败，遂弃用）
 *参考链接: [ALHP：优化你的archlinux性能 - 哔哩哔哩](https://www.bilibili.com/opus/745324585822453908?from=search&spm_id_from=333.337.0.0%2a)
 
 * 检查芯片支持,记住结果里是x86-64-v几
@@ -2479,6 +2480,9 @@ sudo pacman -Syyu
 ```
 
 ## ranger预览图片
+
+（yazi比ranger更好用，故弃用）
+
 ```
 sudo pacman -S python-pillow ranger kitty 
 ```
@@ -2491,7 +2495,7 @@ set preview_images_method kitty
 ```
 
 ## 美化kitty
-（多个显示器的情况下，kitty用tiling shell扩展的自动平铺有bug，无法在当前显示器开启第一个窗口，所以换掉了）
+（多个显示器的情况下，kitty用tiling shell扩展的自动平铺有bug，无法在当前显示器开启第一个窗口，所以换成了ghostty）
 ```
 sudo pacman -S kitty
 ```
@@ -2526,7 +2530,7 @@ font_size 14
 
 ## appimage
 
-appimgae文件依旧足够方便了，故弃用
+（appimgae文件依旧足够方便了，这个意义不大，故弃用）
 
 appimage是一个下载即用、无需安装的文件。需要确认安装了fuse才能运行appimage。
 
