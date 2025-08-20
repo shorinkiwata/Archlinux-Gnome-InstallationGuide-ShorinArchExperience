@@ -1046,6 +1046,14 @@ ibus-mozc是日语输入法
 
 6. 之后正常使用就可以了，什么flameshot之类没法在gnome下面正常使用的软件就可以正常使用了。
 
+#### 卸载
+
+只需要删除ace bookworm就可以了，这是个容器，删除容器之后里面的所有东西都不会留下。
+
+```
+yay -Rns amber-ce-bookworm
+```
+
 ## 快照
 
 **快照相当于存档，每次做自己不了解的事情之前都存个档**
@@ -1877,13 +1885,11 @@ sudo rm /etc/sysctl.d/40-hugepage.conf
 reboot
 ```
 
-
-
 ### cpupin
 
 [PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#CPU_pinning)
 
-避免虚拟机cpu线程对应的物理cpu线程变化导致缓存性能下降。这一步提升不明显，在virt-manager里手动设置cpu拓扑为1插槽，核心数和线程数跟自己的cpu对应就够用了。如果要设置cpupin的话继续往下看。
+避免虚拟机cpu线程对应的物理cpu线程变化导致缓存性能下降。通常在virt-manager里手动设置cpu拓扑为1插槽，核心数和线程数跟自己的cpu对应就够用了。如果要极致的优化继续往下看。
 
 1. 查看物理cpu拓扑
 
@@ -1910,13 +1916,13 @@ reboot
        <vcpupin vcpu="9" cpuset="14"/>
        <vcpupin vcpu="10" cpuset="7"/>
        <vcpupin vcpu="11" cpuset="15"/>
-       <emulatorpin cpuset="0,1,8,9"/>
-       <iothreadpin iothread="1" cpuset="0,8"/>
-       <iothreadpin iothread="2" cpuset="1,9"/>
+       <emulatorpin cpuset="0,8,1,9"/>
+       <iothreadpin iothread="1" cpuset="0.8,1,9"/>
+       <iothreadpin iothread="2" cpuset="0,8,1,9"/>
      </cputune>
    ```
 
-     ```<iothreads>2</iothreads>```设置iothreads的数量，建议至少设置一个，可以稳定low帧。
+     ```<iothreads>2</iothreads>```设置io线程
 
    ```<vcpupin vcpu="0" cpuset="2"/>```虚拟机有几个线程就写几行vcpu，0算第一个。cpuset指定vcpu对应的主机cpu线程，也就是```lscpu -e```输出结果里的cpu那一列。比如举例的这段的意思是vcpu0对应本机的cpu2
    
