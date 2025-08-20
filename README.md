@@ -4,6 +4,10 @@
 
 一些上传不到git上的文件会在网盘里
 
+本文档创建时制作的视频，虽然已经过时，但是依旧值得一看：
+
+[「Archlinux究极指南」从手动安装到显卡直通，最后删除Linux_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1L2gxzVEgs/?spm_id_from=333.1387.homepage.video_card.click&vd_source=65a8f230813d56660e48ae1afdfa4182)
+
 ```
 更新日志：
 2025.7.23 修改原本的fcitx5内容，添加fcitx5-rime和ibus-rime输入法相关内容
@@ -18,6 +22,7 @@
 2025.8.5  修复了错误，优化了排版
 2025.8.12 新增虚拟机性能优化和伪装相关内容
 2025.8.16 新增蓝牙配置、wps中文语言包、常用办公字体相关内容
+2025.8.20 新增swap大小参考、脚本安装后的双系统配置、星火应用商店、更改gnome为windows布局相关内容；新增小技巧章节；优化了排版；修复了若干错误
 ```
 
 
@@ -33,8 +38,9 @@
 10. [在linux上玩游戏](#在linux上玩游戏)
 11. [性能优化](#性能优化)
 12. [删除linux](#删除linux)
-13. [issues](#issues)
-14. [附录](#附录)
+13. [小技巧](#小技巧)
+14. [issues](#issues)
+15. [附录](#附录)
 
 ## vim基础操作
 i 键进入编辑模式
@@ -66,7 +72,7 @@ Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsU
 
 [阿里云镜像站下载](https://mirrors.aliyun.com/archlinux/iso/)
 
-## 制作系统
+## 制作系统u盘
 
 ### 方法一 ：压缩卷（没有u盘使用这个方法）
 
@@ -82,7 +88,7 @@ windows系统内win+x键，选择磁盘管理。找到想安装archlinux的位�
 
 ventoy制作的系统盘可以存放多个系统镜像，推荐。
 
-# 安装系统
+# 安装
 
 ## 手动安装
 参考链接：
@@ -101,7 +107,7 @@ ping bilibili.com 确认网络正常
 iwctl
 ```
 ```
-station wlan0 connect <wifiname>
+station wlan0 connect <wifiname> #回车后会提升让输入密码
 ```
 ```
 exit
@@ -120,7 +126,7 @@ fdisk -l /dev/想要查询详细情况的硬盘  小写字母l，查看详细分
 ```
 cfdisk /dev/nvme0n1 选择自己要使用的硬盘进行分区
 ```
-创建512MB或者1g的分区，类型（type）选择efi system
+创建1g的分区，类型（type）选择efi system
 
 其余全部分到一个分区里，类型linux filesystem 
 
@@ -133,11 +139,11 @@ fdisk -l /dev/想要查询详细情况的硬盘  小写字母l，查看详细分
 
 - 格式化efi启动分区
 ```
-mkfs.fat -F 32 /dev/efi_system_partition
+mkfs.fat -F 32 /dev/nvme0n1p1（EFI分区名）
 ```
 - 格式化btrfs根分区
 ```
-mkfs.btrfs /dev/root_partition
+mkfs.btrfs /dev/nvme0n1p2（根分区名）
 
 #加上-f参数可以强制格式化
 ```
@@ -146,7 +152,7 @@ mkfs.btrfs /dev/root_partition
 
 - 挂载
 ```
-mount -t btrfs -o compress=zstd /dev/root_partition /mnt
+mount -t btrfs -o compress=zstd /dev/nvme0n1p2（根分区名） /mnt
 ```
 
 - 创建子卷
@@ -169,19 +175,21 @@ umount /mnt
 ### 挂载
 
 ```
-mount -t btrfs -o subvol=/@,compress=zstd /dev/root_partition /mnt #根目录
-mount --mkdir -t btrfs -o subvol=/@home,compress=zstd /dev/root_partition /mnt/home #/home目录
-mount --mkdir -t btrfs -o subvol=/@swap,compress=zstd /dev/root_partition /mnt/swap #/swap目录
-mount --mkdir /dev/efi_partition /mnt/boot #/boot目录
-mount --mkdir /dev/winefi_partition /mnt/winboot #windows的启动分区，为双系统引导做准备
+mount -t btrfs -o subvol=/@,compress=zstd /dev/nvme0n1p2 /mnt #根目录
+mount --mkdir -t btrfs -o subvol=/@home,compress=zstd /dev/nvme0n1p2 /mnt/home #/home目录
+mount --mkdir -t btrfs -o subvol=/@swap,compress=zstd /dev/nvme0n1p2 /mnt/swap #/swap目录
+mount --mkdir /dev/nvme0n1p1 /mnt/boot #/boot目录，/dev/nvme0n1p1替换为自己对应的efi分区名
+mount --mkdir /dev/nvme1n1p1 /mnt/winboot #windows的启动分区，为双系统引导做准备。/dev/nvme1n1p1替换为自己win启动分区对应的设备名
 ```
 ```
 df -h 复查挂载情况
 ```
 
 ### 安装系统
-#### 设置镜像源
-##### reflector自动设置
+- 设置镜像源
+
+  方法一：reflector自动设置
+
 ```
 reflector -a 24 -c cn -f 10 --sort score --save /etc/pacman.d/mirrorlist --v
 
@@ -192,7 +200,8 @@ reflector -a 24 -c cn -f 10 --sort score --save /etc/pacman.d/mirrorlist --v
 --save /etc/pacman.d/mirrorlist 将结果保存到/etc/pacman.d/mirrorlist
 --v（verbose） 过程可视化
 ```
-##### 手动设置
+​		方法二：手动设置
+
 ```
 vim /etc/pacman.d/mirrorlist
 
@@ -202,6 +211,10 @@ vim /etc/pacman.d/mirrorlist
 - 更新密钥
 ```
 pacman -Sy archlinux-keyring
+
+pacman是包管理器，管理软件的安装、卸载之类的
+-S代表安装
+-Sy代表同步数据库然后安装
 ```
 
 - 安装系统
@@ -227,15 +240,46 @@ amd-ucode 是微码，用来修复和优化cpu，intel用户安装intel-ucode
 
 ## 设置swap
 
-参考链接：[Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
+参考链接：
 
-创建swap文件
+[Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
+
+[Swap - Manjaro](https://wiki.manjaro.org/index.php/Swap)
+
+swap与虚拟内存和休眠有关，可以创建swap分区或者swap文件，二选一，前者配置更简单，后者配置稍复杂，但是更加灵活。这里采用交换分区的方式，交换文件的配置方法在手动安装的部分有。
+
+```
+SWAP大小参考
+    	内存  				不需要休眠    				需要休眠    不建议超过
+       1GB              1GB                 2GB        2GB
+       2GB              2GB                 3GB        4GB
+       3GB              3GB                 5GB        6GB
+       4GB              4GB                 6GB        8GB
+       5GB              2GB                 7GB       10GB
+       6GB              2GB                 8GB       12GB
+       8GB              3GB                 11GB       16GB
+      12GB              3GB                 15GB        24GB
+      16GB              4GB                 20GB       32GB
+      24GB              5GB                 29GB       48GB
+      32GB              6GB                 38GB       64GB
+      64GB              8GB                 72GB       128GB
+     128GB             11GB                 139GB       256GB
+     256GB             16GB                 272GB       512GB
+     512GB             23GB                 535GB       1TB
+       1TB             32GB                1056GB       2TB
+       2TB             46GB                2094GB       4TB
+       4TB             64GB                4160GB       8TB
+       8TB             91GB                8283GB       16TB
+```
+
+1. 创建swap文件
 
 ```
 btrfs filesystem mkswapfile --size 64g --uuid clear /mnt/swap/swapfile
 ```
 
-启动swap
+2. 启动swap
+
 ```
 swapon /mnt/swap/swapfile
 ```
@@ -249,12 +293,6 @@ genfstab -U /mnt > /mnt/etc/fstab
 
 ```
 arch-chroot /mnt
-```
-
-### 主机名
-
-```
-vim /etc/hostname
 ```
 
 ### 设置时间和时区
@@ -290,11 +328,16 @@ passwd
 ```
 pacman -S grub efibootmgr os-prober
 
+grub是最常用的工具，其他还有systemd-boot，有需要自行查找
 efibootmgr 管理uefi启动项
 os-prober 用来搜索win11
 ```
 ```
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=ARCH #此处的id可以自取
+grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=ARCH 
+
+--target指定架构
+--efi-directory指定目录
+--bootloader-id任意取一个启动项在bios里显示的名字
 ```
 
 - 编辑grub的源文件
@@ -302,13 +345,15 @@ grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=ARCH #此
 vim /etc/default/grub
 ```
 
-GRUB_DEFAULT=0改成saved，再取消GRUB_SAVEDEFAULT=true的注释，或者手动写入。这可以记住开机的选择。
+  1. GRUB_DEFAULT=0改成saved，再取消GRUB_SAVEDEFAULT=true的注释。这一步是记住开机的选择。
 
-GRUB_CMDLINE_LINUX_DEFAULT里面去掉quiet以显示开机日志，loglevel设置日志等级为5，loglevel共7级，5级是一个信息量的平衡点。再添加nowatchdog modprobe.blacklist=sp5100_tco，禁用watchdog，intelcpu用户把sp5100_tco换成iTCO_wdt。
+  2. GRUB_CMDLINE_LINUX_DEFAULT里面去掉quiet以显示开机日志，loglevel设置日志等级为5。再添加nowatchdog modprobe.blacklist=sp5100_tco，禁用watchdog，intelcpu用户把sp5100_tco换成iTCO_wdt。
 
-watchdog的目的是在系统死机的时候自动重启系统。这在服务器或者嵌入式上有用，但是对个人用户来说没有意义，禁用以节省系统资源、提高开机和关机速度
+     loglevel共7级，5级是一个信息量的平衡点。
 
-手动写入或者取消最后一行GRUB_DISABLE_OS_PROBER=false的注释让grub使用os-prober生成其他系统的启动项
+     watchdog的目的是在系统死机的时候自动重启系统。这在服务器或者嵌入式上有用，但是对个人用户来说没有意义，禁用以节省系统资源、提高开机和关机速度
+
+3. 手动写入或者取消最后一行GRUB_DISABLE_OS_PROBER=false的注释。这一步让grub使用os-prober生成其他系统的启动项
 
 - 生成配置文件
 ```
@@ -322,13 +367,18 @@ reboot 重启，会自动取消所有的挂载
 ```
 ## 启动网络
 
-登录root账号
+#### 登录root账号
+
+- 开启networkmanager服务，注意大小写
 
 ```
-systemctl enable --now NetworkManager #enbale代表开机自启，--now代表现在启动，开启networkmanager服务，注意大小写
+systemctl enable --now NetworkManager 
+
+enbale代表开机自启
+--now代表现在启动
 ```
 
-连接wifi
+#### 连接wifi
 
 - nmcli
 
@@ -348,10 +398,9 @@ clear清屏，或者ctrl+L清屏
 - 确认网络连接
 
 ```
-方法手动安装的时候学过了
+ip a
+ping bilibili.com
 ```
-
-
 
 ### 放松一下吧
 
@@ -359,7 +408,11 @@ clear清屏，或者ctrl+L清屏
 pacman -S fastfetch lolcat cmatrix
 ```
 
-使用示例： fastfetch | lolcat，竖线代表把左边程序的输出结果输入到右边的程序里
+使用示例： fastfetch | lolcat，竖线代表把左边程序的输出结果输入到右边的程序里。
+
+cmatrix是代码雨，输入cmatris回车运行。
+
+---
 
 
 
@@ -371,9 +424,9 @@ pacman -S fastfetch lolcat cmatrix
 * 连接wifi
 ```
 iwctl #开启wifi连接
-station wlan0 connect wifi名 
+station wlan0 connect 【wifi名】 
 在跳出的条目内输入密码
-exit退出iwctl
+exit 退出iwctl
 ```
 * ping一个网址确认网络正常
 
@@ -381,6 +434,10 @@ exit退出iwctl
 * 更新archlinux-keyring
 ```
 pacman -Sy archlinux-keyring
+
+pacman是包管理器，管理软件的安装、卸载之类的
+-S代表安装
+-Sy代表同步数据库然后安装。
 ```
 - 更新archinstall
 ```
@@ -391,15 +448,44 @@ pacman -S archinstall
 ### 设置镜像源
 * mirror选自己所在地区或国家，也可以不手动选，在optional repositories里开启32位源（multilib）玩游戏或者运行windows程序需要32位支持
 
-### 磁盘分区 disk configuration
+### 磁盘分区 
 #### 启动分区
 wiki推荐是1GB，所以填入1024MB，小点也行，类型fat32,挂载点是/boot
-#### swap交换空间
-swap与虚拟内存和休眠有关，可以创建swap分区或者swap文件，二选一，前者配置更简单，后者配置稍复杂，但是更加灵活。
+#### swap交换分区
+swap与虚拟内存和休眠有关，可以创建swap分区或者swap文件，二选一，前者配置更简单，后者配置稍复杂，但是更加灵活。这里采用交换分区的方式，交换文件的配置方法在手动安装的部分有。
 ##### swap分区
 
+[Swap - Manjaro](https://wiki.manjaro.org/index.php/Swap)
+
+```
+SWAP大小参考
+    	内存  				不需要休眠    				需要休眠    不建议超过
+       1GB              1GB                 2GB        2GB
+       2GB              2GB                 3GB        4GB
+       3GB              3GB                 5GB        6GB
+       4GB              4GB                 6GB        8GB
+       5GB              2GB                 7GB       10GB
+       6GB              2GB                 8GB       12GB
+       8GB              3GB                 11GB       16GB
+      12GB              3GB                 15GB        24GB
+      16GB              4GB                 20GB       32GB
+      24GB              5GB                 29GB       48GB
+      32GB              6GB                 38GB       64GB
+      64GB              8GB                 72GB       128GB
+     128GB             11GB                 139GB       256GB
+     256GB             16GB                 272GB       512GB
+     512GB             23GB                 535GB       1TB
+       1TB             32GB                1056GB       2TB
+       2TB             46GB                2094GB       4TB
+       4TB             64GB                4160GB       8TB
+       8TB             91GB                8283GB       16TB
+```
+
+
+
   创建一个和内存大小相同的硬盘分区，类型选择swap
-##### btrfs根分区
+
+#### btrfs根分区
 
 将所有剩余空间分到一个分区，类型选择btrfs,设置compress（透明压缩,可以节省磁盘空间），添加子卷（subvolume）。
 - @ 对应 /
@@ -426,28 +512,83 @@ vim /etc/fstab
 
 ### 其他
 * bootloader 选择grub，因为主流发行版用的都是grub,配置简单，遇到问题时网上帖子多
+
 * 设置root密码
+
 * 设置普通用户，添加管理员权限
+
 * profile可以预装桌面环境，有需要的自行选择，选择桌面之后还可以选择安装显卡驱动（驱动选择看：[AMDGPU](https://wiki.archlinux.org/title/AMDGPU)、[NVIDIAGPU](https://wiki.archlinux.org/title/NVIDIA)）
+
 * 内核（kernel）台式机选zen,笔记本用linux（注意不同内核的显卡驱动不一样）
+
 * networ configuration选择第三项networkmanager，因为主流桌面环境默认与这个集成
+
 * additional pakages 里面选一个文本编辑器（通常用vim）和os-prober（双系统相关）
+
 * 设置时区
+
 * install安装
 
+### 双系统
+
+1.  选择exit archinstall，推出archinstall
+
+2. 挂载windwos的启动分区
+
+   ```
+   lsblk -pf 列出当前分区情况
+   找到ntfs上面的fat分区，通常是nvme1n1p1或者0n1p1。或者用fdisk -l 小写字母l，查看更详细的信息。找到后挂载到mnt下的任意一个目录，比如winboot。
+   mount /dev/nvme1n1p1 /mnt/winboot 
+   ```
+
+3. arch-chroot 
+
+   ```
+   arch-chroot /mnt 进入刚刚安装的系统
+   ```
+
+4. 编辑grub源文件启用os-prober
+
+   ```
+   vim /etc/default/grub 
+   
+   i键进入编辑模式
+   
+   取消最后一行GRUB_DISABLE_OS_PROBER=false的注释
+   
+   esc退出编辑模式
+   
+   :wq 冒号小写wq保存并退出
+   ```
+
+5. 生成grub的配置文件
+
+   ```
+   grub-mkconfig -o /boot/grub/grub.cfg
+   ```
+
+6. exit 退出chroot
+
+7. reboot 重启
+
+8. 更改bios启动项
+
 ---
+
+
 
 # 配置系统
 
 ## 创建普通用户
-没有普通用户无法登入桌面环境，有些软件会拒绝再root权限下运行，所以普通用户是必须的。
+没有普通用户无法登入桌面环境，有些软件会拒绝在root权限下运行，所以普通用户是必须的。
 
 (archinstall安装的可以跳过)
 
 ```
-useradd -m -g wheel <username> #不需要输入<>符号
+useradd -m -g wheel <username> 
 
-#-m代表创建用户的时候创建home目录，-g代表设置组
+<username>替换为自己的用户名（不需要输入<>符号）
+-m代表创建用户的时候创建home目录，-g代表设置组
 ```
 * 设置密码
 ```
@@ -461,6 +602,34 @@ EDITOR=vim visudo
 ```
 %wheel ALL=（ALL：ALL） ALL
 ```
+### 开启32位源和CN仓库 (archinstall可以跳过)
+
+32位源建议开启，因为steam需要，wine运行exe也需要
+
+1. 编辑pacman配置文件
+
+   ```
+   sudo vim /etc/pacman.conf
+   
+   去掉[multilib]两行的注释，这一步是开启32位源
+   
+   再在文件底部写入：
+   
+   [archlinuxcn]
+   Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch 
+   Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch 
+   Server = https://mirrors.hit.edu.cn/archlinuxcn/$arch 
+   Server = https://repo.huaweicloud.com/archlinuxcn/$arch 
+   
+   这是添加cn源
+   ```
+
+2. 同步数据库并安装archlinuxcn密钥
+
+   ```
+   sudo pacman -Sy archlinuxcn-keyring 
+   ```
+
 ## 安装显卡驱动和硬件编解码
 
 我的配置是4060+7940h，所以以4060和780m为例子
@@ -470,17 +639,22 @@ EDITOR=vim visudo
 ### 检查头文件
 ```
 sudo pacman -S linux-headers
+
 #linux替换为自己的内核，比如zen内核是linux-zen-headers
 ```
 ### 安装显卡驱动 
 
 N卡此时如果不安装显卡驱动，可能无法启动桌面环境
 ```
-sudo pacman -S nvidia-open
+sudo pacman -S nvidia-open lib32-nvidia-utils
 ```
-nvidia包里面已经包含了nvidia-utils包。非stable内核要安装的驱动不一样，具体看wiki，例如zen内核装nvidia-open-dkms。
+lib32-nvidai-utils玩游戏要用。
 
-显卡驱动的选择在[CodeNames · freedesktop.org](https://nouveau.freedesktop.org/CodeNames.html)这个页面搜索自己的显卡，看看对应的family是什么。然后在[NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)这个页面查找对应的显卡驱动。nv160~最新的显卡用nvidia-open，nv110~190可以还可以用nvidia。nvidia-open是内核模块开源的驱动，不是完全的开源驱动。
+nvdiai包里面已经包含了nvidia-utils包。
+
+非stable内核要安装的驱动不一样，具体看wiki，例如zen内核装nvidia-open-dkms。后续开启32位源之后如果需要用steam的话安装时选择lib32-nvidia开头的包。
+
+显卡驱动的选择在[CodeNames · freedesktop.org](https://nouveau.freedesktop.org/CodeNames.html)这个页面搜索自己的显卡，看看对应的family是什么。然后在[NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)这个页面查找对应的显卡驱动。nv160family往后的显卡用nvidia-open，nv110到190如果nvidia-open表现不佳的话可以使用nvidia。nvidia-open是内核模块开源的驱动，不是完全的开源驱动。
 
 #### AMD显卡建议检查是否安装vulkan驱动
 ```
@@ -488,13 +662,16 @@ sudo pacman -S vulkan-radeon
 ```
 - 可选：混合模式软件还是跑在N卡上
 
-检查有没有安装vulkan-mesa-layers
+  参考链接：[gnome-shell uses dgpu instead of igpu : r/gnome](https://www.reddit.com/r/gnome/comments/1irvmki/gnomeshell_uses_dgpu_instead_of_igpu/)
 
-参考链接：[gnome-shell uses dgpu instead of igpu : r/gnome](https://www.reddit.com/r/gnome/comments/1irvmki/gnomeshell_uses_dgpu_instead_of_igpu/)
+  检查有没有安装vulkan-mesa-layers
 
-```
-sudo pacman -S vulkan-mesa-layers
-```
+  ```
+  sudo pacman -S vulkan-mesa-layers
+  ```
+
+  
+
 ### 硬件编解码
 
 - 可选：libva-utils包提供了测试硬件编解码的工具，比如vainfo命令可以显示当前硬件编解码支持
@@ -508,11 +685,11 @@ sudo pacman -S libva-nvidia-driver
 sudo pacman -S intel-media-driver libva
 ```
 * amd 780M
-确认安装了libva-mesa-driver
+开箱即用，不需要配置。出问题可以确认是否安装了libva-mesa-driver
 ```
 sudo pacman -Q libva-mesa-driver
 ```
-* 环境变量名（不需要手动设置，只在指定某块gpu时使用）
+* 可选：设置环境变量（不需要手动设置，只在指定某块gpu时使用）
 ```
 LIBVA_DRIVER_NAME=nvidia #nvidia
 LIBVA_DRIVER_NAME=radeonsi #amd
@@ -522,37 +699,29 @@ LIBVA_DRIVER_NAME=radeonsi #amd
 ```
 sudo pacman -S wqy-zenhei noto-fonts noto-fonts-emoji
 ```
-* 重启激活显卡驱动
+* 重启激活显卡驱动和字体
 ```
 reboot 
-```
-### 开启32位源 (archinstall可以跳过)
-
-建议开启，因为steam需要，wine运行exe也需要
-```
-sudo vim /etc/pacman.conf #编辑pacman配置文件
-去掉[multilib]两行的注释
-sudo pacman -Sy #刷新源
 ```
 ## Gnome桌面环境
 
 ```
 pacman -S gnome-desktop gdm ghostty gnome-control-center gnome-software flatpak
-```
-```
+
 #gnome-desktop最小化安装gnome
 #gdm是显示管理器(gnome display manager)
 #ghostty是一个可高度自定义的终端模拟器（terminal emulator)
 #gnome-control-center是设置中心
 #software和flatpak是软件商城
+#flatpak是flathub软件
 ```
 * 临时开启GDM
 ```
-sudo systemctl start gdm #即使出了问题重启也能恢复，避免进不了tty的情况
-```
-* 设置gdm开机自启
+sudo systemctl start gdm 
 
-桌面环境正常开启后设置开机自启
+#即使出了问题重启也能恢复，避免进不了tty的情况
+```
+* 正常开启后设置gdm开机自启
 
 ```
 sudo systemctl enable gdm
@@ -589,12 +758,32 @@ sudo locale-gen
 ```
 
 ## 删除或隐藏不必要的快捷方式
-```
-flatpak install flathub io.github.fabrialberio.pinapp
-```
-也可以用menulibre，使用pacman安装
 
-想隐藏的图标激活invisible，然后保存
+- 方法一：pinapp
+
+  从应用商店搜索pinapp安装pins，图标是个图钉钉在蓝色的板子上。
+
+  也可以用命令安装，更方便：
+
+  ```
+  flatpak install flathub io.github.fabrialberio.pinapp
+  ```
+
+  选择想隐藏的图标激活invisible即可
+
+- 方法二：menulibre
+
+  使用pacman安装
+
+  ```
+  sudo pacman -S menulibre
+  ```
+
+  选择想隐藏的图标激活invisible，然后保存即可
+
+- 方法三：gnome扩展
+
+  商店搜索extension，安装扩展管理器。然后安装apphider扩展。就可以右键概览里的快捷方式隐藏了。
 
 ## 安装声音固件和声音服务
 
@@ -616,7 +805,7 @@ systemctl --user enable --now pipewire pipewire-pulse wireplumber
 sudo pacman -S pavucontrol 
 ```
 
-## 蓝牙
+## 启用蓝牙
 
 ```
 sudo pacman -S bluez
@@ -632,237 +821,266 @@ sudo pacman -S network-manager-applet dnsmasq
 ```
 * 设置跃点
 ```
-启动安装的软件或输入nm-connection-editor
+启动安装的软件或终端输入nm-connection-editor
 跃点需手动设置为100,默认的-999会导致网络速率异常
 ```
 
 
 ## 安装yay
 
-- 编辑pacman配置文件
-```
-sudo vim /etc/pacman.conf
-```
-- 在文件底部写入以下内容
-```
-[archlinuxcn]
-Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch 
-Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch 
-Server = https://mirrors.hit.edu.cn/archlinuxcn/$arch 
-Server = https://repo.huaweicloud.com/archlinuxcn/$arch 
-```
-- 安装密钥
-```
-sudo pacman -Sy archlinuxcn-keyring 
-```
-- 安装yay
+- 方法一：直接从archlinuxcn安装（需要前面按照步骤添加了cn源）
+
 ```
 sudo pacman -S yay 
 ```
 
-### 或者从git安装
-[GitHub - Jguer/yay: Yet another Yogurt - An AUR Helper written in Go](https://github.com/Jguer/yay)
+- 方法儿：从github安装
 
-```
-sudo pacman -S git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
-```
+  [GitHub - Jguer/yay: Yet another Yogurt - An AUR Helper written in Go](https://github.com/Jguer/yay)
+
+  ```
+  sudo pacman -S git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+  ```
 
 ## 安装输入法
 
 ### ibus-rime
 
-[Rime - Arch Linux 中文维基](https://wiki.archlinuxcn.org/zh-hant/Rime)
-
-[可选配置（基础篇） | archlinux 简明指南](https://arch.icekylin.online/guide/advanced/optional-cfg-1#%F0%9F%8D%80%EF%B8%8F-%E8%BE%93%E5%85%A5%E6%B3%95)
-
-[RIME · GitHub](https://github.com/rime)
+参考：[Rime - Arch Linux 中文维基](https://wiki.archlinuxcn.org/zh-hant/Rime) | [可选配置（基础篇） | archlinux 简明指南](https://arch.icekylin.online/guide/advanced/optional-cfg-1#%F0%9F%8D%80%EF%B8%8F-%E8%BE%93%E5%85%A5%E6%B3%95) | [RIME · GitHub](https://github.com/rime)
 
 ibus输入法在gnome的兼容性极佳，无须配置环境变量即可使用，rime可以解决ibus-libpinyin词库垃圾的问题，扩展可以解决ibus自定义的问题，故弃用fcitx5。如果一定要使用fcitx5的话，看附录的[fcitx5-rime 雾凇拼音](#fcitx5-rime 雾凇拼音)
 
-- 安装ibus-rime
+1. 安装ibus-rime
 
 ```
-sudo pacman -S ibus ibus-rime rime-ice-pinyin-git
+yay -S ibus ibus-rime rime-ice-pinyin-git ibus-mozc
 
-yay -S ibus-mozc #日语输入法
+ibus是ibus输入法的基本包
+ibus-rime是中州韵
+rime-ice是雾凇拼音输入法方案，实测比万象拼音方案好用
+ibus-mozc是日语输入法
 ```
 
-- 在gnome的设置中心 > 键盘 里面搜索rime添加输入法，如果没有的话登出一次
+2. 在gnome的设置中心 > 键盘 里面搜索rime添加输入法，如果没有的话登出一次
 
-- 编辑配置文件设置输入法为ice雾凇拼音
+3. 编辑配置文件设置rime的输入法方案为ice雾凇拼音
 
-```
-vim ~/.config/ibus/rime/default.custom.yaml
-```
+   ```
+   vim ~/.config/ibus/rime/default.custom.yaml
+   ```
 
-如果没有文件夹的话自己创建，mkdir命令创建文件夹，touch命令创建文件
+   如果没有文件夹的话自己创建。``` mkdir ~/.config/ibus/rime/```创建文件夹，```touch default.custom.yaml```创建文件。写入以下内容：
 
-```
-patch:
-  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
-  __include: rime_ice_suggestion:/
-```
+   ```
+   patch:
+     # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
+     __include: rime_ice_suggestion:/
+   ```
 
-- 第一次切换至rime输入法需要等待部署完成
-- 出现异常可以登出一次
-- 可选：添加萌娘百科词库
+   可选：添加萌娘百科词库
 
-```
-yay -S rime-pinyin-moegirl
+   ```
+   yay -S rime-pinyin-moegirl
+   
+   sudo vim /usr/share/rime-data/rime_ice.dict.yaml 
+   按照指引在合适的位置添加
+   - moegirl
+   ```
 
-sudo vim /usr/share/rime-data/rime_ice.dict.yaml 
-按照指引在合适的位置添加
-- moegirl
-```
-- 安装扩展自定义ibus
-- 
-商店搜索安装蓝色的扩展管理器，搜索安装
+4. 默认使用super+空格切换输入法，可以在设置里修改。第一次切换至rime输入法需要等待部署完成。（出现异常可以登出一次）
 
-ibus tweaker，设置里激活“隐藏页按钮”和“切换输入模式”
+5. 安装扩展自定义ibus
 
-Customize IBus，设置里，常规页面取消“候选框调页按钮”。主题页面可导入css自定义主题，[GitHub - openSUSE/IBus-Theme-Hub: This is the hub for IBus theme that can be used by Customize IBus GNOME Shell Extension.(可被自定义IBus GNOME Shell 扩展使用的IBus主题集合)](https://github.com/openSUSE/IBus-Theme-Hub)，这个网站有一些预设。背景页面可以自定义背景（这个无敌了，什么美化都比不过gtk默认加一张合适的自定义背景）。其他的就自己探索吧。
+   商店搜索extension安装蓝色的扩展管理器。安装两个扩展：
 
+   - ibus tweaker
 
+     设置里激活“隐藏页按钮”
+
+   - Customize IBus
+
+     设置里，常规页面取消“候选框调页按钮”。主题页面可导入css自定义主题，[GitHub - openSUSE/IBus-Theme-Hub: This is the hub for IBus theme that can be used by Customize IBus GNOME Shell Extension.(可被自定义IBus GNOME Shell 扩展使用的IBus主题集合)](https://github.com/openSUSE/IBus-Theme-Hub)，这个网站有一些预设主题。背景页面可以自定义背景（这个无敌了，什么美化都比不过gtk默认主题加一张合适的自定义背景）。其他的选项就自己探索吧。
 
 
 ## 自定义安装软件
 
-### 我安装的软件
+### 我会安装的软件
 
 这是我会安装的，你可以按需求选择
-- 安装后没显示图标的话登出一次
-- pacman
-```
-sudo pacman -S mission-center gnome-text-editor gnome-disk-utility gnome-clocks gnome-calculator loupe snapshot baobab mpv celluloid fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib amberol 
-```
-```
-#mission-center 类似win11的任务管理器
-#gnome-text-ditor记事本
-#gnome-disk-utility磁盘管理
-#gnome-clocks时钟
-#gnome-calculator计算器
-#loupe图像查看
-#snapshot相机，摄像头
-#baobab磁盘使用情况分析工具，
-#mpv是功能强大的视频播放器，celluloid是mpv的gtk前端
-#fragments是符合gnome设计理念的种子下载器
-#file-roller解压
-#foliate 电子书阅读器
-#zen-browser zen浏览器，也可以安装firefox或者discover商店搜索chrome或edge，linux上表现最好的浏览器是firefox
-#zen-browser-i18n-zh-cn zen的中文语言包
-#gst-plugin-pipewire gst-plugins-good gnome截图工具自带的录屏，需登出
-#pacman-contrib 是pacman的一些小工具
-#amberol 音乐播放器
 
-zen浏览器一定要在设置>zen模组里面安装transparent zen模组，可以获得特别流畅的动画效果
-```
+**安装软件后没显示图标的话登出一次**
+
+- pacman
+
+  ```
+  sudo pacman -S mission-center gnome-text-editor gnome-disk-utility gnome-clocks gnome-weather gnome-calculator loupe snapshot baobab celluloid fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib decibels
+  
+  #mission-center 类似win11的任务管理器
+  #gnome-text-ditor记事本
+  #gnome-disk-utility磁盘管理器
+  #gnome-clocks时钟工具，可以设置闹钟和计时
+  #gnome-weather天气
+  #gnome-calculator计算器
+  #loupe图片查看工具
+  #snapshot相机，摄像头
+  #baobab磁盘使用情况分析工具
+  #celluloid是基于mpv的视频播放器
+  #fragments是符合gnome设计理念的种子下载器
+  #file-roller压缩解压缩
+  #foliate 电子书阅读器
+  #zen-browser zen浏览器，也可以安装firefox或者商店搜索你想要用的浏览器，但是linux上表现最好的浏览器是firefox。zen浏览器一定要在设置>zen模组里面安装transparent zen模组，可以获得特别流畅的动画效果
+  #zen-browser-i18n-zh-cn是zen的中文语言包
+  #gst-plugin-pipewire gst-plugins-good是gnome截图工具自带的录屏，需登出一次
+  #pacman-contrib 是pacman的一些小工具，比如checkupdates用来检查更新
+  #decibels是音频播放器，我一般在网页上听音乐，所以就装个轻量化的，其实用celluloid也能放音频，但是这个软件可以显示波形，很酷。本地播放音乐的话推荐amberol。
+  ```
+  
 - 从aur安装常用软件
 
-[WPS Office - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/WPS_Office)
+  [WPS Office - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/WPS_Office)
 
-```
-yay -S linuxqq-appimage wechat-appimage wps-office-cn wps-office-mui-zh-cn typora-free
+  ```
+  yay -S linuxqq-appimage wechat-appimage wps-office-cn wps-office-mui-zh-cn typora-free
+  
+  linuxqq-appimage是appimgae版qq
+  wechat-appimage是appimage版微信
+  wps-office-cn是wps
+  wps-office-mui-zh-cn是wps的中文语言包
+  typora-free是markdown编辑器
+  ```
 
-linuxqq-appimage是appimgae版qq
-wechat-appimage是appimage版微信
-wps-office-cn是wps
-wps-office-mui-zh-cn是wps的中文语言包
-typora-free是markdown编辑器
+  - 关于字体
 
-```
+    从网上搜索常用办公字体，下载解压后存放到```~/.local/share/fonts```里面（在这个目录下新建文件夹整理字体文件）。放进去之后刷新字体缓存 。
 
-- 关于字体
-
-从网上搜索常用办公字体，下载解压后存放到```~/.local/share/fonts```里面，可以新建文件夹整理。
-
-放进去之后记得刷新缓存 
-
-```
-fc-cache --force
-```
+    ```
+    fc-cache --force
+    ```
 
 - flathub
 
-```
-flatpak install flathub be.alexandervanhee.gradia io.github.Predidit.Kazumi io.gitlab.theevilskeleton.Upscaler com.github.unrud.VideoDownloader io.github.ilya_zlobintsev.LACT xyz.ketok.Speedtest com.geeks3d.furmark com.rafaelmardojai.Blanket
-```
-```
-gradia编辑截图
-kazumi追番
-upscaler图片超分
-video downloader下载youtube 144p～8k视频
-LACT 显卡超频、限制功率、风扇控制等等
-speedtest 测试网速
-furmark 显卡烤鸡
-Blanket 白噪音播放器
-```
-- gradia编辑截图使用方法
-可以对截图进行一些简单的添加文字、马赛克、图表、背景之类的操作
-设置自定义快捷键的时候命令写：
-```
-flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
-```
-我设置了两个截图快捷键，ctrl+alt+a普通系统截图（仿qq截图快捷键），super+shift+s截图并进入编辑界面（仿win截图快捷键）。
+  这里都是些有趣或者实用的工具，可以从商店搜索安装，也可以用命令
 
-### mpv开启硬件编解码
+  ```
+  flatpak install flathub be.alexandervanhee.gradia io.github.Predidit.Kazumi io.gitlab.theevilskeleton.Upscaler com.github.unrud.VideoDownloader io.github.ilya_zlobintsev.LACT xyz.ketok.Speedtest com.geeks3d.furmark com.rafaelmardojai.Blanket
+  
+  gradia编辑截图
+  kazumi追番
+  upscaler图片超分
+  video downloader下载youtube 144p～8k视频
+  LACT 显卡超频、限制功率、风扇控制等等
+  speedtest 测试网速
+  furmark 显卡烤鸡
+  Blanket 白噪音播放器
+  ```
 
-- 编辑配置文件
+  - gradia可以对截图进行一些简单的添加文字、马赛克、图表、背景之类的操作
+
+    使用方法：
+
+    设置自定义快捷键的时候命令写
+
+    ```
+    flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
+    ```
+
+#### 视频播放器开启硬件编解码
+
+- 方法一：配置文件
+
+  1. 编辑mpv配置文件
 
   ```
   vim ~/.config/mpv/mpv.confg
   
+  写入：
   #使用vulkan后端
   gpu-api=vulkan
   #通用自动模式硬解
   hwdec=auto-safe
   ```
 
-- celluloid首选项里设置读取mpv配置文件，手动指定一下路径
+  2. celluloid首选项的配置文件页面，激活“加载mpv配置文件”，手动指定一下路径
+
+- 方法二：celluloid首选项
+
+  在首选项的杂项页面写入
+
+  ```
+  hwdec=yes
+  ```
+
+## 星火应用商店（国产系统的应用商店）
+
+[amber-ce-bookworm: 使用bwrap的Debian 12容器](https://gitee.com/amber-ce/amber-ce-bookworm)
+
+[Spark Store](https://www.spark-app.store/)
+
+由于特殊国情，星火应用商店里的应用可能比aur上的都好用，建议安装。
+
+1. 安装ace bookworm
+
+   这是一个极其轻量的debian容器，系统占用可以忽略不计。
+
+   ```
+   yay -S amber-ce-bookworm
+   ```
+
+2. 安装完成后重启电脑
+
+3. 官网下载星火应用商店的deb包
+
+   [Spark Store](https://www.spark-app.store/)
+
+4. 打开ace booworm（蓝色图标）
+
+5. 安装星火应用商店
+
+   ```
+   sudo apt install /home/shorin/Downloads/spark-store_4.8.0_amd64.
+   
+   apt是debian的包管理器
+   install代表安装
+   后面指定了安装包的绝对路径，可以手动输入，也可以把安装包拖拽进终端里输入路径
+   ```
+
+6. 之后正常使用就可以了，什么flameshot之类没法在gnome下面正常使用的软件就可以正常使用了。
 
 ## 快照
 
-**快照相当于存档，每次试验什么之前最好都存个档**
+**快照相当于存档，每次做自己不了解的事情之前都存个档**
 
-**！！！警告！！！**
+**！！！警告！！！timeshitf里删除已创建快照必须一个一个删除，否则大概率崩盘。**
 
-**删除已创建快照必须一个一个删除，否则大概率崩盘。**
+1. 安装timeshift
 
-- 安装timeshift
 ```
 sudo pacman -S timeshift 
 ```
-- 开启自动备份服务
+2. 开启自动备份服务
+
 ```
 sudo systemctl enable --now cronie.service 
 ```
-### 可选：创建快照时自动生成快照启动项
-- 安装必要组件
-```
-sudo pacman -S grub-btrfs 
-```
-- 开启服务
-```
-sudo systemctl enable --now grub-btrfsd.service 
-```
-- 修改配置文件
-```
-sudo systemctl edit grub-btrfsd.service 
-```
-- 在默认位置添加
-```
-[Service]
-ExecStart=
-ExecStart=/usr/bin/grub-btrfsd --syslog --timeshift-auto
-```
-- 重启服务
-```
-sudo systemctl daemon-reload
-sudo systemctl restart grub-btrfsd.service
-```
-- 避免id变更导致挂载失败
-```
-sudo sed -i -E 's/(subvolid=[0-9]+,)|(,subvolid=[0-9]+)//g' /etc/fstab
-```
+### 关于滚挂和良好的系统使用习惯
+
+- 滚挂
+
+  archlinux是滚动发行版。滚动是英文直译，原词是rolling，指一种推送更新的方式，只要有新版本就会推送，由用户管理更新。对应的另一种更新方式是定期更新一个大版本，例如fedora是六个月一更新，由发行方管理更新。 滚挂，指的是滚动更新的发行版因为更新导致系统异常。这通常是用户操作不当、忽略官方公告等原因导致的。只要学习一下正确的更新方式和快照的使用方法就不用担心滚挂问题。 
+
+  通常软件更新不用担心。**出现密钥（archlinux-keyring）、内核、驱动、固件、引导程序之类的更新要留个心眼，先不第一时间更新，等一手社区或者官方消息。** 另一个重点是滚动更新的发行版的软件通常会适配最新的依赖，如果长期不更新可能会无法使用软件。
+
+- 良好的使用习惯
+
+  btrfs文件系统已经足够稳定，“不作死就不会死”。使用时遵循以下几点：
+
+  1. **别第一时间更新，别长时间不更新，密钥单独更新，重要程序更新前创建快照**
+
+  2. **明白自己的行为会造成怎样的后果，做不了解的事情前创建快照**
+
+### 关于创建快照时自动创建启动项
+
+意义不大，我已经弃用。想配置的看[创建快照时自动生成快照启动项](#创建快照时自动生成快照启动项)
 
 ## open in any terminal
 
@@ -901,22 +1119,27 @@ flatpak install flathub page.tesk.Refine
 ```
 
 ## 配置系统快捷键
-### 可选：交换大写锁定键和esc键
-- 安装gnome-tweaks
-```
-sudo pacman -S gnome-tweaks
-```
-在键盘→其他布局里面交换CAPSLOCK和ESC键
+- 可选：交换大写锁定键和esc键
 
-右键桌面打开设置，选择键盘>查看及自定义快捷键
-我的配置：
+  安装gnome-tweaks
+
+  ```
+  sudo pacman -S gnome-tweaks
+  ```
+
+  在键盘→其他布局里面交换CAPSLOCK和ESC键
+
+
+### 我的快捷键配置：
+
+设置>键盘>查看自定义快捷键
 
 * 导航
+
 ```
 super+shift+数字键 #将窗口移到工作区
 super+shift+A/D #将窗口左右移动工作区
-Super+数字键 #切换工作区
-gnome默认super+滚轮上下可以左右切换工作区
+Super+数字键 #切换工作区，ps：gnome默认super+滚轮上下可以左右切换工作区
 alt+tab #切换应用程序
 super+M #隐藏所有正常窗口
 alt+` #在应用程序的窗口之间切换窗口
@@ -924,11 +1147,6 @@ alt+` #在应用程序的窗口之间切换窗口
 * 截图
 ```
 ctrl+alt+A #交互式截图
-```
-- 打字
-```
-禁用快捷键
-在fcitx5的configtool里面设置super+space切换输入法
 ```
  * 无障碍
 ```
@@ -944,7 +1162,6 @@ super+alt+F #切换全屏
 ```
 ctrl+super+S #打开快速设置菜单
 super+G #显示全部应用
-ctrl+空格 #显示运行命令提示符 
 ```
 * 自定义快捷键<快捷键>   <命令>
 ```
@@ -956,50 +1173,68 @@ super+shift+S   flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
 ```
 
 ## 功能性扩展
-[arch + gnome美化教程_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1ym4y1G76s/?share_source=copy_web&vd_source=1c6a132d86487c8c4a29c7ff5cd8ac50)
-
-[the best tiling extension](https://www.reddit.com/r/gnome/comments/1ei9bj0/the_best_tiling_extension/)
+- 从商店安装蓝色的扩展管理器
 
 ```
 flatpak install flathub com.mattjakeman.ExtensionManager
 ```
 
-```
-#安装扩展
-
-ibus tweaker #ibus自定义相关
- 
-Customize IBus #ibus自定义相关
-
-AppIndicator and KStatusNotifierItem Support #右上角显示后台应用
-
-workspace indicator #显示工作区
-
-caffeine #防止熄屏
-
-lock keys #osd显示大写锁定和小键盘锁定
-
-clipboard indicator #剪贴板历史
-
-GNOME Fuzzy App Search #模糊搜索
-
-steal my focus window #如果打开窗口时窗口已经被打开则置顶
-
-tiling shell #窗口平铺，tilingshell是用布局平铺,另一个叫forge是hyprland那种自动平铺但是很卡。推荐用tilingshell，记得自定义快捷键，我快捷键是super+w/a/s/d对应上下左右移动窗口，Super+Alt+w/a/s/d对应上下左右扩展窗口，super+c取消平铺。
-
-color picker #对自定义非常有用
-vitals #右上角显示当前资源使用情况
-emoji copy #快捷输入emoji,很有趣
-```
 
 
-# 笔记本
+- AppIndicator and KStatusNotifierItem Support 
+
+  面板上显示后台应用
+
+- caffeine
+
+  防止熄屏
+
+- lock keys 
+
+  osd显示大写锁定和小键盘锁定
+
+- GNOME Fuzzy App Search 
+
+  模糊搜索
+
+- steal my focus window 
+
+  如果打开窗口时窗口已经被打开则置顶
+
+- tiling shell 
+
+  窗口平铺，tilingshell是用布局平铺,另一个叫forge是hyprland那种自动平铺但是很卡。推荐用tilingshell，记得自定义快捷键，我快捷键是super+w/a/s/d对应上下左右移动窗口，Super+Alt+w/a/s/d对应上下左右扩展窗口，super+c取消平铺。
+
+- color picker 
+
+  对自定义非常有用
+
+- quick close in overview
+
+  在概览里面不用点窗口右上角的叉关闭窗口了，而是使用鼠标中键
+
+- bottom overview
+
+  鼠标滑到屏幕底部边缘激活概览
+
+- Top Panel Workspace Scroll
+
+  在顶部面板上滚动滚轮切换工作区
+
+- Arch Update Notifier 
+
+  在面板上显示一个和arch更新相关的图标。要安装pacman-contrib
+
+其他有用扩展见[其他有用的扩展](#其他有用的扩展)和[实现windows布局](#实现windows布局)
 
 ## 显卡切换
 
-### 切换为集显模式
+linux由于没有厂家专门做显卡切换工具，只能用通用工具，所以功能通常不完整，可能只能做到从混合模式切换到核显模式。
 
-#### asus华硕用户可以用supergfxctl
+#### 从混合模式切换为核显模式
+
+- asus华硕用户可以用supergfxctl
+
 [Linux for ROG Notebooks](https://asus-linux.org/)
 
 ```
@@ -1023,24 +1258,22 @@ AsusEgpu supergfxctl --mode AsusEgpu
 AsusMuxDgpu supergfxctl --mode AsusMuxDgpu
 ```
 
-#### envycontrol
+- 非华硕用户使用envycontrol
+
 [GitHub - bayasdev/envycontrol: Easy GPU switching for Nvidia Optimus laptops under Linux](https://github.com/bayasdev/envycontrol)
 
-* 笔记本BIOS内切换为混合模式
+1. 笔记本BIOS内切换为混合模式
 
-```
-yay -S envycontrol 
-```
+2. 安装
 
-* 安装gnome插件,GPU Profile Selector
+   ```
+   yay -S envycontrol 
+   ```
 
-```
-https://extensions.gnome.org/extension/5009/gpu-profile-selector/
-```
+3. 安装gnome插件 GPU Profile Selector
+4. 在右上角切换显卡至integrated
 
-* 在右上角切换显卡至integrated
-
-### 混合模式下用独显运行程序
+#### 混合模式下用独显运行程序
 
 ####  PRIME
 
@@ -1056,7 +1289,7 @@ prime-run firefox
 
 - 使用pinapp修改.desktop文件，在command的最前面加上 prime-run 
 
-#### 在gnome桌面环境下右键快捷方式选择使用独显运行
+#### 右键快捷方式选择使用独显运行
 
 ```
 sudo pacman -S switcheroo-control 
@@ -1091,7 +1324,7 @@ reboot
 systemctl hibernate
 ```
 
-### 内核参数
+### 修改内核参数
 
 [[HowTo] Disable watchdogs (and silence "watchdog did not stop!") - Contributions / Tutorials - Manjaro Linux Forum](https://forum.manjaro.org/t/howto-disable-watchdogs-and-silence-watchdog-did-not-stop/148561/4)
 
@@ -1099,19 +1332,34 @@ systemctl hibernate
 sudo vim /etc/default/grub
 ```
 
-在GRUB_CMDLNE_LINUX_DEFAULT=""里面添加参数
-nowatchdog modprobe.blacklist=sp5100_tco
-禁用watchdog，intelcpu用户把sp5100_tco换成iTCO_wdt
-可选参数： pcie_aspm=force 强制pcie活动电源管理，可以略微降低功耗。
+1. 禁用watchdog
 
-```
-sudo grub-mkconfig -o /boot/grub/grub.cfg
-```
+   在GRUB_CMDLNE_LINUX_DEFAULT=""里面添加参数
 
-### power-profiles-daemon
+   ```
+   nowatchdog modprobe.blacklist=sp5100_tco
+   
+   # intelcpu用户把sp5100_tco换成iTCO_wdt
+   
+   #可选参数： 
+   
+   pcie_aspm=force
+   
+   #强制pcie活动电源管理，可以略微降低功耗
+   
+   ```
 
-性能模式切换，有三个档位，performance性能、balance平衡、powersave节电
-不建议使用tlp或者auto-cpufreq，意义不大。这个易用而且足够，如果想折腾的话可以自己试试tlp。
+2. 重新生成grub的配置文件
+
+   ```
+   sudo grub-mkconfig -o /boot/grub/grub.cfg
+   ```
+
+### 性能模式切换工具 power-profiles-daemon
+
+性能模式切换，有三个档位，performance性能、balance平衡、powersave节电。一般平衡档位就够用了，也不需要调节风扇什么的。
+
+不建议使用tlp或者auto-cpufreq，意义不大。这个易用而且足够，如果想折腾的话可以看附录[TLP相关](#TLP相关)。tlp和auto-cpufreq都有对应的gnome扩展，但未经验证，不保证能用。
 
 ```
 sudo pacman -S power-profiles-daemon
@@ -1126,33 +1374,82 @@ sudo systemctl enable --now power-profiles-daemon
 ```
 power tracker #显示电池充放电
 auto power profile #配合powerProfilesDaemon使用，可以自动切换模式
-power profile indicator # 配合powerProfilesDaemon使用，顶栏显示当前模式
+power profile indicator # 配合powerProfilesDaemon使用，面板显示当前模式
 ```
 
 ---
 
+
+
 # 美化
+
 ## 更换壁纸
 ```
 右键桌面选择更换背景
 ```
 ## 扩展美化
 
+我会使用的扩展：
+
 [arch + gnome美化教程_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1ym4y1G76s/?share_source=copy_web&vd_source=1c6a132d86487c8c4a29c7ff5cd8ac50)
 
-```
-#安装扩展
-lock screen background #更换锁屏背景
-blur my shell #透明度美化
-hide top bar #隐藏顶栏
-burn my windows #应用开启和打开的动画
-user themes #主题，浏览器搜索gnome shell theme下载主题
-logo menu # top bar的左上角显示一个logo,好玩
-hide activities button #隐藏左上角的activities按钮
-```
+- blur my shell 
+
+  透明度美化
+
+- hide top bar 
+
+  隐藏顶栏
+
+- burn my windows 
+
+  应用开启和打开的动画
+
+- user themes 
+
+  主题，浏览器搜索gnome shell theme下载主题
+
+- logo menu 
+
+   top bar的左上角显示一个logo,好玩
+
+- hide activities button 
+
+  隐藏左上角的activities按钮
+  
+- desktop cube 
+
+  把工作区切换从平铺变成一个可以旋转的方块的面，可以设置透明度，超级酷！
+
+## 实现windows布局
+
+可以通过扩展把gnome变成windows布局
+
+1. 安装扩展
+
+   - arcmenu
+
+     这是功能强大的开始菜单
+
+   - app icons taskbar
+
+     实现windows那样的任务栏。和hide top bar冲突。gnome48下自动隐藏的功能不生效，原因不明（2025.8.20记）。
+
+   - just perfection
+
+     功能强大的自定义扩展，可以设置gnome各个元素的开关。不过根据gnome版本的不同能设置的选项会有所不同。
+
+   - desktop icons ng
+
+     实现windows那样的桌面快捷方式
+
+2. 修改扩展的设置
+
+   （待施工…………）
 
 ## 主题美化
-- 去掉标题栏用来关闭窗口的x
+
+- 可选：去掉标题栏用来关闭窗口的x。可以使用命令，也可以用refine
 ```
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:'
 ```
@@ -1163,13 +1460,15 @@ gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:'
 将下载的.tar.gz文件里面的文件夹放到～/.local/share/icons/目录下，没有icons文件夹的话自己创建一个
 
 ### gnome主题
+gnome的默认主题已经相当漂亮，如果有修改主题的需要的话去这个网站：
+
 https://www.gnome-look.org/browse?cat=134&ord=latest
 
 通常下载页面都有指引，文件路径是~/.themes/，放进去之后在user themes扩展的设置里面改可以改
 
 ## 终端美化
 
-- 安装字体
+- 安装终端字体
 ```
 sudo pacman -S ttf-jetbrains-mono-nerd
 ```
@@ -1198,14 +1497,16 @@ sudo pacman -S starship
 vim ~/.zshrc
 ```
 ```
+#写入
 eval "$(starship init zsh)"
 ```
 
-#### preset主题
+#### starship preset 预设主题
 https://starship.rs/presets/
-挑一个自己喜欢的，下载后改名为starship.toml，移动到~/.config目录
-### 语法高亮和自动补全
-- 语法检查、补全、tab
+挑一个自己喜欢的，下载后改名为starship.toml，移动到~/.config/目录下
+
+### 终端语法高亮和自动补全
+- 语法检查、补全、tab选择
 ```
 sudo pacman -S zsh-syntax-highlighting zsh-autosuggestions zsh-completions
 ```
@@ -1224,28 +1525,27 @@ zstyle ':completion:*' menu select
 autoload -Uz compinit
 compinit
 
-# 所有命令历史都会被保存在用户主目录下的 .zsh_history 文件中
+# 设置历史记录文件的路径
 HISTFILE=~/.zsh_history
 
-# 设置在当前会话（内存）中保留的历史记录条数
-HISTSIZE=100
+# 设置在会话（内存）中和历史文件中保存的条数，建议设置得大一些
+HISTSIZE=1000
+SAVEHIST=1000
 
-# 设置在历史文件中永久保存的条数
-SAVEHIST=100
+# 忽略重复的命令，连续输入多次的相同命令只记一次
+setopt HIST_IGNORE_DUPS
 
-# 新的命令会追加到文件末尾，而不是覆盖整个文件
-setopt APPEND_HISTORY
+# 忽略以空格开头的命令（用于临时执行一些你不想保存的敏感命令）
+setopt HIST_IGNORE_SPACE
 
-# 每执行一条命令后，立即将其写入历史文件 
-# 这样即使终端意外关闭，历史也不会丢失
-setopt INC_APPEND_HISTORY
-
-# 在多个打开的终端之间实时共享历史记录 
-# 在A终端输入的命令，可以立刻在B终端按“上箭头”找到
+# 在多个终端之间实时共享历史记录 
+# 这是实现多终端同步最关键的选项
 setopt SHARE_HISTORY
 
-# 删除历史记录中的连续重复命令
-setopt HIST_IGNORE_DUPS
+# 让新的历史记录追加到文件，而不是覆盖
+setopt APPEND_HISTORY
+# 在历史记录中记录命令的执行开始时间和持续时间
+setopt EXTENDED_HISTORY
 ```
 ```
 source ~/.zshrc
@@ -1286,25 +1586,29 @@ font-size = 15
 
 [如何在 Linux 主机和 KVM 中的 Windows 客户机之间共享文件夹 | Linux 中国 - 知乎](https://zhuanlan.zhihu.com/p/645234144)
 
+1. 安装qemu，图形界面， TPM
 
-* 安装qemu，图形界面， TPM
 ```
 sudo pacman -S qemu-full virt-manager swtpm 
 ```
-* 开启libvirtd系统服务
+2. 开启libvirtd系统服务
+
 ```
 sudo systemctl enable --now libvirtd
 ```
-* 开启NAT default网络
+3. 开启NAT default网络
+
 ```
 sudo virsh net-start default
 sudo virsh net-autostart default
 ```
-* 添加组权限 需要登出
+4. 添加组权限 需要登出
+
 ```
 sudo usermod -a -G libvirt $(whoami)
 ```
-* 编辑配置文件提高权限
+5. 编辑配置文件提高权限
+
 ```
 sudo vim /etc/libvirt/qemu.conf
 ```
@@ -1313,7 +1617,8 @@ sudo vim /etc/libvirt/qemu.conf
 #把group = "libvirt-qemu"改为group = "libvirt"
 #取消这两行的注释
 ```
-* 重启服务
+6. 重启服务
+
 ```
 sudo systemctl restart libvirtd
 ```
@@ -1327,23 +1632,26 @@ modprobe kvm_amd nested=1
 ```
 - 永久生效
 
-```
-sudo vim /etc/modprobe.d/kvm_amd.conf
-```
-- 写入
+  1. 编辑配置文件
 
-```
-options kvm_amd nested=1
-```
-- 重新生成
+  ```
+  sudo vim /etc/modprobe.d/kvm_amd.conf
+  
+  #写入
+  options kvm_amd nested=1
+  ```
 
-```
-sudo mkinitcpio -P
-```
+  2. 重新生成initramfs
 
-- 重启电脑
+  ```
+  sudo mkinitcpio -P
+  ```
+
+  3. 重启电脑
 
 ### 配置桥接网络
+
+无线网卡无法配置桥接
 
 * 启动高级网络配置工具
 ```
@@ -1358,28 +1666,35 @@ nm-connection-editor
 ```
 #保存后将网络连接改为刚才创建的以太网网桥连接
 ```
-已知问题：使用桥接网络的配置进行连接会导致steam下载速度缓慢
-
-### 安装win11 LTS虚拟机
+### 安装win11虚拟机
 
 [手把手教你给笔记本重装系统（Windows篇）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV16h4y1B7md/?spm_id_from=333.337.search-card.all.click)
 
 [太突然！Win11 LTSC 官方精简版，终于来了 - 知乎](https://zhuanlan.zhihu.com/p/1000648759)
 
-* 下载win11 iot LTS iso 镜像
-```
-https://go.microsoft.com/fwlink/?linkid=2270353&clcid=0x409&culture=en-us&country=us
-```
-* 下载virtiowin11 iso
-```
-https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.271-1/virtio-win-0.1.271.iso
-```
-```
-根据视频指引安装
-```
-- 显示协议里监听类型选无，OpenGL，选择AMD显卡（N卡暂时不支持3d加速，可以用vmware），显卡里选virtio，勾选3d加速
+1. 任选一个网站下载镜像
+
+   - [HelloWindows.cn - 精校 完整 极致 Windows系统下载仓储站](https://hellowindows.cn/)
+
+   - [下载 Windows 11](https://www.microsoft.com/zh-cn/software-download/windows11)
+
+   - 可选：win11 iot LTS iso 镜像
+
+     ```
+     https://go.microsoft.com/fwlink/?linkid=2270353&clcid=0x409&culture=en-us&country=us
+     ```
+
+2. 下载virtio驱动镜像
+
+   [Index of /groups/virt/virtio-win/direct-downloads/archive-virtio](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/?C=M;O=A)
+
+   点击last modified，然后下载最新版本
+
+3. [「Archlinux究极指南」从手动安装到显卡直通](https://www.bilibili.com/video/BV1L2gxzVEgs/?spm_id_from=333.1387.homepage.video_card.click&vd_source=65a8f230813d56660e48ae1afdfa4182)按照视频里kvm虚拟机的部分安装
+
 - 跳过联网
-确保机器没有连接到网络，按下shift+f10 ，鼠标点选窗口，输入
+  确保机器没有连接到网络，按下shift+f10 ，鼠标点选窗口，输入
+
 ```
 oobe\bypassnro
 ```
@@ -1406,10 +1721,12 @@ https://winfsp.dev/rel/
 [PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF)
 
 - 确认iommu是否开启，有输出说明开启
+
 ```
 sudo dmesg | grep -e DMAR -e IOMMU
 ```
 - 获取显卡的硬件id，如果是显卡所在group的所有设备的id都记下。如果group里有cpu的话去看wiki。
+
 ```
 for d in /sys/kernel/iommu_groups/*/devices/*; do 
     n=${d#*/iommu_groups/*}; n=${n%%/*}
@@ -1418,59 +1735,84 @@ for d in /sys/kernel/iommu_groups/*/devices/*; do
 done
 ```
 - 隔离GPU
+
 ```
 sudo vim /etc/modprobe.d/vfio.conf
-```
-写入如下内容
-```
+
+#写入
+
 options vfio-pci ids=硬件id,硬件id
 ```
-- 让vfio-pci抢先加载
-```
-sudo vim /etc/mkinitcpio.conf
-```
-MODULES=（）里面写入vfio_pci vfio vfio_iommu_type1 
-```
-MODULES=(... vfio_pci vfio vfio_iommu_type1  ...)
-```
-HOOKS=()里面写入 modconf
-```
-HOOKS=(... modconf ...)
-```
-- 重新生成
+- 编辑内核参数让vfio-pci抢先加载
+
+  1. 
+
+  ```
+  sudo vim /etc/mkinitcpio.conf
+  ```
+
+  2. MODULES=（）里面写入vfio_pci vfio vfio_iommu_type1 
+
+  ```
+  MODULES=(... vfio_pci vfio vfio_iommu_type1  ...)
+  ```
+
+  3. HOOKS=()里面写入 modconf
+
+  ```
+  HOOKS=(... modconf ...)
+  ```
+
+- 重新生成initramfs
+
 ```
 sudo mkinitcpio -P
 ```
-- 安装ovmf
-```
-sudo pacman -S edk2-ovmf
-```
-编辑配置文件
-```
-sudo vim /etc/libvirt/qemu.conf
-```
-```
-nvram = [
-	"/usr/share/ovmf/x64/OVMF_CODE.fd:/usr/share/ovmf/x64/OVMF_VARS.fd"
-]
-```
+- 安装和配置ovmf
+
+   ```
+   sudo pacman -S edk2-ovmf
+   ```
+
+   编辑配置文件
+
+   ```
+   sudo vim /etc/libvirt/qemu.conf
+   ```
+
+   搜索nvram，在合适的地方写入：
+
+   ```
+   nvram = [
+   	"/usr/share/ovmf/x64/OVMF_CODE.fd:/usr/share/ovmf/x64/OVMF_VARS.fd"
+   ]
+   ```
+
 - 重启电脑
 
-virt-manager的虚拟机页面内添加设备，PCI Host Device里找到要直通的显卡。 然后USB hostDevice里面把鼠标键盘也直通进去。
+- virt-manager的虚拟机页面内添加设备
+
+   PCI Host Device里找到要直通的显卡（只直通显卡，不要直通类似audio的东西，可能会43报错，安装完驱动之后再直通audio）， 然后USB hostDevice里面把鼠标键盘也直通进去。
+
 - 取消显卡直通
-```
-sudo vim /etc/modprobe.d/vfio.conf
-```
-注释掉里面的内容
-```
-sudo mkinitcpio -P
-```
-```
-重启
-```
+
+  ```
+  sudo vim /etc/modprobe.d/vfio.conf
+  ```
+
+  注释掉里面的东西
+
+  重新生成initramfs
+
+  ```
+  sudo mkinitcpio -P
+  ```
+
+  重启
+
 ## 虚拟机性能优化
 
-我在使用的过程中，最大的感受就是cpu和gpu以近乎原生的性能在运行，但是内存性能很差、非常差、难以置信的差。在研究looking glass的时候偶然解决了这个问题。元凶是memballoon
+优化后可以做到原生九成五的性能。
 
 ### 禁用memballoon
 
@@ -1489,54 +1831,59 @@ memlbaloon的目的是提高内存的利用率，但是由于它会不停地“�
 
 可以大幅提高内存性能。用minecraft实测帧数提升了20%
 
-- 计算大页大小
+1. 计算大页大小
 
-内存（GB）* 1024 / 2 = 需要的大小
+   内存（GB）* 1024 / 2 = 需要的大小
 
-比如16GB内存就是16*1024/2=8192，wiki建议略大一些，那就8200。
+   比如16GB内存就是16*1024/2=8192，wiki建议略大一些，那就8200。
 
-我通常给虚拟机分24GB内存，24*1024/2=12288，略大一些就是12300。
+   我通常给虚拟机分24GB内存，24*1024/2=12288，略大一些就是12300。
 
-- 编辑虚拟机xml
+2. 编辑虚拟机xml
 
-在virt-manager的g首选项里开启xml编辑，找到```<memoryBacking>```并添加```<hugepages/>```
-```
-  <memoryBacking>
-    <hugepages/>
-  </memoryBacking>
-```
-- 永久生效
+   在virt-manager的g首选项里开启xml编辑，找到```<memoryBacking>```并添加```<hugepages/>```
 
-记得把数字改成自己需要的
+   ```
+     <memoryBacking>
+       <hugepages/>
+     </memoryBacking>
+   ```
 
-```
-sudo vim /etc/sysctl.d/40-hugepage.conf
+3. 永久生效
 
-vm.nr_hugepages = 8800
-```
+   记得把数字改成自己需要的
 
-- reboot
-- 虚拟机开启后查看大页使用情况
+   ```
+   sudo vim /etc/sysctl.d/40-hugepage.conf
+   
+   vm.nr_hugepages = 8800
+   ```
+
+4. reboot
+
+6. 虚拟机开启后查看大页使用情况
 
 ```
 grep HugePages /proc/meminfo
 ```
 
-- 取消大页
+#### 取消大页
 
 ```
 sudo rm /etc/sysctl.d/40-hugepage.conf
+```
 
+```
 reboot
 ```
+
+
 
 ### cpupin
 
 [PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#CPU_pinning)
 
-这一步提升不明显。
-
-设置cpu拓扑和自己的cpu核心线程数对应。然后把虚拟机的vcpu线程绑定到物理线程上，避免虚拟机cpu线程对应的物理cpu线程变化导致缓存性能下降。
+避免虚拟机cpu线程对应的物理cpu线程变化导致缓存性能下降。这一步提升不明显，在virt-manager里手动设置cpu拓扑为1插槽，核心数和线程数跟自己的cpu对应就够用了。如果要设置cpupin的话继续往下看。
 
 1. 查看物理cpu拓扑
 
@@ -1544,7 +1891,7 @@ reboot
    lscpu -e
    ```
 
-   输出结果里的cpu是线程，core是线程对应的物理核心。如果开启超线程的话会出现一个core对应多个cpu的情况。
+   输出结果里的cpu是线程，core是线程对应的物理核心。如果开启超线程的话会出现一个多个cpu对应同一个core的情况。
 
 2. 修改xml，在```  <vcpu placement="static">16</vcpu>```下方插入
 
@@ -1569,9 +1916,13 @@ reboot
      </cputune>
    ```
 
-   虚拟机有几个线程就写几行vcpu，0算第一个。cpuset指定vcpu对应的主机cpu线程，也就是```lscpu -e```输出结果里的cpu那一列。
+     ```<iothreads>2</iothreads>```设置iothreads的数量，建议至少设置一个，可以稳定low帧。
 
-     ```<iothreads>2</iothreads>```设置iothreads的数量，建议至少设置一个，可以稳定low帧。```<iothreadpin iothread="1" cpuset="0,8"/>```指定专门用来做io相关的活的cpu。    ```<emulatorpin cpuset="0,8"/>```设置专门用来干和qemu相关工作的cpu，可以稳定low帧
+   ```<vcpupin vcpu="0" cpuset="2"/>```虚拟机有几个线程就写几行vcpu，0算第一个。cpuset指定vcpu对应的主机cpu线程，也就是```lscpu -e```输出结果里的cpu那一列。比如举例的这段的意思是vcpu0对应本机的cpu2
+   
+   ```    <emulatorpin cpuset="0,1,8,9"/>```这一段设置专门用来处理qemu相关工作的cpu。
+   
+   ```<iothreadpin iothread="1" cpuset="0,8"/>```指定专门用来做io相关工作的cpu。    
 
 ### 伪装虚拟机
 
@@ -1579,9 +1930,11 @@ reboot
 
 为了避免被反作弊程序检测到虚拟机，需要修改xml伪装虚拟机。
 
-### 警告：每进行一步都要确认虚拟机能正常运行再进行下一步
+#### ⚠️警告：进入虚拟机的反作弊之间的猫鼠游戏意味着你做好了被封号的觉悟 
 
-1. 使用sata硬盘和e1000网卡（可选）
+#### ⚠️警告：每进行一步都要确认虚拟机能正常运行再进行下一步
+
+1. 可选：使用sata硬盘和e1000网卡
 
 2. 在```</hyperv> ```下面一行插入：
 
@@ -2081,9 +2434,11 @@ sudo systemctl enable --now nvidia-powerd.service
 ```
 ## LACT进行显卡offset
 
-## 交换空间
-关于交换空间大小：
-[Swap - Manjaro --- Swap - Manjaro](https://wiki.manjaro.org/index.php?title=Swap)
+使用软件商城安装的lact即可
+
+## 交换空间和zram
+
+参考资料：
 
 [电源管理/挂起与休眠 - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/%E7%94%B5%E6%BA%90%E7%AE%A1%E7%90%86/%E6%8C%82%E8%B5%B7%E4%B8%8E%E4%BC%91%E7%9C%A0#%E7%A6%81%E7%94%A8_zswap_%E5%86%99%E5%9B%9E%E4%BB%A5%E4%BB%85%E5%B0%86%E4%BA%A4%E6%8D%A2%E7%A9%BA%E9%97%B4%E7%94%A8%E4%BA%8E%E4%BC%91%E7%9C%A0)
 
@@ -2109,53 +2464,74 @@ sudo systemctl enable --now nvidia-powerd.service
 
 [zram: Compressed RAM-based block devices — The Linux Kernel documentation](https://docs.kernel.org/admin-guide/blockdev/zram.html)
 
+简单来说，硬盘swap交换空间会频繁的读写硬盘，导致硬盘寿命下降。故使用内存作为交换空间。有两种方法，zswap和zram。
+
+zswap依托于swap运行，是硬盘swap的缓存，还是会有硬盘读写，虽然可以关闭zswap的写回，但zram更加优雅、简洁。
+
+zram是把内存的一部分动态地作为swap交换空间，和硬盘swap一样都是swap设备。zram占满前完全不会有硬盘swap的读写。
 
 ### 不需要休眠的话
-如果不需要休眠功能可以禁用swap，然后开启zram
+
+如果不需要休眠功能可以禁用硬盘swap，然后开启zram
+
+1. 关闭swap
+
 ```
 sudo swapoff /swap/swapfile
 ```
+2. 删除swap文件
+
 ```
 sudo rm /swap/swapfile
 ```
-- 编辑fstab
+3. 编辑fstab
+
 ```
 sudo vim /etc/fstab
+
+注释掉swap相关的内容
 ```
-```
-删除与swap相关的挂载
-```
-### zram内存压缩
+#### zram内存压缩
+
+1. 安装zram-generator
 
 ```
 sudo pacman -S zram-generator
 ```
+2. 编辑配置文件
+
 ```
 sudo vim  /etc/systemd/zram-generator.conf
 ```
 ```
 [zram0]
-zram-size = "ram*0.5"
+zram-size = "ram*0.5" #设置zram大小，可以设置为内存（ram）的3倍，保守是一半
 compression-algorithm = zstd #重视cpu开销和速度选择lz4
 ```
-- 禁用zswap
+3. 禁用zswap
+
 ```
 sudo vim /etc/default/grub
 ```
 ```
-编辑GRUB_CMDLINE_LINUX_DEFAULT=""
-写入zswap.enabled=0
+# 在GRUB_CMDLINE_LINUX_DEFAULT=""里写入zswap.enabled=0
+
+GRUB_CMDLINE_LINUX_DEFAULT="... zswap.enabled=0 ... "
 ```
-- 重新生成grub的配置文件
+4. 重新生成grub的配置文件
+
 ```
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
-- reboot
-- 验证zswap是否关闭
+5. reboot
+
+6. 验证zswap是否关闭
+
 ```
 sudo grep -R . /sys/kernel/debug/zswap/
 ```
-- 验证zram是否开启
+7. 验证zram是否开启
+
 ```
 sudo zramctl
 或者
@@ -2163,73 +2539,98 @@ swapon
 ```
 ## 安装zen内核
 ps：会导致功耗略微增加
-* 安装内核
+
+1. 安装内核和头文件
+
 ```
 sudo pacman -S linux-zen linux-zen-headers
 ```
-* 安装显卡驱动，用nvidia-dkms替换nvidia驱动
+2. 安装显卡驱动，用nvidia-dkms替换nvidia驱动
+
 ```
 sudo pacman -S nvidia-dkms
 ```
-* 重新生成grub
+3. 重新生成grub
+
 ```
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
-* 重启
+4. 重启
+
 ```
 reboot #重启时在grub的arch advance启动项里选择zen
 ```
-* 确认正常运行后删除stable内核
+5. 确认正常运行后删除stable内核
+
 ```
 sudo pacman -R linux linux-headers
 ```
-* 重新生成grub
+7. 重新生成grub
+
 ```
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
 # 删除linux
+
 ## 和windows共用efi分区时
 [(重制)彻底删除Linux卸载后的无用引导项_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV14p4y1n7rJ/?spm_id_from=333.1387.favlist.content.click)
 
-win+x 选择磁盘管理，找到efi在第几个磁盘的第几个分区
+1. win+x 选择磁盘管理，找到efi在磁盘几的第几个分区，通常是磁盘0的第一个分区。
 
-win+R 输入 diskpart 回车
-select disk 命令选择efi分区所在磁盘，从0开始，第一个磁盘是数字0
+2. win+R 输入 diskpart 回车
 
-```
-select disk 0
-```
-select partition 选择efi分区，从1开始，第一个分区是数字1
-```
-select partition 1
-```
-以上两条命令代表选中了第一个磁盘的第一个分区
-分配盘符
-```
-assign letter p
-```
-管理员运行记事本
-ctrl+s 打开保存窗口
-选择p盘,删除里面的linux 启动相关文件
-移除盘符
-```
-remove letter p
-```
+   ```
+   select disk 0 #选择efi分区所在磁盘
+   select partition 1 #选择efi分区
+   assign letter p # 分配一个盘符
+   ```
+
+3. 管理员运行记事本
+
+4. ctrl+s 打开保存窗口
+
+5. 选择p盘,删除里面的linux 启动相关文件
+
+6. diskpart里移除盘符
+
+   ```
+   remove letter p
+   ```
 
 ## 单独efi分区时
 [windows10删除EFI分区(绝对安全)-CSDN博客](https://blog.csdn.net/sinat_29957455/article/details/88726797)
 
-diskpart选中efi分区后输入：
+- 方法一：[图吧工具箱官方网站 - DIY爱好者的必备工具合集](https://www.tbtool.cn/)
 
-```
- SET ID=ebd0a0a2-b9e5-4433-87c0-68b6b72699c7
-```
-即可在磁盘管理工具里面删除分区
-或者使用diskgeniux，图吧工具箱里面有
+  下载图吧工具箱，在磁盘工具里双击打开，diskgenius，右键linux对应分区删除，然后左上角保存。
+
+- 方法二：windows自带工具
+
+  1. 使用diskpart选中Linux的efi分区后在终端运行：
+
+  ```
+   SET ID=ebd0a0a2-b9e5-4433-87c0-68b6b72699c7
+  ```
+
+  2. 使用磁盘管理右键分区删除
 
 ---
+# 小技巧
+
+## super+左键按住窗口的任意位置移动窗口
+
+## super+中间按住窗口的边缘和角落可以调整窗口大小
+
+## ctrl+c复制文件后ctrl+m可以粘贴一个链接
+
+[Creating Symlinks in Files under Wayland : r/gnome](https://www.reddit.com/r/gnome/comments/10qayrs/creating_symlinks_in_files_under_wayland/)
+
+
+
 # issues
+
+这里是我使用过程中遇到的问题
 
 ## 磁盘占用异常
 
@@ -2243,7 +2644,7 @@ diskpart选中efi分区后输入：
 sudo pacman -S gst-plugins-good gst-libav libde265
 ```
 
-## 时间错乱，windwos开机磁盘检查
+## windows时间错乱，开机磁盘检查
 [双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)
 
 管理员打开powershell 运行
@@ -2251,13 +2652,6 @@ sudo pacman -S gst-plugins-good gst-libav libde265
 ```
 Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsUniversal /t REG_DWORD /d 1
 ```
-
-## nautilus创建文件的symlinks符号链接
-[Creating Symlinks in Files under Wayland : r/gnome](https://www.reddit.com/r/gnome/comments/10qayrs/creating_symlinks_in_files_under_wayland/)
-
-
-
-ctrl+c复制文件后ctrl+m
 
 ## NAUTILUS无法访问smb共享
 如果你的路由器或者别的设备开启了smb文件共享，安装gvfs-smb可以使你在nautilus访问那些文件
@@ -2284,6 +2678,8 @@ NIUBI partition Editor free edition #使用这个工具
 
 ## grub卡顿
 n卡的锅，没辙
+
+
 
 # 附录
 
@@ -2326,6 +2722,49 @@ sudo pacman -Rns $(pacman -Qdt)
 - 无视依赖关系强制删除某个包
 ```
 sudo pacman -Rdd
+```
+
+## 创建快照时自动生成快照启动项
+
+（意义不大，故弃用）
+
+- 安装必要组件
+
+```
+sudo pacman -S grub-btrfs 
+```
+
+- 开启服务
+
+```
+sudo systemctl enable --now grub-btrfsd.service 
+```
+
+- 修改配置文件
+
+```
+sudo systemctl edit grub-btrfsd.service 
+```
+
+- 在默认位置添加
+
+```
+[Service]
+ExecStart=
+ExecStart=/usr/bin/grub-btrfsd --syslog --timeshift-auto
+```
+
+- 重启服务
+
+```
+sudo systemctl daemon-reload
+sudo systemctl restart grub-btrfsd.service
+```
+
+- 避免id变更导致挂载失败
+
+```
+sudo sed -i -E 's/(subvolid=[0-9]+,)|(,subvolid=[0-9]+)//g' /etc/fstab
 ```
 
 ## fcitx5-rime 雾凇拼音
@@ -2495,7 +2934,7 @@ sudo pacman -Syyu
 
 ## ranger预览图片
 
-（yazi比ranger更好用，故弃用）
+（rander是一款终端文档管理器，yazi比ranger更好用，故弃用）
 
 ```
 sudo pacman -S python-pillow ranger kitty 
@@ -2557,3 +2996,28 @@ yay -S appimagelauncher
 - 卸载appimage软件
 右键快捷方式，点击remove appimage from system，或者手动删除~/.local/share/Applications下的destop文件和安装目录下的appimage文件。
 
+### 其他有用的扩展
+
+- dask to dock 
+
+  把概览里的快捷栏放到桌面上
+
+- desktop widgets （desktop clock）
+
+  在桌面上显示一个时钟组件
+
+- clipboard indicator 
+
+  剪贴板历史
+
+- lock screen background 
+
+  更换锁屏背景
+
+- vitals 
+
+  右上角显示当前资源使用情况
+
+- emoji copy 
+
+  快捷输入emoji,很有趣
