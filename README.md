@@ -9,6 +9,7 @@
 [「Archlinux究极指南」从手动安装到显卡直通，最后删除Linux_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1L2gxzVEgs/?spm_id_from=333.1387.homepage.video_card.click&vd_source=65a8f230813d56660e48ae1afdfa4182)
 
 顺便一提，正在通过把这个文档的整个流程自动化的方式学习shell脚本XD
+
 ```
 更新日志：
 2025.7.23 修改原本的fcitx5内容，添加fcitx5-rime和ibus-rime输入法相关内容
@@ -1990,9 +1991,13 @@ reboot
   migratable是为服务器集群准备的“搬家”功能，关闭。
 ```
 
-5. 在```    <topology sockets="1" dies="1" clusters="1" cores="8" threads="2"/>```下面一行插入
+5. 在```    <topology sockets="1" dies="1" clusters="1" cores="8" threads="2"/>```下面一行插入（**这里仅适用于amd处理器，由于我没有intel处理器所以没法测试适用于intel的配置，可以问一问ai**）
+
+
 
 主要是为了伪装成一个友好的hyper-v，调整cpu时钟，修复cpu安全漏洞、设置高级指令集、隐藏cpu虚拟化。注意这里如果伪装成hyper-v的话就没法在虚拟机里面安装vmware了。
+
+
 
 ```
     <cache mode="passthrough"/>
