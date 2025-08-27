@@ -596,10 +596,11 @@ vim /etc/fstab
 
 ```
 useradd -m -g wheel <username> 
+```
 
 <username>替换为自己的用户名（不需要输入<>符号）
 -m代表创建用户的时候创建home目录，-g代表设置组
-```
+
 * 设置密码
 ```
 passwd <username>
@@ -620,20 +621,19 @@ EDITOR=vim visudo
 
    ```
    sudo vim /etc/pacman.conf
-   
+   ```
    去掉[multilib]两行的注释，这一步是开启32位源
    
    再在文件底部写入：
-   
+   ```
    [archlinuxcn]
    Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch 
    Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch 
    Server = https://mirrors.hit.edu.cn/archlinuxcn/$arch 
    Server = https://repo.huaweicloud.com/archlinuxcn/$arch 
-   
-   这是添加cn源
    ```
-
+   这是添加cn源
+   
 2. 同步数据库并安装archlinuxcn密钥
 
    ```
@@ -649,9 +649,9 @@ EDITOR=vim visudo
 ### 检查头文件
 ```
 sudo pacman -S linux-headers
-
-#linux替换为自己的内核，比如zen内核是linux-zen-headers
 ```
+linux替换为自己的内核，比如zen内核是linux-zen-headers
+
 ### 安装显卡驱动 
 
 N卡此时如果不安装显卡驱动，可能无法启动桌面环境
@@ -717,7 +717,8 @@ reboot
 
 ```
 pacman -S gnome-desktop gdm ghostty gnome-control-center gnome-software flatpak
-
+```
+```
 #gnome-desktop最小化安装gnome
 #gdm是显示管理器(gnome display manager)
 #ghostty是一个可高度自定义的终端模拟器（terminal emulator)
@@ -728,7 +729,8 @@ pacman -S gnome-desktop gdm ghostty gnome-control-center gnome-software flatpak
 * 临时开启GDM
 ```
 sudo systemctl start gdm 
-
+```
+```
 #即使出了问题重启也能恢复，避免进不了tty的情况
 ```
 * 正常开启后设置gdm开机自启
@@ -864,7 +866,8 @@ ibus输入法在gnome的兼容性极佳，无须配置环境变量即可使用�
 
 ```
 yay -S ibus ibus-rime rime-ice-pinyin-git ibus-mozc
-
+```
+```
 ibus是ibus输入法的基本包
 ibus-rime是中州韵
 rime-ice是雾凇拼音输入法方案，实测比万象拼音方案好用
@@ -891,9 +894,12 @@ ibus-mozc是日语输入法
 
    ```
    yay -S rime-pinyin-moegirl
-   
+   ```
+   ```
    sudo vim /usr/share/rime-data/rime_ice.dict.yaml 
+   ```
    按照指引在合适的位置添加
+   ```
    - moegirl
    ```
 
@@ -924,7 +930,8 @@ ibus-mozc是日语输入法
 
   ```
   sudo pacman -S mission-center gnome-text-editor gnome-disk-utility gnome-clocks gnome-weather gnome-calculator loupe snapshot baobab celluloid fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib decibels
-  
+  ```
+  ```
   #mission-center 类似win11的任务管理器
   #gnome-text-ditor记事本
   #gnome-disk-utility磁盘管理器
@@ -951,7 +958,8 @@ ibus-mozc是日语输入法
 
   ```
   yay -S linuxqq-appimage wechat-appimage wps-office-cn wps-office-mui-zh-cn typora-free
-  
+  ```
+  ```
   linuxqq-appimage是appimgae版qq
   wechat-appimage是appimage版微信
   wps-office-cn是wps
@@ -973,7 +981,8 @@ ibus-mozc是日语输入法
 
   ```
   flatpak install flathub be.alexandervanhee.gradia io.github.Predidit.Kazumi io.gitlab.theevilskeleton.Upscaler com.github.unrud.VideoDownloader io.github.ilya_zlobintsev.LACT xyz.ketok.Speedtest com.geeks3d.furmark com.rafaelmardojai.Blanket
-  
+  ```
+  ```
   gradia编辑截图
   kazumi追番
   upscaler图片超分
@@ -1002,8 +1011,10 @@ ibus-mozc是日语输入法
 
   ```
   vim ~/.config/mpv/mpv.confg
+  ```
   
   写入：
+  ```
   #使用vulkan后端
   gpu-api=vulkan
   #通用自动模式硬解
@@ -1048,7 +1059,8 @@ ibus-mozc是日语输入法
 
    ```
    sudo apt install /home/shorin/Downloads/spark-store_4.8.0_amd64.
-   
+   ```
+   ```
    apt是debian的包管理器
    install代表安装
    后面指定了安装包的绝对路径，可以手动输入，也可以把安装包拖拽进终端里输入路径
@@ -1356,17 +1368,17 @@ sudo vim /etc/default/grub
 
    ```
    nowatchdog modprobe.blacklist=sp5100_tco
+   ```
    
-   # intelcpu用户把sp5100_tco换成iTCO_wdt
+    intelcpu用户把sp5100_tco换成iTCO_wdt
    
-   #可选参数： 
-   
-   pcie_aspm=force
-   
-   #强制pcie活动电源管理，可以略微降低功耗
+   可选参数：
    
    ```
-
+   pcie_aspm=force
+   ```
+   强制pcie活动电源管理，可以略微降低功耗
+   
 2. 重新生成grub的配置文件
 
    ```
@@ -1516,8 +1528,8 @@ sudo pacman -S starship
 ```
 vim ~/.zshrc
 ```
+写入
 ```
-#写入
 eval "$(starship init zsh)"
 ```
 
@@ -1658,8 +1670,9 @@ modprobe kvm_amd nested=1
 
   ```
   sudo vim /etc/modprobe.d/kvm_amd.conf
-  
-  #写入
+  ```
+  写入
+  ```
   options kvm_amd nested=1
   ```
 
@@ -1760,9 +1773,9 @@ done
 
 ```
 sudo vim /etc/modprobe.d/vfio.conf
-
-#写入
-
+```
+写入
+```
 options vfio-pci ids=硬件id,硬件id
 ```
 - 编辑内核参数让vfio-pci抢先加载
@@ -2100,18 +2113,20 @@ looking glass通过共享内存实现屏幕分享，也需要安装[Virtual-Disp
 - 开启终端，添加kvm组，记得重启
 ```
 sudo gpasswd -a $USER kvm 
-
-#添加自己到kvm组里面， 需要重启，重启后用groups确认自己的组
 ```
+
+添加自己到kvm组里面， 需要重启，重启后用groups确认自己的组
+
 - 每次开机检查文件，不存在的话创建并编辑权限
 
 ```
 sudo vim /etc/tmpfiles.d/10-looking-glass.conf
-
+```
 写入（shorin改为自己的用户名）：
-
+```
 f /dev/shm/looking-glass 0660 shorin kvm -
-
+```
+```
 f 代表定文件规则
 /dev/shm/looking-glass是共享内存文件的路径
 0660 设置所有者和所属组的读写权限
@@ -2158,12 +2173,12 @@ yay -S looking-glass-git
 
 ```
  vim ~/.config/looking-glass/client.ini
- 
+```
  写入： 
- 
+ ```
  [input]
 escapeKey=KEY_F9
-```
+ ```
 把F9换成自己想要的键，可用的键可以在终端输入 looking-glass-client -m KEY 查看
 
 我是用gnome系统快捷键切换全屏和窗口的，你也可以选择设置以全屏模式开启，还是刚才那个配置文件，写入：
@@ -2198,7 +2213,8 @@ fullScreen = yes
 
 ```
 sudo pacman -S gamemode
-
+```
+```
 sudo systemctl --user enable --now gamemoded
 ```
 
@@ -2209,10 +2225,13 @@ sudo systemctl --user enable --now gamemoded
 [docs/InstallingDrivers.md at master · lutris/docs](https://github.com/lutris/docs/blob/master/InstallingDrivers.md)
 
 n卡注意，驱动包要换成自己的
-
+- Nvidia GPU
 ```
-sudo pacman -S --needed nvidia-open-dkms nvidia-utils lib32-nvidia-utils vulkan-icd-loader lib32-vulkan-icd-loader #n卡
-sudo pacman -S --needed lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-icd-loader lib32-vulkan-icd-loader #a卡
+sudo pacman -S --needed nvidia-open-dkms nvidia-utils lib32-nvidia-utils vulkan-icd-loader lib32-vulkan-icd-loader 
+```
+- AMD GPU
+```
+sudo pacman -S --needed lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-icd-loader lib32-vulkan-icd-loader
 ```
 ## 小黄鸭 Lossless Scaling
 
@@ -2283,8 +2302,9 @@ yay -S protonup-qt
 
 ```
 vim ~/.steam/steam/steam_dev.cfg
-
+```
 写入：
+```
 @nClientDownloadEnableHTTP2PlatformLinux 0
 @fDownloadRateImprovementToAddAnotherConnection 1.0
 ```
@@ -2294,6 +2314,7 @@ vim ~/.steam/steam/steam_dev.cfg
 ``` 
 yay -S minecraft-launcher #官方启动器
 yay -S hmcl-bin #hmcl
+yay -S xmcl #xmcl
 ```
 安装时选择最新的jdk
 
@@ -2332,8 +2353,9 @@ cd waydroid_script
 python3 -m venv venv
 venv/bin/pip install -r requirements.txt
 sudo venv/bin/python3 main.py
-按照窗口的指引进行安装
 ```
+按照窗口的指引进行安装
+
 - 开启会话
 ```
 waydroid session start
@@ -2379,7 +2401,8 @@ n卡用户用不了waydroid，可以用软件渲染，但是性能很差，勉�
 - 编辑配置文件
 ```
 sudo vim /var/lib/waydroid/waydroid.cfg
-
+```
+```
 [properties]
 ro.hardware.gralloc=default
 ro.hardware.egl=swiftshader
@@ -2394,11 +2417,18 @@ systemctl restart waydroid-container
 ```
 
 #### 卸载waydroid
-
+- 
 ```
 waydroid session stop
+```
+```
 sudo systemctl disable --now waydroid-container.service
-yay -Rns waydroid #如果下载了waydroid-image的话需要一并删除
+```
+```
+yay -Rns waydroid
+```
+如果下载了waydroid-image的话需要一并删除
+```
 sudo rm -rf /var/lib/waydroid ~/.local/share/waydroid ~/.local/share/applications/waydroid*
 ```
 
@@ -2522,9 +2552,9 @@ sudo rm /swap/swapfile
 
 ```
 sudo vim /etc/fstab
-
-注释掉swap相关的内容
 ```
+注释掉swap相关的内容
+
 #### zram内存压缩
 
 1. 安装zram-generator
@@ -2548,7 +2578,7 @@ compression-algorithm = zstd #重视cpu开销和速度选择lz4
 sudo vim /etc/default/grub
 ```
 ```
-# 在GRUB_CMDLINE_LINUX_DEFAULT=""里写入zswap.enabled=0
+#在GRUB_CMDLINE_LINUX_DEFAULT=""里写入zswap.enabled=0
 
 GRUB_CMDLINE_LINUX_DEFAULT="... zswap.enabled=0 ... "
 ```
