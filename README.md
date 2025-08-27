@@ -931,7 +931,7 @@ ibus-mozc是日语输入法
 - pacman
 
   ```
-  sudo pacman -S mission-center gnome-text-editor gnome-disk-utility gnome-clocks gnome-weather gnome-calculator loupe snapshot baobab celluloid fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib decibels
+  sudo pacman -S --needed mission-center gnome-text-editor gnome-disk-utility gnome-clocks gnome-weather gnome-calculator loupe snapshot baobab celluloid fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib decibels
   ```
   ```
   #mission-center 类似win11的任务管理器
@@ -1012,7 +1012,7 @@ ibus-mozc是日语输入法
   1. 编辑mpv配置文件
 
   ```
-  vim ~/.config/mpv/mpv.confg
+  vim ~/.config/mpv/mpv.config
   ```
   
   写入：
