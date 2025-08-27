@@ -915,6 +915,8 @@ ibus-mozc是日语输入法
 
    - Customize IBus
 
+     需要登出一次
+     
      设置里，常规页面取消“候选框调页按钮”。主题页面可导入css自定义主题，[GitHub - openSUSE/IBus-Theme-Hub: This is the hub for IBus theme that can be used by Customize IBus GNOME Shell Extension.(可被自定义IBus GNOME Shell 扩展使用的IBus主题集合)](https://github.com/openSUSE/IBus-Theme-Hub)，这个网站有一些预设主题。背景页面可以自定义背景（这个无敌了，什么美化都比不过gtk默认主题加一张合适的自定义背景）。其他的选项就自己探索吧。
 
 
