@@ -8,8 +8,6 @@
 
 [「Archlinux究极指南」从手动安装到显卡直通，最后删除Linux_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1L2gxzVEgs/?spm_id_from=333.1387.homepage.video_card.click&vd_source=65a8f230813d56660e48ae1afdfa4182)
 
-顺便一提，正在通过把这个文档的整个流程自动化的方式学习shell脚本XD
-
 ```
 更新日志：
 2025.7.23 修改原本的fcitx5内容，添加fcitx5-rime和ibus-rime输入法相关内容
@@ -25,6 +23,7 @@
 2025.8.12 新增虚拟机性能优化和伪装相关内容
 2025.8.16 新增蓝牙配置、wps中文语言包、常用办公字体相关内容
 2025.8.20 新增swap大小参考、脚本安装后的双系统配置、星火应用商店、更改gnome为windows布局相关内容；新增小技巧章节；优化了排版；修复了若干错误
+2025.8.27 新增更换CachyOS源相关内容
 ```
 
 
@@ -62,11 +61,23 @@ esc 退出编辑模式
 参考链接：
 [双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)s
 
-管理员打开powershell 运行
+windows下管理员身份打开powershell 运行
 ```
 Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsUniversal /t REG_DWORD /d 1
 ```
 这条命令修改注册表把时间从硬件时间改为UTC时间。
+
+## 关于CachyOS
+
+如果你设备较新且不要续航不要稳定只想要**极致的性能**，或者你又想用Arch又想**开箱即用**，那么我强烈建议安装CachyOS。它默认搭载了KDE桌面，如果你想用其他的可以自行选择。如果你不喜欢CachyOS对gnome的自定义设计，可以选择no desktop不安装桌面环境，然后按照本文的流程进行gnome的安装和配置。
+
+[下载 — CachyOS --- Download — CachyOS](https://cachyos.org/download/)
+
+PS：handheld是掌机版，类似steamdeck上的steamos，不过也可以当桌面用，因为是KDE桌面环境。
+
+
+
+如果你想要学习archlinux，或者设备老旧，或者不喜欢CachyOS，确认要自己安装archlinux，继续往下看。
 
 ## 下载iso文件
 
@@ -656,11 +667,9 @@ linux替换为自己的内核，比如zen内核是linux-zen-headers
 
 N卡此时如果不安装显卡驱动，可能无法启动桌面环境
 ```
-sudo pacman -S nvidia-open lib32-nvidia-utils
+sudo pacman -S nvidia-open nvidia-utils lib32-nvidia-utils
 ```
 lib32-nvidai-utils玩游戏要用。
-
-nvdiai包里面已经包含了nvidia-utils包。
 
 非stable内核要安装的驱动不一样，具体看wiki，例如zen内核装nvidia-open-dkms。后续开启32位源之后如果需要用steam的话安装时选择lib32-nvidia开头的包。
 
@@ -907,14 +916,22 @@ ibus-mozc是日语输入法
 
 5. 安装扩展自定义ibus
 
-   商店搜索extension安装蓝色的扩展管理器。安装两个扩展：
+   商店搜索extension安装蓝色的扩展管理器，或者用命令安装
 
+   ```
+   flatpak install flathub com.mattjakeman.ExtensionManager
+   ```
+
+   
+
+   安装两个扩展：
+   
    - ibus tweaker
-
+   
      设置里激活“隐藏页按钮”
-
+   
    - Customize IBus
-
+   
      需要登出一次
      
      设置里，常规页面取消“候选框调页按钮”。主题页面可导入css自定义主题，[GitHub - openSUSE/IBus-Theme-Hub: This is the hub for IBus theme that can be used by Customize IBus GNOME Shell Extension.(可被自定义IBus GNOME Shell 扩展使用的IBus主题集合)](https://github.com/openSUSE/IBus-Theme-Hub)，这个网站有一些预设主题。背景页面可以自定义背景（这个无敌了，什么美化都比不过gtk默认主题加一张合适的自定义背景）。其他的选项就自己探索吧。
@@ -1171,12 +1188,14 @@ flatpak install flathub page.tesk.Refine
 ```
 super+shift+数字键 #将窗口移到工作区
 super+shift+A/D #将窗口左右移动工作区
-Super+数字键 #切换工作区，ps：gnome默认super+滚轮上下可以左右切换工作区
+super+shift+Q/E #移动到左/右工作区
+ps：gnome默认super+滚轮上下可以左右切换工作区
 alt+tab #切换应用程序
 super+M #隐藏所有正常窗口
 alt+` #在应用程序的窗口之间切换窗口
 ```
 * 截图
+
 ```
 ctrl+alt+A #交互式截图
 ```
@@ -1211,8 +1230,6 @@ super+shift+S   flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
 flatpak install flathub com.mattjakeman.ExtensionManager
 ```
 
-
-
 - AppIndicator and KStatusNotifierItem Support 
 
   面板上显示后台应用
@@ -1223,7 +1240,7 @@ flatpak install flathub com.mattjakeman.ExtensionManager
 
 - lock keys 
 
-  osd显示大写锁定和小键盘锁定
+  osd显示大写锁定和小键盘锁定。设置里把指示器风格改成show/hide cap-locks only
 
 - GNOME Fuzzy App Search 
 
@@ -1241,6 +1258,14 @@ flatpak install flathub com.mattjakeman.ExtensionManager
 
   对自定义非常有用
 
+- Arch Linux Updates Indicator
+
+  在面板上显示一个和arch更新相关的图标。要安装pacman-contrib。设置取消始终显示，高级设置里命令改成ghostty -e sudo pacman -Syu
+
+  
+
+可选：使用鼠标的用户建议安装的扩展
+
 - quick close in overview
 
   在概览里面不用点窗口右上角的叉关闭窗口了，而是使用鼠标中键
@@ -1252,10 +1277,10 @@ flatpak install flathub com.mattjakeman.ExtensionManager
 - Top Panel Workspace Scroll
 
   在顶部面板上滚动滚轮切换工作区
+  
+- dask to dock 
 
-- Arch Update Notifier 
-
-  在面板上显示一个和arch更新相关的图标。要安装pacman-contrib
+  把概览里的快捷栏放到桌面上
 
 其他有用扩展见[其他有用的扩展](#其他有用的扩展)和[实现windows布局](#实现windows布局)
 
@@ -1433,11 +1458,7 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
 - hide top bar 
 
-  隐藏顶栏
-
-- burn my windows 
-
-  应用开启和打开的动画
+  隐藏顶栏。设置里激活sensitivity的第一个。intellihide取消激活第二项。
 
 - user themes 
 
@@ -1447,13 +1468,9 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
    top bar的左上角显示一个logo,好玩
 
-- hide activities button 
-
-  隐藏左上角的activities按钮
-  
 - desktop cube 
 
-  把工作区切换从平铺变成一个可以旋转的方块的面，可以设置透明度，超级酷！
+  把工作区切换从平铺变成一个可以旋转的方块的面。设置的overview里把透明度（opacity）都改成50%，超级酷！
 
 ## 实现windows布局
 
@@ -1467,7 +1484,7 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
    - app icons taskbar
 
-     实现windows那样的任务栏。和hide top bar冲突。gnome48下自动隐藏的功能不生效，原因不明（2025.8.20记）。
+     实现windows那样的任务栏。和hide top bar冲突。如果关闭了在所有显示器上显示就无法智能隐藏，原因不明。
 
    - just perfection
 
@@ -1479,7 +1496,19 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
 2. 修改扩展的设置
 
+   - app icons taskbar
+   
+     settings里激活hide dash in overview，app icons position in panel 改成center，激活show all apps按钮，放在右边。icon size 按需调整。
+   
+     panel里激活intllihide（智能隐藏）设置里把only focused window 改成all windows。 panel location选bottom。panel height调整到合适的数值。取消激活show activities button，show weather near clock选right。clockposisiton in panel 改成right。这样布局就和win11一模一样了。
+   
+   - desktop icons ng
+   
+     取消激活显示个人文件夹、回收站图标
+   
    （待施工…………）
+   
+   
 
 ## 主题美化
 
@@ -1914,11 +1943,11 @@ sudo rm /etc/sysctl.d/40-hugepage.conf
 reboot
 ```
 
-### cpupin
+### 可选：cpupin
 
 [PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#CPU_pinning)
 
-避免虚拟机cpu线程对应的物理cpu线程变化导致缓存性能下降。通常在virt-manager里手动设置cpu拓扑为1插槽，核心数和线程数跟自己的cpu对应就够用了。如果要极致的优化继续往下看。
+主要目的是提升cpu缓存性能。避免虚拟机cpu线程对应的物理cpu线程变化导致缓存性能下降。通常在virt-manager里手动设置cpu拓扑为1插槽，核心数和线程数跟自己的cpu对应就够用了。如果要极致的优化继续往下看。
 
 1. 查看物理cpu拓扑
 
@@ -1926,7 +1955,33 @@ reboot
    lscpu -e
    ```
 
-   输出结果里的cpu是线程，core是线程对应的物理核心。如果开启超线程的话会出现一个多个cpu对应同一个core的情况。
+   主要看3项，cpu是线程，core是物理核心，L1d:L1i:L2:L3是缓存。如果开启了超线程，会出现一个core对应两个cpu的情况。究竟该pin哪些cpu需要看缓存。
+
+   看一个例子：
+
+   ```
+     CPU    NODE     SOCKET    CORE L1d:L1i:L2:L3 ONLINE    MAXMHZ   MINMHZ       MHZ
+     0    0      0    0 0:0:0:0           是 5263.0610 402.7860 4687.7769
+     1    0      0    1 1:1:1:0           是 5263.0610 402.7860 4687.6860
+     2    0      0    2 2:2:2:0           是 5263.0610 402.7860 4688.5659
+     3    0      0    3 3:3:3:0           是 5263.0610 402.7860 4688.6870
+     4    0      0    4 4:4:4:0           是 5263.0610 402.7860 4688.7310
+     5    0      0    5 5:5:5:0           是 5263.0610 402.7860 4689.5552
+     6    0      0    6 6:6:6:0           是 5263.0610 402.7860 4689.2202
+     7    0      0    7 7:7:7:0           是 5263.0610 402.7860 4689.5889
+     8    0      0    0 0:0:0:0           是 5263.0610 402.7860 4688.2788
+     9    0      0    1 1:1:1:0           是 5263.0610 402.7860 2361.5911
+    10    0      0    2 2:2:2:0           是 5263.0610 402.7860 4688.4370
+    11    0      0    3 3:3:3:0           是 5263.0610 402.7860 4688.4502
+    12    0      0    4 4:4:4:0           是 5263.0610 402.7860 4688.4072
+    13    0      0    5 5:5:5:0           是 5263.0610 402.7860 4688.2578
+    14    0      0    6 6:6:6:0           是 5263.0610 402.7860 4688.2778
+    15    0      0    7 7:7:7:0           是 5263.0610 402.7860 4688.3350
+   ```
+
+   这个例子里所有核心共享L3缓存，所以无法优化L3缓存性能。但是可以优化L1和L2。比如core0对应cpu0和cpu1，cpu0和cpu1共享同一个L1L2缓存，如果仅pin cpu0就会导致运行到cpu1的缓存里，导致缓存性能下降，所以必须同时pin cpu0和cpu1
+
+   
 
 2. 修改xml，在```  <vcpu placement="static">16</vcpu>```下方插入
 
@@ -1954,10 +2009,44 @@ reboot
      ```<iothreads>2</iothreads>```设置io线程
 
    ```<vcpupin vcpu="0" cpuset="2"/>```虚拟机有几个线程就写几行vcpu，0算第一个。cpuset指定vcpu对应的主机cpu线程，也就是```lscpu -e```输出结果里的cpu那一列。比如举例的这段的意思是vcpu0对应本机的cpu2
-   
+
    ```    <emulatorpin cpuset="0,1,8,9"/>```这一段设置专门用来处理qemu相关工作的cpu。
-   
-   ```<iothreadpin iothread="1" cpuset="0,8"/>```指定专门用来做io相关工作的cpu。    
+
+   ```<iothreadpin iothread="1" cpuset="0,1,8,9"/>```指定专门用来做io相关工作的cpu。    
+
+3. 禁用大部分timer，以减少虚拟机空闲时的cpu占用
+
+   ```
+   <clock offset='localtime'>
+     <timer name='rtc' present='no' tickpolicy='catchup'/>
+     <timer name='pit' present='no' tickpolicy='delay'/>
+     <timer name='hpet' present='no'/>
+     <timer name='kvmclock' present='no'/>
+     <timer name='hypervclock' present='yes'/>
+   </clock>
+   ```
+
+4. 启用 Hyper-V enlightenments
+
+   ```
+   <hyperv>
+   <relaxed state='on'/>
+   <vapic state='on'/>
+   <spinlocks state='on' retries='8191'/>
+   <vpindex state='on'/>
+   <synic state='on'/>
+   <stimer state='on'>
+   <direct state='on'/>
+   </stimer>
+   <reset state='on'/>
+   <frequencies state='on'/>
+   <reenlightenment state='on'/>
+   <tlbflush state='on'/>
+   <ipi state='on'/>
+   </hyperv> 
+   ```
+
+   让 KVM “伪装”成 Hyper-V，以“欺骗”Windows 开启高性能模式，大幅提升 Windows 虚拟机的运行性能、降低CPU消耗，并改善其稳定性
 
 ### 伪装虚拟机
 
@@ -2008,11 +2097,7 @@ reboot
 
 5. 在```    <topology sockets="1" dies="1" clusters="1" cores="8" threads="2"/>```下面一行插入（**这里仅适用于amd处理器，由于我没有intel处理器所以没法测试适用于intel的配置，可以问一问ai**）
 
-
-
-主要是为了伪装成一个友好的hyper-v，调整cpu时钟，修复cpu安全漏洞、设置高级指令集、隐藏cpu虚拟化。注意这里如果伪装成hyper-v的话就没法在虚拟机里面安装vmware了。
-
-
+主要是为了伪装成一个友好的hyper-v，调整cpu时钟，修复cpu安全漏洞、设置高级指令集、隐藏cpu虚拟化。注意这里如果伪装成hyper-v的话就没法在虚拟机里面安装vmware了，``` <feature policy="disable" name="svm"/> ```这个虚拟机无法使用cpu虚拟化，也就玩不了安卓模拟器之类的东西了
 
 ```
     <cache mode="passthrough"/>
@@ -2178,7 +2263,7 @@ yay -S looking-glass-git
 ```
  写入： 
  ```
- [input]
+[input]
 escapeKey=KEY_F9
  ```
 把F9换成自己想要的键，可用的键可以在终端输入 looking-glass-client -m KEY 查看
@@ -2604,6 +2689,7 @@ sudo zramctl
 swapon
 ```
 ## 安装zen内核
+
 ps：会导致功耗略微增加
 
 1. 安装内核和头文件
@@ -2637,8 +2723,30 @@ sudo pacman -R linux linux-headers
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
----
+## 更换CachyOS源和内核
 
+如果你渴望极致的性能优化，可以使用CachyOS的源
+
+- 安装
+
+  ```
+  curl https://mirror.cachyos.org/cachyos-repo.tar.xz -o cachyos-repo.tar.xz
+  tar xvf cachyos-repo.tar.xz && cd cachyos-repo
+  sudo ./cachyos-repo.sh
+  ```
+
+- 移除
+
+  ```
+  curl https://mirror.cachyos.org/cachyos-repo.tar.xz -o cachyos-repo.tar.xz
+  tar xvf cachyos-repo.tar.xz
+  cd cachyos-repo
+  sudo ./cachyos-repo.sh --remove
+  ```
+
+  
+
+---
 
 
 
@@ -2758,6 +2866,18 @@ NIUBI partition Editor free edition #使用这个工具
 
 ## grub卡顿
 n卡的锅，没辙
+
+## virsh list --all不显示虚拟机加上sudo后显示
+
+```
+sudo vim /etc/environment
+```
+
+写入
+
+```
+VIRSH_DEFAULT_CONNECT_URI=qemu:///system
+```
 
 ---
 
@@ -3082,9 +3202,7 @@ yay -S appimagelauncher
 
 ### 其他有用的扩展
 
-- dask to dock 
 
-  把概览里的快捷栏放到桌面上
 
 - desktop widgets （desktop clock）
 
@@ -3105,3 +3223,18 @@ yay -S appimagelauncher
 - emoji copy 
 
   快捷输入emoji,很有趣
+  
+- burn my windows 
+
+  应用开启和打开的动画
+
+- hide activities button 
+
+  隐藏左上角的activities按钮
+
+### 用archinstall安装gnome后的一些清理
+
+```
+sudo pacman -Rns gnome-contacts gnome-maps gnome-music totem gnome-characters gnome-connections evince gnome-logs malcontent gnome-system-monitor gnome-console gnome-tour yelp simple-scan htop sushi gnome-user-docs epiphany
+```
+
