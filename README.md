@@ -77,7 +77,7 @@ PS：handheld是掌机版，类似steamdeck上的steamos，不过也可以当桌
 
 
 
-如果你想要学习archlinux，或者设备老旧，或者不喜欢CachyOS，确认要自己安装archlinux，继续往下看。
+如果你想要完全精简的archlinux，或者想学习linux知识，或者设备老旧，或者不喜欢CachyOS，继续往下看。
 
 ## 下载iso文件
 
