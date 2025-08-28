@@ -431,6 +431,8 @@ pacman -S fastfetch lolcat cmatrix
 
 cmatrix是代码雨，输入cmatris回车运行。
 
+接下来看[配置系统](#配置系统)
+
 ---
 
 
@@ -624,32 +626,53 @@ EDITOR=vim visudo
 ```
 %wheel ALL=（ALL：ALL） ALL
 ```
-### 开启32位源和CN仓库 (archinstall可以跳过)
+### 开启32位源 (archinstall可以跳过)
 
 32位源建议开启，因为steam需要，wine运行exe也需要
 
-1. 编辑pacman配置文件
+编辑pacman配置文件
 
    ```
-   sudo vim /etc/pacman.conf
+vim /etc/pacman.conf
    ```
-   去掉[multilib]两行的注释，这一步是开启32位源
-   
-   再在文件底部写入：
-   ```
-   [archlinuxcn]
-   Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch 
-   Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch 
-   Server = https://mirrors.hit.edu.cn/archlinuxcn/$arch 
-   Server = https://repo.huaweicloud.com/archlinuxcn/$arch 
-   ```
-   这是添加cn源
-   
-2. 同步数据库并安装archlinuxcn密钥
+去掉[multilib]两行的注释
 
-   ```
-   sudo pacman -Sy archlinuxcn-keyring 
-   ```
+可选：把ParallelDownloads的数值调大，这是多线程下载，默认是5 
+
+然后同步数据库
+
+```
+pacman -Sy
+```
+
+## Gnome桌面环境
+
+```
+pacman -S gnome-desktop gdm ghostty gnome-control-center gnome-software flatpak
+```
+jack选择pipewire-jack
+
+```
+#gnome-desktop最小化安装gnome
+#gdm是显示管理器(gnome display manager)
+#ghostty是一个可高度自定义的终端模拟器（terminal emulator)
+#gnome-control-center是设置中心
+#software和flatpak是软件商城
+#flatpak是flathub软件
+```
+* 临时开启GDM
+```
+sudo systemctl start gdm 
+```
+```
+#即使出了问题重启也能恢复，避免进不了tty的情况
+#N卡如果不装驱动可能进不了桌面环境
+```
+* 正常开启后设置gdm开机自启
+
+```
+sudo systemctl enable gdm
+```
 
 ## 安装显卡驱动和硬件编解码
 
@@ -665,7 +688,6 @@ linux替换为自己的内核，比如zen内核是linux-zen-headers
 
 ### 安装显卡驱动 
 
-N卡此时如果不安装显卡驱动，可能无法启动桌面环境
 ```
 sudo pacman -S nvidia-open nvidia-utils lib32-nvidia-utils
 ```
@@ -689,7 +711,6 @@ sudo pacman -S vulkan-radeon
   sudo pacman -S vulkan-mesa-layers
   ```
 
-  
 
 ### 硬件编解码
 
@@ -722,33 +743,10 @@ sudo pacman -S wqy-zenhei noto-fonts noto-fonts-emoji
 ```
 reboot 
 ```
-## Gnome桌面环境
 
-```
-pacman -S gnome-desktop gdm ghostty gnome-control-center gnome-software flatpak
-```
-```
-#gnome-desktop最小化安装gnome
-#gdm是显示管理器(gnome display manager)
-#ghostty是一个可高度自定义的终端模拟器（terminal emulator)
-#gnome-control-center是设置中心
-#software和flatpak是软件商城
-#flatpak是flathub软件
-```
-* 临时开启GDM
-```
-sudo systemctl start gdm 
-```
-```
-#即使出了问题重启也能恢复，避免进不了tty的情况
-```
-* 正常开启后设置gdm开机自启
+## 可选：更换flatpak上海交大源
 
-```
-sudo systemctl enable gdm
-```
-
-### 可选：更换flatpak上海交大源
+国内可能连不上flatpak导致gnome的商店一直转圈圈，可以换国内flatpak源解决 
 
 ```
 sudo flatpak remote-modify flathub --url=https://mirror.sjtu.edu.cn/flathub
@@ -811,11 +809,11 @@ sudo locale-gen
 - 安装声音固件
 
 ```
-sudo pacman -S sof-firmware alsa-firmware alsa-ucm-conf
+sudo pacman -S --needed sof-firmware alsa-firmware alsa-ucm-conf
 ```
 - 安装声音服务
 ```
-sudo pacman -S pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber
+sudo pacman -S --needed pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber
 ```
 * 启用服务
 ```
@@ -829,7 +827,7 @@ sudo pacman -S pavucontrol
 ## 启用蓝牙
 
 ```
-sudo pacman -S bluez
+sudo pacman -S --needed bluez
 ```
 ```
 sudo systemctl enable --now bluetooth
@@ -849,7 +847,28 @@ sudo pacman -S network-manager-applet dnsmasq
 
 ## 安装yay
 
-- 方法一：直接从archlinuxcn安装（需要前面按照步骤添加了cn源）
+- 方法一：直接从archlinuxcn安装
+
+```
+sudo vim /etc/pacman.conf
+```
+
+在文件底部写入：
+
+   ```
+   [archlinuxcn]
+   Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch 
+   Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch 
+   Server = https://mirrors.hit.edu.cn/archlinuxcn/$arch 
+   Server = https://repo.huaweicloud.com/archlinuxcn/$arch 
+   ```
+   这是添加cn源
+
+2. 同步数据库并安装archlinuxcn密钥
+
+   ```
+   sudo pacman -Sy archlinuxcn-keyring 
+   ```
 
 ```
 sudo pacman -S yay 
