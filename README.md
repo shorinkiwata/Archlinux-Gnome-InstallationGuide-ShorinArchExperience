@@ -849,38 +849,43 @@ sudo pacman -S network-manager-applet dnsmasq
 
 - 方法一：直接从archlinuxcn安装
 
-```
-sudo vim /etc/pacman.conf
-```
+  ```
+  sudo vim /etc/pacman.conf
+  ```
 
-在文件底部写入：
+  文件底部写入：
 
-   ```
-   [archlinuxcn]
-   Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch 
-   Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch 
-   Server = https://mirrors.hit.edu.cn/archlinuxcn/$arch 
-   Server = https://repo.huaweicloud.com/archlinuxcn/$arch 
-   ```
-   这是添加cn源
+  ```
+     [archlinuxcn]
+     Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch 
+     Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch 
+     Server = https://mirrors.hit.edu.cn/archlinuxcn/$arch 
+     Server = https://repo.huaweicloud.com/archlinuxcn/$arch 
+  ```
 
-2. 同步数据库并安装archlinuxcn密钥
+  同步数据库并安装archlinuxcn密钥
 
-   ```
-   sudo pacman -Sy archlinuxcn-keyring 
-   ```
+  ```
+  sudo pacman -Sy archlinuxcn-keyring 
+  ```
 
-```
-sudo pacman -S yay 
-```
+  安装yay
 
-- 方法儿：从github安装
+  ```
+  sudo pacman -S yay 
+  ```
+
+- 方法二：从github安装
 
   [GitHub - Jguer/yay: Yet another Yogurt - An AUR Helper written in Go](https://github.com/Jguer/yay)
 
   ```
   sudo pacman -S git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
   ```
+  
+- 方法三：从cachyos源安装
+
+  见[更换CachyOS源](#更换CachyOS源)
 
 ## 安装输入法
 
@@ -2742,9 +2747,11 @@ sudo pacman -R linux linux-headers
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-## 更换CachyOS源和内核
+## 更换CachyOS源
 
-如果你渴望极致的性能优化，可以使用CachyOS的源
+如果你渴望极致的性能优化，可以使用CachyOS的源。
+
+ps：谨慎更换cachyos的内核```linux-cachyos```，内核恐慌（kernel panic）的概率会很大。
 
 - 安装
 
@@ -2753,6 +2760,8 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
   tar xvf cachyos-repo.tar.xz && cd cachyos-repo
   sudo ./cachyos-repo.sh
   ```
+
+- 重启电脑
 
 - 移除
 
@@ -2763,9 +2772,13 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
   sudo ./cachyos-repo.sh --remove
   ```
 
-  
+- 重启电脑
 
 ---
+
+
+
+
 
 
 
