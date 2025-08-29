@@ -265,7 +265,7 @@ amd-ucode 是微码，用来修复和优化cpu，intel用户安装intel-ucode
 
 [Swap - Manjaro](https://wiki.manjaro.org/index.php/Swap)
 
-swap与虚拟内存和休眠有关，可以创建swap分区或者swap文件，二选一，前者配置更简单，后者配置稍复杂，但是更加灵活。这里采用交换分区的方式，交换文件的配置方法在手动安装的部分有。
+swap与虚拟内存和休眠有关，可以创建swap分区或者swap文件，二选一，前者配置更简单，后者配置稍复杂，但是更加灵活。这里采用交换文件的方式。
 
 ```
 SWAP大小参考
