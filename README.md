@@ -977,12 +977,13 @@ ibus-mozc是日语输入法
 - pacman
 
   ```
-  sudo pacman -S --needed mission-center gnome-text-editor gnome-disk-utility gnome-clocks gnome-weather gnome-calculator loupe snapshot baobab celluloid fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib decibels wofi 
+  sudo pacman -S --needed mission-center gnome-text-editor gnome-disk-utility gnome-font-viewer gnome-clocks gnome-weather gnome-calculator loupe snapshot baobab celluloid fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib decibels wofi gnome-font-viewer
   ```
   ```
   mission-center 类似win11的任务管理器
   gnome-text-ditor记事本
   gnome-disk-utility磁盘管理器
+  gnome-font-viewer 方便安装和查看字体
   gnome-clocks时钟工具，可以设置闹钟和计时
   gnome-weather天气
   gnome-calculator计算器
@@ -2869,6 +2870,15 @@ ps：谨慎更换cachyos的内核```linux-cachyos```，内核恐慌（kernel pan
 ## ctrl+c复制文件后ctrl+m可以粘贴一个链接
 
 [Creating Symlinks in Files under Wayland : r/gnome](https://www.reddit.com/r/gnome/comments/10qayrs/creating_symlinks_in_files_under_wayland/)
+
+## time命令可以计算一个程序启动的时间
+
+示例：
+
+```
+time firefox
+```
+然后你会看到firefox的启动时间
 
 ---
 
