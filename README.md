@@ -1492,7 +1492,7 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
 - blur my shell 
 
-  透明度美化。设置里激活在概览界面中禁用
+  透明度美化。
 
 - hide top bar 
 
