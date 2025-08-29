@@ -1260,6 +1260,9 @@ super+M gnome-text-editor
 ```
 
 ## 功能性扩展
+
+#### ⚠️ 警告：扩展在gnome桌面环境大版本更新的时候大概率会大面积失效，如果出现gnome桌面环境的更新，一定要先关闭所有扩展，谨慎行事
+
 - 从商店安装蓝色的扩展管理器
 
 ```
@@ -1298,7 +1301,11 @@ flatpak install flathub com.mattjakeman.ExtensionManager
 
   在面板上显示一个和arch更新相关的图标。要安装pacman-contrib。设置取消始终显示，高级设置里命令改成ghostty -e sudo pacman -Syu
 
-  
+- quick settings tweaks
+
+  让右上角的快速设置面板变得更合理。包括把通知从时间面板移动到快速设置面板，缩小时间面板的占地面积，免打扰模式开关按钮移动到快速设置面板，允许调整单个应用的声音大小等等。
+
+  扩展设置的menu页面的两项可以激活，第一项让声音调整菜单以悬浮的方式显示出来，第二项给这个功能增加动画，很酷。
 
 可选：使用鼠标的用户建议安装的扩展
 
@@ -1477,13 +1484,15 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 ```
 ## 扩展美化
 
+#### ⚠️ 警告：扩展在gnome桌面环境大版本更新的时候大概率会大面积失效，如果出现gnome桌面环境的更新，一定要先关闭所有扩展，谨慎行事
+
 我会使用的扩展：
 
 [arch + gnome美化教程_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1ym4y1G76s/?share_source=copy_web&vd_source=1c6a132d86487c8c4a29c7ff5cd8ac50)
 
 - blur my shell 
 
-  透明度美化。设置里激活在概览界面不禁用模糊
+  透明度美化。设置里激活在概览界面中禁用
 
 - hide top bar 
 
@@ -1500,6 +1509,10 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 - desktop cube 
 
   把工作区切换从平铺变成一个可以旋转的方块的面。设置的overview里把透明度（opacity）都改成50%，超级酷！
+  
+- rounded window corners reborn 
+
+  让所有窗口变成圆角。这个扩展是真神。 设置里取消激活skip libadwaita applications，然后把corner radius改成14，这样就和gnome的圆角没区别了。
 
 ## 实现windows布局
 
@@ -1785,8 +1798,6 @@ nm-connection-editor
 
 [手把手教你给笔记本重装系统（Windows篇）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV16h4y1B7md/?spm_id_from=333.337.search-card.all.click)
 
-[太突然！Win11 LTSC 官方精简版，终于来了 - 知乎](https://zhuanlan.zhihu.com/p/1000648759)
-
 1. 任选一个网站下载镜像
 
    - [HelloWindows.cn - 精校 完整 极致 Windows系统下载仓储站](https://hellowindows.cn/)
@@ -1805,11 +1816,11 @@ nm-connection-editor
 
    点击last modified，然后下载最新版本
 
-3. [「Archlinux究极指南」从手动安装到显卡直通](https://www.bilibili.com/video/BV1L2gxzVEgs/?spm_id_from=333.1387.homepage.video_card.click&vd_source=65a8f230813d56660e48ae1afdfa4182)按照视频里kvm虚拟机的部分安装
+3. [「Archlinux究极指南」从手动安装到显卡直通](https://www.bilibili.com/video/BV1L2gxzVEgs/?spm_id_from=333.1387.homepage.video_card.click&vd_source=65a8f230813d56660e48ae1afdfa4182)按照视频里kvm虚拟机的部分安装。或者参照这篇教程[winapps/docs/libvirt.md at main · winapps-org/winapps](https://github.com/winapps-org/winapps/blob/main/docs/libvirt.md)
 
 #### 跳过联网
 
-确保机器没有连接到网络，按下shift+f10 ，鼠标点选窗口，输入
+确保机器**没有连接到网络**，按下shift+f10 ，鼠标点击选中弹出来的cmd窗口，运行：
 
 ```
 oobe\bypassnro
@@ -2778,6 +2789,8 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 ## 更换CachyOS源
 
+[Optimized Repositories | CachyOS](https://wiki.cachyos.org/features/optimized_repos/)
+
 如果你渴望极致的性能优化，可以使用CachyOS的源。
 
 ps：谨慎更换cachyos的内核```linux-cachyos```，内核恐慌（kernel panic）的概率会很大。
@@ -3299,6 +3312,10 @@ yay -S appimagelauncher
 - hide activities button 
 
   隐藏左上角的activities按钮
+  
+- Quick Settings Audio Panel
+
+  让你快捷地在右上角的面板里调整每个软件、网页的音频。quick settings tweaks扩展包含了这个功能，如果安装了就不要装这个啦。
 
 ### 用archinstall安装gnome后的一些清理
 
