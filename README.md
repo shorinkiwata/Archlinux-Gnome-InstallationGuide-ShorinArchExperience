@@ -611,7 +611,8 @@ vim /etc/fstab
 useradd -m -g wheel <username> 
 ```
 
-<username>替换为自己的用户名（不需要输入<>符号）
+username替换为自己的用户名（不需要输入<>符号）
+
 -m代表创建用户的时候创建home目录，-g代表设置组
 
 * 设置密码
@@ -662,16 +663,15 @@ jack选择pipewire-jack
 ```
 * 临时开启GDM
 ```
-sudo systemctl start gdm 
+systemctl start gdm 
 ```
-```
-#即使出了问题重启也能恢复，避免进不了tty的情况
-#N卡如果不装驱动可能进不了桌面环境
-```
+即使出了问题重启也能恢复，避免进不了tty的情况
+N卡如果不装驱动可能进不了桌面环境
+
 * 正常开启后设置gdm开机自启
 
 ```
-sudo systemctl enable gdm
+systemctl enable gdm
 ```
 
 ## 安装显卡驱动和硬件编解码
@@ -682,20 +682,20 @@ sudo systemctl enable gdm
 
 ### 检查头文件
 ```
-sudo pacman -S linux-headers
+pacman -S linux-headers
 ```
 linux替换为自己的内核，比如zen内核是linux-zen-headers
 
 ### 安装显卡驱动 
 
 ```
-sudo pacman -S nvidia-open nvidia-utils lib32-nvidia-utils
+pacman -S nvidia-open nvidia-utils lib32-nvidia-utils
 ```
 lib32-nvidai-utils玩游戏要用。
 
-非stable内核要安装的驱动不一样，具体看wiki，例如zen内核装nvidia-open-dkms。后续开启32位源之后如果需要用steam的话安装时选择lib32-nvidia开头的包。
-
 显卡驱动的选择在[CodeNames · freedesktop.org](https://nouveau.freedesktop.org/CodeNames.html)这个页面搜索自己的显卡，看看对应的family是什么。然后在[NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)这个页面查找对应的显卡驱动。nv160family往后的显卡用nvidia-open，nv110到190如果nvidia-open表现不佳的话可以使用nvidia。nvidia-open是内核模块开源的驱动，不是完全的开源驱动。
+
+非stable内核要安装的驱动不一样，具体看wiki，例如zen内核装nvidia-open-dkms。后续开启32位源之后如果需要用steam的话安装时选择lib32-nvidia开头的包。
 
 #### AMD显卡建议检查是否安装vulkan驱动
 ```
@@ -716,9 +716,9 @@ sudo pacman -S vulkan-radeon
 
 - 可选：libva-utils包提供了测试硬件编解码的工具，比如vainfo命令可以显示当前硬件编解码支持
 
- - nvidia4060
+ - nvidia 4060
 ```
-sudo pacman -S libva-nvidia-driver
+suodo pacman -S libva-nvidia-driver
 ```
 - intel xe核显
 ```
@@ -819,7 +819,7 @@ sudo pacman -S --needed pipewire pipewire-pulse pipewire-alsa pipewire-jack wire
 ```
 systemctl --user enable --now pipewire pipewire-pulse wireplumber
 ```
-* 可选：安装GUI
+* 可选：安装GUI（图形界面管理工具）
 ```
 sudo pacman -S pavucontrol 
 ```
@@ -836,7 +836,7 @@ sudo systemctl enable --now bluetooth
 ## 安装高级网络配置工具nm-connection-editor
 
 ```
-sudo pacman -S network-manager-applet dnsmasq
+sudo pacman -S --needed network-manager-applet dnsmasq
 ```
 * 设置跃点
 ```
@@ -846,7 +846,7 @@ sudo pacman -S network-manager-applet dnsmasq
 
 ## 安装yay
 
-yay可以从aur安装软件（paru也是类似yay的软件，但是会出现有些软件无法安装的情况，所以建议还是用yay）
+yay是aur助手，可以从aur安装软件（paru也是一个aur助手，但是会出现有些软件无法安装的情况，所以建议还是用yay）
 
 - 方法一：直接从archlinuxcn安装
 
@@ -884,9 +884,15 @@ yay可以从aur安装软件（paru也是类似yay的软件，但是会出现有�
   sudo pacman -S git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
   ```
   
+  这条命令有四步，每步之间用&&隔开。第一步用pacman安装git和base-devel。这是git管理工具和编译软件需要的包。第二步git clone把链接里的文件下载到本地。第三步cd 进入yay目录。第四步makepkg编译包。
+  
 - 方法三：从cachyos源安装
 
   见[更换CachyOS源](#更换CachyOS源)
+  
+  ```
+  sudo pacman -S yay
+  ```
 
 ## 安装输入法
 
@@ -908,7 +914,7 @@ rime-ice是雾凇拼音输入法方案，实测比万象拼音方案好用
 ibus-mozc是日语输入法
 ```
 
-2. 在gnome的设置中心 > 键盘 里面搜索rime添加输入法，如果没有的话登出一次
+2. 在gnome的设置中心 > 键盘 > 添加输入源 > 汉语，里面找到rime添加，如果没有的话登出一次
 
 3. 编辑配置文件设置rime的输入法方案为ice雾凇拼音
 
@@ -937,7 +943,7 @@ ibus-mozc是日语输入法
    - moegirl
    ```
 
-4. 默认使用super+空格切换输入法，可以在设置里修改。第一次切换至rime输入法需要等待部署完成。（出现异常可以登出一次）
+4. 默认使用super+空格切换输入法，可以在设置里修改。第一次切换至rime输入法需要等待部署完成。
 
 5. 安装扩展自定义ibus
 
@@ -947,10 +953,8 @@ ibus-mozc是日语输入法
    flatpak install flathub com.mattjakeman.ExtensionManager
    ```
 
-   
-
    安装两个扩展：
-   
+
    - ibus tweaker
    
      设置里激活“隐藏页按钮”
@@ -966,7 +970,7 @@ ibus-mozc是日语输入法
 
 ### 我会安装的软件
 
-这是我会安装的，你可以按需求选择
+这是我会安装的，你可以按自己的需求安装
 
 **安装软件后没显示图标的话登出一次**
 
@@ -976,24 +980,24 @@ ibus-mozc是日语输入法
   sudo pacman -S --needed mission-center gnome-text-editor gnome-disk-utility gnome-clocks gnome-weather gnome-calculator loupe snapshot baobab celluloid fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib decibels wofi 
   ```
   ```
-  #mission-center 类似win11的任务管理器
-  #gnome-text-ditor记事本
-  #gnome-disk-utility磁盘管理器
-  #gnome-clocks时钟工具，可以设置闹钟和计时
-  #gnome-weather天气
-  #gnome-calculator计算器
-  #loupe图片查看工具
-  #snapshot相机，摄像头
-  #baobab磁盘使用情况分析工具
-  #celluloid是基于mpv的视频播放器
-  #fragments是符合gnome设计理念的种子下载器
-  #file-roller压缩解压缩
-  #foliate 电子书阅读器
-  #zen-browser zen浏览器，也可以安装firefox或者商店搜索你想要用的浏览器，但是linux上表现最好的浏览器是firefox。zen浏览器一定要在设置>zen模组里面安装transparent zen模组，可以获得特别流畅的动画效果
-  #zen-browser-i18n-zh-cn是zen的中文语言包
-  #gst-plugin-pipewire gst-plugins-good是gnome截图工具自带的录屏，需登出一次
-  #pacman-contrib 是pacman的一些小工具，比如checkupdates用来检查更新
-  #decibels是音频播放器，我一般在网页上听音乐，所以就装个轻量化的，其实用celluloid也能放音频，但是这个软件可以显示波形，很酷。本地播放音乐的话推荐amberol。
+  mission-center 类似win11的任务管理器
+  gnome-text-ditor记事本
+  gnome-disk-utility磁盘管理器
+  gnome-clocks时钟工具，可以设置闹钟和计时
+  gnome-weather天气
+  gnome-calculator计算器
+  loupe图片查看工具
+  snapshot相机，摄像头
+  baobab磁盘使用情况分析工具
+  celluloid是基于mpv的视频播放器
+  fragments是符合gnome设计理念的种子下载器
+  file-roller压缩解压缩
+  foliate 电子书阅读器
+  zen-browser zen浏览器，也可以安装firefox或者商店搜索你想要用的浏览器，但是linux上表现最好的浏览器是firefox。zen浏览器一定要在设置>zen模组里面安装transparent zen模组，可以获得特别流畅的动画效果
+  zen-browser-i18n-zh-cn是zen的中文语言包
+  gst-plugin-pipewire gst-plugins-good是gnome截图工具自带的录屏，需登出一次
+  pacman-contrib 提供pacman的一些额外功能，比如checkupdates用来检查更新
+  decibels是音频播放器，我一般在网页上听音乐，所以就装个轻量化的。其实用celluloid也能放音频，但是这个软件可以显示波形，很酷。本地播放音乐的话推荐amberol。
   #wofi 这是一个快捷搜索工具
   ```
   
@@ -1031,12 +1035,12 @@ ibus-mozc是日语输入法
   gradia编辑截图
   kazumi追番
   upscaler图片超分
-  video downloader下载youtube 144p～8k视频
+  video downloader下载youtube/bilibili 144p～8k视频
   LACT 显卡超频、限制功率、风扇控制等等
   speedtest 测试网速
   furmark 显卡烤鸡
   Blanket 白噪音播放器
-  chrome 浏览器。有些网站或者浏览器功能在firefox下无法正常运行，所以一个chromium的浏览器是必须的
+  chrome 浏览器。有些网站或者浏览器功能在firefox下无法正常运行，所以装一个chromium的浏览器做备用
   Warehouse 用来管理flatpak的源、软件、属性、用户数据之类的
   Flatseal 管理flatpak应用的权限、环境变量之类的
   ```
@@ -1114,7 +1118,7 @@ ibus-mozc是日语输入法
    后面指定了安装包的绝对路径，可以手动输入，也可以把安装包拖拽进终端里输入路径
    ```
 
-6. 之后正常使用就可以了，什么flameshot之类没法在gnome下面正常使用的软件就可以正常使用了。
+6. 之后正常使用就可以了，什么flameshot之类没法在gnome下面正常使用的软件也可以正常使用。
 
 #### 卸载
 
@@ -1128,7 +1132,7 @@ yay -Rns amber-ce-bookworm
 
 **快照相当于存档，每次做自己不了解的事情之前都存个档**
 
-**！！！警告！！！timeshitf里删除已创建快照必须一个一个删除，否则大概率崩盘。**
+#### ⚠️**！！！警告！！！timeshitf里删除已创建快照必须一个一个删除，否则大概率崩盘。**
 
 1. 安装timeshift
 
@@ -1146,7 +1150,7 @@ sudo systemctl enable --now cronie.service
 
   archlinux是滚动发行版。滚动是英文直译，原词是rolling，指一种推送更新的方式，只要有新版本就会推送，由用户管理更新。对应的另一种更新方式是定期更新一个大版本，例如fedora是六个月一更新，由发行方管理更新。 滚挂，指的是滚动更新的发行版因为更新导致系统异常。这通常是用户操作不当、忽略官方公告等原因导致的。只要学习一下正确的更新方式和快照的使用方法就不用担心滚挂问题。 
 
-  通常软件更新不用担心。**出现密钥（archlinux-keyring）、内核、驱动、固件、引导程序之类的更新要留个心眼，先不第一时间更新，等一手社区或者官方消息。** 另一个重点是滚动更新的发行版的软件通常会适配最新的依赖，如果长期不更新可能会无法使用软件。
+  通常软件更新不用担心。**出现密钥（keyring）、内核、驱动、固件、引导程序之类的更新要留个心眼，先不第一时间更新，等一手社区或者官方消息。** 另一个重点是滚动更新的发行版的软件通常会适配最新的依赖，如果长期不更新可能会无法使用软件。
 
 - 良好的使用习惯
 
@@ -1183,7 +1187,8 @@ sudo pacman -S dconf-editor
 ```
 修改配置，路径为/com/github/stunkymonkey/nautilus-open-any-terminal
 ```
-- 重载nautilus
+重载nautilus
+
 ```
 nautilus -q 
 ```
@@ -1336,15 +1341,6 @@ sudo systemctl enable --now supergfxd
 扩展下载GPU supergfxctl switch
 ```
 
-```
-使用方法：
-Integrated supergfxctl --mode Integrated 
-Hybrid supergfxctl --mode Hybrid 
-VFIO supergfxctl --mode Vfio 
-AsusEgpu supergfxctl --mode AsusEgpu 
-AsusMuxDgpu supergfxctl --mode AsusMuxDgpu
-```
-
 - 非华硕用户使用envycontrol
 
 [GitHub - bayasdev/envycontrol: Easy GPU switching for Nvidia Optimus laptops under Linux](https://github.com/bayasdev/envycontrol)
@@ -1396,7 +1392,7 @@ sudo systemctl enable --now switcheroo-control
 sudo vim /etc/mkinitcpio.conf
 ```
 ```
-在HOOKS()内添加resume,注意需要添加在udev的后面,建议加在末尾
+在HOOKS()内添加resume,注意需要添加在udev的后面
 ```
 - 重新生成initramfs
 ```
@@ -1446,7 +1442,9 @@ sudo vim /etc/default/grub
 
 性能模式切换，有三个档位，performance性能、balance平衡、powersave节电。一般平衡档位就够用了，也不需要调节风扇什么的。
 
-不建议使用tlp或者auto-cpufreq，意义不大。这个易用而且足够，如果想折腾的话可以看附录[TLP相关](#TLP相关)。tlp和auto-cpufreq都有对应的gnome扩展，但未经验证，不保证能用。
+不建议使用tlp或者auto-cpufreq，意义不大，这个易用而且足够。如果想折腾的话可以看附录[TLP相关](#TLP相关)。
+
+tlp和auto-cpufreq都有对应的gnome扩展，但未经验证，不保证能用。
 
 ```
 sudo pacman -S power-profiles-daemon
@@ -1492,11 +1490,11 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
 - user themes 
 
-  主题，浏览器搜索gnome shell theme下载主题
+  管理主题
 
 - logo menu 
 
-   top bar的左上角显示一个logo,好玩
+   在面板（panel，任务栏）显示一个logo，好玩
 
 - desktop cube 
 
@@ -1508,29 +1506,49 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
 1. 安装扩展
 
-   - arcmenu
-
-     这是功能强大的开始菜单
-
    - app icons taskbar
 
      实现windows那样的任务栏。和hide top bar冲突。如果关闭了在所有显示器上显示就无法智能隐藏，原因不明。
-
-   - just perfection
-
-     功能强大的自定义扩展，可以设置gnome各个元素的开关。不过根据gnome版本的不同能设置的选项会有所不同。
 
    - desktop icons ng
 
      实现windows那样的桌面快捷方式
 
+   - 可选：arcmenu
+
+     这是功能强大的开始菜单扩展
+
+   - 可选：just perfection
+
+     功能强大的自定义扩展，可以设置gnome各个元素的开关。不过根据gnome版本的不同能设置的选项会有所不同。
+
 2. 修改扩展的设置
 
    - app icons taskbar
    
-     settings里激活hide dash in overview，app icons position in panel 改成center，激活show all apps按钮，放在右边。icon size 按需调整。
+     settings页面里：
    
-     panel里激活intllihide（智能隐藏）设置里把only focused window 改成all windows。 panel location选bottom。panel height调整到合适的数值。取消激活show activities button，show weather near clock选right。clockposisiton in panel 改成right。这样布局就和win11一模一样了。
+     激活hide dash in overview（隐藏概览里的快捷栏）
+   
+     app icons position in panel （软件图标在面板上的位置）改成center
+   
+     激活show all apps button（显示所有软件按钮），位置选right（右边）
+   
+     icon size（图标大小）和padding（间距） 按需调整
+   
+     panel里激活intllihide（智能隐藏），设置里把only focused window （仅选中的窗口）改成all windows（所有窗口）
+   
+      panel location（面板位置）选bottom（底部）
+   
+     panel height（面板高度）调整到合适的数值。
+   
+     取消激活show activities button（显示活动按钮）
+   
+     show weather near clock（在时钟旁显示天气）选right（右边）
+   
+     clock posisiton in panel（时钟在面板中的位置）改成right
+   
+     这样布局就和win11一模一样了。
    
    - desktop icons ng
    
@@ -1774,7 +1792,7 @@ nm-connection-editor
 
    - [下载 Windows 11](https://www.microsoft.com/zh-cn/software-download/windows11)
 
-   - 可选：win11 iot LTS iso 镜像
+   - 可选：win11 iot LTS 镜像
 
      ```
      https://go.microsoft.com/fwlink/?linkid=2270353&clcid=0x409&culture=en-us&country=us
@@ -2045,7 +2063,7 @@ fullScreen = yes
 ```
 
 - 关于虚拟机性能优化，见[虚拟机性能优化](#虚拟机性能优化)
-- 推荐： 配置完looking glass之后克隆虚拟机，用克隆机而不是初号机，好处不用多说了吧👆🤓
+- 推荐： 配置完looking glass之后克隆虚拟机，用克隆机而不是初号机，好处不用多说了吧
 
 ## 虚拟机性能优化
 
@@ -2118,7 +2136,9 @@ reboot
 
 [PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#CPU_pinning)
 
-主要目的是提升cpu缓存性能。避免虚拟机cpu线程对应的物理cpu线程变化导致缓存性能下降。通常在virt-manager里手动设置cpu拓扑为1插槽，核心数和线程数跟自己的cpu对应就够用了。如果要极致的优化继续往下看。
+主要目的是提升cpu缓存性能。避免虚拟机cpu线程对应的物理cpu线程变化导致缓存性能下降。
+
+通常在virt-manager里手动设置cpu拓扑为1插槽，核心数和线程数跟自己的cpu对应就够用了，如果要极致的优化继续往下看。
 
 1. 查看物理cpu拓扑
 
@@ -2181,7 +2201,7 @@ reboot
 
    ```<vcpupin vcpu="0" cpuset="2"/>```虚拟机有几个线程就写几行vcpu，0算第一个。cpuset指定vcpu对应的主机cpu线程，也就是```lscpu -e```输出结果里的cpu那一列。比如举例的这段的意思是vcpu0对应本机的cpu2
 
-   ```    <emulatorpin cpuset="0,1,8,9"/>```这一段设置专门用来处理qemu相关工作的cpu。
+   ```    <emulatorpin cpuset="0,1,8,9"/>```这一段设置专门用来处理虚拟机相关工作的cpu。
 
    ```<iothreadpin iothread="1" cpuset="0,1,8,9"/>```指定专门用来做io相关工作的cpu。    
 
@@ -2268,7 +2288,7 @@ reboot
 
 5. 在```    <topology sockets="1" dies="1" clusters="1" cores="8" threads="2"/>```下面一行插入（**这里仅适用于amd处理器，由于我没有intel处理器所以没法测试适用于intel的配置，可以问一问ai**）
 
-主要是为了伪装成一个友好的hyper-v，调整cpu时钟，修复cpu安全漏洞、设置高级指令集、隐藏cpu虚拟化。注意这里如果伪装成hyper-v的话就没法在虚拟机里面安装vmware了，``` <feature policy="disable" name="svm"/> ```这个虚拟机无法使用cpu虚拟化，也就玩不了安卓模拟器之类的东西了
+主要是为了伪装成一个友好的hyper-v，调整cpu时钟，修复cpu安全漏洞、设置高级指令集、隐藏cpu虚拟化。顺便一提如果伪装成hyper-v的话就没法在虚拟机里面安装vmware了，``` <feature policy="disable" name="svm"/> ```这个申明虚拟机cpu没有虚拟化功能，也就玩不了安卓模拟器之类的东西了。
 
 ```
     <cache mode="passthrough"/>
@@ -2341,12 +2361,15 @@ sudo systemctl --user enable --now gamemoded
 
 [docs/InstallingDrivers.md at master · lutris/docs](https://github.com/lutris/docs/blob/master/InstallingDrivers.md)
 
-n卡注意，驱动包要换成自己的
-- Nvidia GPU
+n卡注意驱动包要换成自己的
+
+Nvidia GPU
+
 ```
 sudo pacman -S --needed nvidia-open-dkms nvidia-utils lib32-nvidia-utils vulkan-icd-loader lib32-vulkan-icd-loader 
 ```
-- AMD GPU
+AMD GPU
+
 ```
 sudo pacman -S --needed lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-icd-loader lib32-vulkan-icd-loader
 ```
@@ -2358,9 +2381,8 @@ sudo pacman -S --needed lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-icd-
 
 需要先下载steam正版的的小黄鸭。也许盗版也可以，但是正版就30块而已，我就不试盗版行不行了，有兴趣的可以自己试试，手动指定一下lossless.dll的路径说不定能运行。
 
-- 养成好习惯，做任何自己不了解的事情之前先创建一个快照
-
 - 从yay安装lsfg-vk，有lsfg-vk-bin、lsfg-vk、lsfg-vk-git三个包，随意装一个。
+
 ```
 yay -S lsfg-vk-git
 ```
@@ -2598,7 +2620,7 @@ yay -S heroic-games-launcher
 ## 用显卡直通玩游戏
 
 经过前面显卡直通的操作，我已经有了一台4060显卡的win11，并且配置了looking glass，理论上所有win11能干的事情我都能在这台虚拟机上干。具体的就不用再往下说了吧🤓☝️
-至于为什么显卡直通虚拟机win11而不是重启到真的win11里面。[「Linux游戏指南」关于Linux玩游戏的一切](https://www.bilibili.com/video/BV1zyttzPEmp/?spm_id_from=333.1387.homepage.video_card.click&vd_source=65a8f230813d56660e48ae1afdfa4182)这个视频后半表达得很清楚了。
+至于为什么显卡直通虚拟机win11而不是重启到真的win11里面。[「Linux游戏指南」关于Linux玩游戏的一切](https://www.bilibili.com/video/BV1zyttzPEmp/?spm_id_from=333.1387.homepage.video_card.click&vd_source=65a8f230813d56660e48ae1afdfa4182)这个视频表达得很清楚了。
 
 ---
 
@@ -2856,7 +2878,7 @@ ps：谨慎更换cachyos的内核```linux-cachyos```，内核恐慌（kernel pan
 
 # issues
 
-这里是我使用过程中遇到的问题
+这里是我使用过程中遇到的问题以及对应的解决方案
 
 ## 磁盘占用异常
 
@@ -2898,9 +2920,7 @@ nameserver 8.8.4.4
 ```
 
 ## 扩展windwos的efi分区空间
-```
-NIUBI partition Editor free edition #使用这个工具
-```
+NIUBI partition Editor free edition 使用这个工具
 
 ## grub卡顿
 n卡的锅，没辙
@@ -2925,6 +2945,8 @@ VIRSH_DEFAULT_CONNECT_URI=qemu:///system
 
 # 附录
 
+这里是一些有用但是被我弃用的内容，以及一些额外的补充内容。
+
 ## pacman常用指令
 
 - 下载包但不安装
@@ -2933,7 +2955,7 @@ VIRSH_DEFAULT_CONNECT_URI=qemu:///system
 sudo pacman -Sw
 ```
 
-* 删除包，同时删除不再被其他包需要的依赖和配置文件,-R删除包，s删除依赖，n删除配置文件
+* 删除包，同时删除不再被其他包需要的依赖
 ```
 sudo pacman -Rns
 ```
@@ -3091,7 +3113,7 @@ export GTK_IM_MODULE=fcitx
 ```
 
 ## cpu资源优先级
-（没感觉到区别，故遵循奥卡姆剃刀原则弃用。）
+（没感觉到区别，故弃用。）
 ```
  yay -S ananicy-cpp cachyos-ananicy-rules
 ```
@@ -3145,7 +3167,7 @@ sudo systemctl enable --now tlp
 ```
 
 ## 安装alhp 
-（下载太慢，容易下载失败，遂弃用）
+（下载太慢，容易下载失败，遂弃用。2025年8月29日记：换cachyos源可以做到相同的效果，这个已经完全没有意义了。）
 *参考链接: [ALHP：优化你的archlinux性能 - 哔哩哔哩](https://www.bilibili.com/opus/745324585822453908?from=search&spm_id_from=333.337.0.0%2a)
 
 * 检查芯片支持,记住结果里是x86-64-v几
@@ -3240,8 +3262,6 @@ yay -S appimagelauncher
 
 ### 其他有用的扩展
 
-
-
 - desktop widgets （desktop clock）
 
   在桌面上显示一个时钟组件
@@ -3252,7 +3272,7 @@ yay -S appimagelauncher
 
 - lock screen background 
 
-  更换锁屏背景
+  更换锁屏背景（默认锁屏是模糊，会透出桌面壁纸，已经很好看了，所以这个意义不大）
 
 - vitals 
 
@@ -3260,7 +3280,7 @@ yay -S appimagelauncher
 
 - emoji copy 
 
-  快捷输入emoji,很有趣
+  快捷复制emoji，很有趣
   
 - burn my windows 
 
