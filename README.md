@@ -844,8 +844,9 @@ sudo pacman -S network-manager-applet dnsmasq
 跃点需手动设置为100,默认的-999会导致网络速率异常
 ```
 
-
 ## 安装yay
+
+yay可以从aur安装软件（paru也是类似yay的软件，但是会出现有些软件无法安装的情况，所以建议还是用yay）
 
 - 方法一：直接从archlinuxcn安装
 
@@ -856,11 +857,11 @@ sudo pacman -S network-manager-applet dnsmasq
   文件底部写入：
 
   ```
-     [archlinuxcn]
-     Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch 
-     Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch 
-     Server = https://mirrors.hit.edu.cn/archlinuxcn/$arch 
-     Server = https://repo.huaweicloud.com/archlinuxcn/$arch 
+  [archlinuxcn]
+  Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch 
+  Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch 
+  Server = https://mirrors.hit.edu.cn/archlinuxcn/$arch 
+  Server = https://repo.huaweicloud.com/archlinuxcn/$arch 
   ```
 
   同步数据库并安装archlinuxcn密钥
@@ -972,7 +973,7 @@ ibus-mozc是日语输入法
 - pacman
 
   ```
-  sudo pacman -S --needed mission-center gnome-text-editor gnome-disk-utility gnome-clocks gnome-weather gnome-calculator loupe snapshot baobab celluloid fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib decibels
+  sudo pacman -S --needed mission-center gnome-text-editor gnome-disk-utility gnome-clocks gnome-weather gnome-calculator loupe snapshot baobab celluloid fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib decibels wofi 
   ```
   ```
   #mission-center 类似win11的任务管理器
@@ -993,6 +994,7 @@ ibus-mozc是日语输入法
   #gst-plugin-pipewire gst-plugins-good是gnome截图工具自带的录屏，需登出一次
   #pacman-contrib 是pacman的一些小工具，比如checkupdates用来检查更新
   #decibels是音频播放器，我一般在网页上听音乐，所以就装个轻量化的，其实用celluloid也能放音频，但是这个软件可以显示波形，很酷。本地播放音乐的话推荐amberol。
+  #wofi 这是一个快捷搜索工具
   ```
   
 - 从aur安装常用软件
@@ -1023,7 +1025,7 @@ ibus-mozc是日语输入法
   这里都是些有趣或者实用的工具，可以从商店搜索安装，也可以用命令
 
   ```
-  flatpak install flathub be.alexandervanhee.gradia io.github.Predidit.Kazumi io.gitlab.theevilskeleton.Upscaler com.github.unrud.VideoDownloader io.github.ilya_zlobintsev.LACT xyz.ketok.Speedtest com.geeks3d.furmark com.rafaelmardojai.Blanket
+  flatpak install flathub be.alexandervanhee.gradia io.github.Predidit.Kazumi io.gitlab.theevilskeleton.Upscaler com.github.unrud.VideoDownloader io.github.ilya_zlobintsev.LACT xyz.ketok.Speedtest com.geeks3d.furmark com.rafaelmardojai.Blanket com.google.Chrome io.github.flattool.Warehouse com.github.tchx84.Flatseal
   ```
   ```
   gradia编辑截图
@@ -1034,14 +1036,17 @@ ibus-mozc是日语输入法
   speedtest 测试网速
   furmark 显卡烤鸡
   Blanket 白噪音播放器
+  chrome 浏览器。有些网站或者浏览器功能在firefox下无法正常运行，所以一个chromium的浏览器是必须的
+  Warehouse 用来管理flatpak的源、软件、属性、用户数据之类的
+  Flatseal 管理flatpak应用的权限、环境变量之类的
   ```
-
+  
   - gradia可以对截图进行一些简单的添加文字、马赛克、图表、背景之类的操作
-
+  
     使用方法：
-
+  
     设置自定义快捷键的时候命令写
-
+  
     ```
     flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
     ```
@@ -1050,7 +1055,7 @@ ibus-mozc是日语输入法
 
 - 方法一：配置文件
 
-  1. 编辑mpv配置文件
+  1. 编辑mpv配置文件（记得打开一次mpv生成目录）
 
   ```
   vim ~/.config/mpv/mpv.config
@@ -1215,7 +1220,6 @@ super+shift+A/D #将窗口左右移动工作区
 super+shift+Q/E #移动到左/右工作区
 ps：gnome默认super+滚轮上下可以左右切换工作区
 alt+tab #切换应用程序
-super+M #隐藏所有正常窗口
 alt+` #在应用程序的窗口之间切换窗口
 ```
 * 截图
@@ -1245,6 +1249,8 @@ super+T   ghostty
 ctrl+alt+S    missioncenter
 super+E   nautilus
 super+shift+S   flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
+super+R wofi --show drun
+super+M gnome-text-editor
 ```
 
 ## 功能性扩展
@@ -1478,7 +1484,7 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
 - blur my shell 
 
-  透明度美化
+  透明度美化。设置里激活在概览界面不禁用模糊
 
 - hide top bar 
 
@@ -1782,13 +1788,14 @@ nm-connection-editor
 
 3. [「Archlinux究极指南」从手动安装到显卡直通](https://www.bilibili.com/video/BV1L2gxzVEgs/?spm_id_from=333.1387.homepage.video_card.click&vd_source=65a8f230813d56660e48ae1afdfa4182)按照视频里kvm虚拟机的部分安装
 
-- 跳过联网
-  确保机器没有连接到网络，按下shift+f10 ，鼠标点选窗口，输入
+#### 跳过联网
+
+确保机器没有连接到网络，按下shift+f10 ，鼠标点选窗口，输入
 
 ```
 oobe\bypassnro
 ```
-* 和本机进行文件分享
+#### 和本机进行文件分享
 [如何在 Linux 主机和 KVM 中的 Windows 客户机之间共享文件夹 | Linux 中国 - 知乎](https://zhuanlan.zhihu.com/p/645234144)
 
 ```
@@ -1801,7 +1808,7 @@ oobe\bypassnro
 在虚拟机管理器内添加共享文件夹,粘贴刚才复制的路径，取个名字
 ```
 ```
-虚拟机内win11安装winFSP
+win11虚拟机内安装winFSP
 https://winfsp.dev/rel/
 ```
 ```
@@ -1831,7 +1838,7 @@ sudo vim /etc/modprobe.d/vfio.conf
 ```
 写入
 ```
-options vfio-pci ids=硬件id,硬件id
+options vfio-pci ids=10de:28e0,10de:22be （硬件id与硬件id之间用英文逗号隔开）
 ```
 - 编辑内核参数让vfio-pci抢先加载
 
@@ -1861,7 +1868,7 @@ sudo mkinitcpio -P
 - 安装和配置ovmf
 
    ```
-   sudo pacman -S edk2-ovmf
+   sudo pacman -S --needed edk2-ovmf
    ```
 
    编辑配置文件
@@ -1899,6 +1906,146 @@ sudo mkinitcpio -P
   ```
 
   重启
+
+
+## 远程桌面
+三种方案，parsec、sunshineo+moonlight、looking glass，配置难度和最终效果逐级上升
+
+### parsec
+- windows上浏览器搜索安装
+- linux上安装
+```
+yay -S parsec-bin
+```
+- 登录相同账号
+
+
+### sunshine+moonlight
+[GitHub - LizardByte/Sunshine: Self-hosted game stream host for Moonlight.](https://github.com/LizardByte/Sunshine)
+
+虚拟机win11内安装sunshine
+
+```
+https://github.com/LizardByte/Sunshine
+```
+安装虚拟显示器（parsec-vdd很好用但是有bug,重启会重置）
+```
+https://github.com/VirtualDrivers/Virtual-Display-Driver
+```
+客机安装moonlight
+https://moonlight-stream.org/
+
+```
+sudo pacman -S moonlight-qt
+```
+sunshine在web设置pin码添加设备之后就可以连接了。
+
+### looking glass
+
+[Installation — Looking Glass B7 documentation](https://looking-glass.io/docs/B7/install/)
+
+[PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF)
+
+视频教程：[两分钟学会looking glass使用方法_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1w6tDzKEn1?spm_id_from=333.788.videopod.sections&vd_source=65a8f230813d56660e48ae1afdfa4182)
+
+looking glass通过共享内存实现屏幕分享，也需要安装[Virtual-Display-Driver](https://github.com/VirtualDrivers/Virtual-Display-Driver)
+
+- 计算需要的共享内存大小
+具体可以看官方档案，我是2560x1440@180hz 非HDR，需要大小是64M
+- 设置共享内存设备
+打开virt-manager，点击编辑 > 首选项，勾选启用xml编辑。
+打开虚拟机配置，找到xml底部的  ```</devices>```，在  ```</devices>```的上面添加设备，size记得该成自己需要的，就是这种感觉：
+```
+<devices>
+    ...
+  <shmem name='looking-glass'>
+    <model type='ivshmem-plain'/>
+    <size unit='M'>64</size> 
+  </shmem>
+</devices>
+```
+64改为自己需要的大小
+
+- 开启终端，添加kvm组，记得重启
+```
+sudo gpasswd -a $USER kvm 
+```
+
+添加自己到kvm组里面， 需要重启，重启后用groups确认自己的组
+
+- 每次开机检查文件，不存在的话创建并编辑权限
+
+```
+sudo vim /etc/tmpfiles.d/10-looking-glass.conf
+```
+写入（shorin改为自己的用户名）：
+```
+f /dev/shm/looking-glass 0660 shorin kvm -
+```
+```
+f 代表定文件规则
+/dev/shm/looking-glass是共享内存文件的路径
+0660 设置所有者和所属组的读写权限
+user 设置所有者
+kvm 设置所属组
+- 代表保留时间永久，不进行清理
+```
+- 无须重启，现在手动创建文件
+
+```
+sudo systemd-tmpfiles --create /etc/tmpfiles.d/10-looking-glass.conf
+```
+
+- 回到虚拟机设置
+  确认有spice显示协议
+  显卡设置为none
+  添加virtio键盘和virtio鼠标（要在xml里面更改bus=“ps2”为bus=“virtio”）
+  确认有spice信道设备，没有的话添加，设备类型为spice，开启剪贴板同步
+  确认有ich9声卡，点击概况，去到xml底部，在里面找到下面这段，把type从none 改成spice，开启声音传输
+
+```
+<audio id='1' type='spice'/>
+```
+
+- 开启虚拟机，安装looking glass 服务端
+
+ [Looking Glass - Download Looking Glass](https://looking-glass.io/downloads)
+
+浏览器搜索 looking glass，点击download，下载bleeding-edge的windows host binary，解压后双击exe安装
+
+- linux安装客户端
+
+ 服务端和客户端的版本要匹配，最容易出错的就是这个地方。如果出现问题可以去aur搜索一下looking glass的包，多试一试，或者从[GitHub - gnif/LookingGlass: An extremely low latency KVMFR (KVM FrameRelay) implementation for guests with VGA PCI Passthrough.](https://github.com/gnif/LookingGlass)自己编译。
+
+```
+yay -S looking-glass-git
+```
+- 桌面快捷方式打开lookingglass即可连接
+- 使用技巧
+
+具体可以看这个页面：https://looking-glass.io/docs/B6-rc1/usage/
+
+开启looking-glass后使用scroll lock键有很多功能，包括最重要的键鼠捕获。长按会显示可用功能的列表.如果你的键盘没有scroll lock键，可以修改配置文件更改。
+
+```
+ vim ~/.config/looking-glass/client.ini
+```
+ 写入： 
+ ```
+[input]
+escapeKey=KEY_F9
+ ```
+把F9换成自己想要的键，可用的键可以在终端输入 looking-glass-client -m KEY 查看
+
+我是用gnome系统快捷键切换全屏和窗口的，你也可以选择设置以全屏模式开启，还是刚才那个配置文件，写入：
+
+```
+[win]
+fullScreen = yes 
+```
+
+- 关于虚拟机性能优化，见[虚拟机性能优化](#虚拟机性能优化)
+- 推荐： 配置完looking glass之后克隆虚拟机，用克隆机而不是初号机，好处不用多说了吧👆🤓
 
 ## 虚拟机性能优化
 
@@ -2161,147 +2308,6 @@ reboot
     <timer name="tsc" present="yes" mode="native"/>
   </clock>
 ```
-
-
-## 远程桌面
-三种方案，parsec、sunshineo+moonlight、looking glass，配置难度和最终效果逐级上升
-
-### parsec
-- windows上浏览器搜索安装
-- linux上安装
-```
-yay -S parsec-bin
-```
-- 登录相同账号
-
-
-### sunshine+moonlight
-[GitHub - LizardByte/Sunshine: Self-hosted game stream host for Moonlight.](https://github.com/LizardByte/Sunshine)
-
-虚拟机win11内安装sunshine
-
-```
-https://github.com/LizardByte/Sunshine
-```
-安装虚拟显示器（parsec-vdd很好用但是有bug,重启会重置）
-```
-https://github.com/VirtualDrivers/Virtual-Display-Driver
-```
-客机安装moonlight
-https://moonlight-stream.org/
-
-```
-sudo pacman -S moonlight-qt
-```
-sunshine在web设置pin码添加设备之后就可以连接了。
-
-### looking glass
-
-[Installation — Looking Glass B7 documentation](https://looking-glass.io/docs/B7/install/)
-
-[PCI passthrough via OVMF - ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF)
-
-视频教程：[两分钟学会looking glass使用方法_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1w6tDzKEn1?spm_id_from=333.788.videopod.sections&vd_source=65a8f230813d56660e48ae1afdfa4182)
-
-looking glass通过共享内存实现屏幕分享，也需要安装[Virtual-Display-Driver](https://github.com/VirtualDrivers/Virtual-Display-Driver)
-
-- 计算需要的共享内存大小
-具体可以看官方档案，我是2560x1440@180hz 非HDR，需要大小是64M
-- 设置共享内存设备
-打开virt-manager，点击编辑 > 首选项，勾选启用xml编辑。
-打开虚拟机配置，找到xml底部的  ```</devices>```，在  ```</devices>```的上面添加设备，size记得该成自己需要的，就是这种感觉：
-```
-<devices>
-    ...
-  <shmem name='looking-glass'>
-    <model type='ivshmem-plain'/>
-    <size unit='M'>64</size> 
-  </shmem>
-</devices>
-```
-64改为自己需要的大小
-
-- 开启终端，添加kvm组，记得重启
-```
-sudo gpasswd -a $USER kvm 
-```
-
-添加自己到kvm组里面， 需要重启，重启后用groups确认自己的组
-
-- 每次开机检查文件，不存在的话创建并编辑权限
-
-```
-sudo vim /etc/tmpfiles.d/10-looking-glass.conf
-```
-写入（shorin改为自己的用户名）：
-```
-f /dev/shm/looking-glass 0660 shorin kvm -
-```
-```
-f 代表定文件规则
-/dev/shm/looking-glass是共享内存文件的路径
-0660 设置所有者和所属组的读写权限
-user 设置所有者
-kvm 设置所属组
-- 代表保留时间永久，不进行清理
-```
-- 无须重启，现在手动创建文件
-
-```
-sudo systemd-tmpfiles --create /etc/tmpfiles.d/10-looking-glass.conf
-```
-
-- 回到虚拟机设置
-  确认有spice显示协议
-  显卡设置为none
-  添加virtio键盘和virtio鼠标（要在xml里面更改bus=“ps2”为bus=“virtio”）
-  确认有spice信道设备，没有的话添加，设备类型为spice，开启剪贴板同步
-  确认有ich9声卡，点击概况，去到xml底部，在里面找到下面这段，把type从none 改成spice，开启声音传输
-
-```
-<audio id='1' type='spice'/>
-```
-
-- 开启虚拟机，安装looking glass 服务端
-
- [Looking Glass - Download Looking Glass](https://looking-glass.io/downloads)
-
-浏览器搜索 looking glass，点击download，下载bleeding-edge的windows host binary，解压后双击exe安装
-
-- linux安装客户端
-
- 服务端和客户端的版本要匹配，最容易出错的就是这个地方。如果出现问题可以去aur搜索一下looking glass的包，多试一试，或者从[GitHub - gnif/LookingGlass: An extremely low latency KVMFR (KVM FrameRelay) implementation for guests with VGA PCI Passthrough.](https://github.com/gnif/LookingGlass)自己编译。
-
-```
-yay -S looking-glass-git
-```
-- 桌面快捷方式打开lookingglass即可连接
-- 使用技巧
-
-具体可以看这个页面：https://looking-glass.io/docs/B6-rc1/usage/
-
-开启looking-glass后使用scroll lock键有很多功能，包括最重要的键鼠捕获。长按会显示可用功能的列表.如果你的键盘没有scroll lock键，可以修改配置文件更改。
-
-```
- vim ~/.config/looking-glass/client.ini
-```
- 写入： 
- ```
-[input]
-escapeKey=KEY_F9
- ```
-把F9换成自己想要的键，可用的键可以在终端输入 looking-glass-client -m KEY 查看
-
-我是用gnome系统快捷键切换全屏和窗口的，你也可以选择设置以全屏模式开启，还是刚才那个配置文件，写入：
-
-```
-[win]
-fullScreen = yes 
-```
-
-- 关于虚拟机性能优化，见[虚拟机性能优化](#虚拟机性能优化)
-- 推荐： 配置完looking glass之后克隆虚拟机，用克隆机而不是初号机，好处不用多说了吧👆🤓
-
 
 ---
 
@@ -2680,7 +2686,7 @@ sudo vim  /etc/systemd/zram-generator.conf
 ```
 ```
 [zram0]
-zram-size = "ram*0.5" #设置zram大小，可以设置为内存（ram）的3倍，保守是一半
+zram-size = "ram*3" #设置zram大小，可以设置为内存（ram）的3倍，保守是一半
 compression-algorithm = zstd #重视cpu开销和速度选择lz4
 ```
 3. 禁用zswap
