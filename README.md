@@ -399,19 +399,19 @@ enbale代表开机自启
 
 #### 连接wifi
 
-- nmcli
-
-```
-nmcli dev wifi connect <wifiname> password <password>
-```
-
-- nmtui
+- 方法一：nmtui
 
 ```
 nmtui开启工具
 选择activate a connection
 选择自己的wifi，回车，，输入密码，回车，esc退出软件
 clear清屏，或者ctrl+L清屏
+```
+
+- 方法二：nmcli
+
+```
+nmcli dev wifi connect <wifiname> password <password>
 ```
 
 - 确认网络连接
@@ -429,7 +429,7 @@ pacman -S fastfetch lolcat cmatrix
 
 使用示例： fastfetch | lolcat，竖线代表把左边程序的输出结果输入到右边的程序里。
 
-cmatrix是代码雨，输入cmatris回车运行。
+cmatrix是代码雨，输入cmatrix回车运行。
 
 接下来看[配置系统](#配置系统)
 
@@ -438,7 +438,7 @@ cmatrix是代码雨，输入cmatris回车运行。
 
 
 ## 脚本安装
-
+（archinstall 更新了，有一些小变化，此处待更新……）
 ### 确认网络连接
 - ip a 查看网络连接
 - ping 一个网址确认网络正常
