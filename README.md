@@ -981,7 +981,7 @@ ibus-mozc是日语输入法
   ```
   ```
   mission-center 类似win11的任务管理器
-  gnome-text-ditor记事本
+  gnome-text-editor记事本
   gnome-disk-utility磁盘管理器
   gnome-font-viewer 方便安装和查看字体
   gnome-clocks时钟工具，可以设置闹钟和计时
