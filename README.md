@@ -24,6 +24,8 @@
 2025.8.16 新增蓝牙配置、wps中文语言包、常用办公字体相关内容
 2025.8.20 新增swap大小参考、脚本安装后的双系统配置、星火应用商店、更改gnome为windows布局相关内容；新增小技巧章节；优化了排版；修复了若干错误
 2025.8.27 新增更换CachyOS源相关内容
+2025.8.31 新增专业软件替代品一栏
+2025.9.2  附录新增vmware相关内容
 ```
 
 
@@ -40,6 +42,7 @@
 11. [性能优化](#性能优化)
 12. [删除linux](#删除linux)
 13. [小技巧](#小技巧)
+13. [专业软件平替](#专业软件平替)
 14. [issues](#issues)
 15. [附录](#附录)
 
@@ -682,14 +685,14 @@ systemctl enable gdm
 
 ### 检查头文件
 ```
-pacman -S linux-headers
+sudo pacman -S linux-headers
 ```
 linux替换为自己的内核，比如zen内核是linux-zen-headers
 
 ### 安装显卡驱动 
 
 ```
-pacman -S nvidia-open nvidia-utils lib32-nvidia-utils
+sudo pacman -S nvidia-open nvidia-utils lib32-nvidia-utils
 ```
 lib32-nvidai-utils玩游戏要用。
 
@@ -900,7 +903,7 @@ yay是aur助手，可以从aur安装软件（paru也是一个aur助手，但是�
 
 参考：[Rime - Arch Linux 中文维基](https://wiki.archlinuxcn.org/zh-hant/Rime) | [可选配置（基础篇） | archlinux 简明指南](https://arch.icekylin.online/guide/advanced/optional-cfg-1#%F0%9F%8D%80%EF%B8%8F-%E8%BE%93%E5%85%A5%E6%B3%95) | [RIME · GitHub](https://github.com/rime)
 
-ibus输入法在gnome的兼容性极佳，无须配置环境变量即可使用，rime可以解决ibus-libpinyin词库垃圾的问题，扩展可以解决ibus自定义的问题，故弃用fcitx5。如果一定要使用fcitx5的话，看附录的[fcitx5-rime 雾凇拼音](#fcitx5-rime 雾凇拼音)
+ibus输入法在gnome的兼容性极佳，无须配置环境变量即可使用，rime可以解决ibus-libpinyin词库垃圾的问题，扩展可以解决ibus自定义的问题，故弃用fcitx5。如果一定要使用fcitx5的话，看附录的[fcitx5](#fcitx5)
 
 1. 安装ibus-rime
 
@@ -1535,6 +1538,10 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
    - 可选：just perfection
 
      功能强大的自定义扩展，可以设置gnome各个元素的开关。不过根据gnome版本的不同能设置的选项会有所不同。
+     
+   - 可选：用dash to panel 替换app icons taskbar
+
+     dash to panel设置更简单，但没有app icons taskbar好看
 
 2. 修改扩展的设置
 
@@ -2895,9 +2902,27 @@ time firefox
 
 ---
 
+# 专业软件平替
 
+## 修图
 
+photopea
 
+canva
+
+gimp
+
+krita
+
+## 视频剪辑
+
+达芬奇
+
+kdenlive
+
+shotcut
+
+以及各类线上剪辑网站，比如flixier
 
 # issues
 
@@ -3054,7 +3079,7 @@ sudo systemctl restart grub-btrfsd.service
 sudo sed -i -E 's/(subvolid=[0-9]+,)|(,subvolid=[0-9]+)//g' /etc/fstab
 ```
 
-## fcitx5-rime 雾凇拼音
+## fcitx5
 
 （ 因为ibus-rime的表现优于fcitx5-rime，扩展解决了ibus的自定义问题，故弃用。）
 
@@ -3316,10 +3341,36 @@ yay -S appimagelauncher
 - Quick Settings Audio Panel
 
   让你快捷地在右上角的面板里调整每个软件、网页的音频。quick settings tweaks扩展包含了这个功能，如果安装了就不要装这个啦。
+  
+- battery time
+
+  显示电量剩余可用时间
 
 ### 用archinstall安装gnome后的一些清理
 
 ```
-sudo pacman -Rns gnome-contacts gnome-maps gnome-music totem gnome-characters gnome-connections evince gnome-logs malcontent gnome-system-monitor gnome-console gnome-tour yelp simple-scan htop sushi gnome-user-docs epiphany
+sudo pacman -R gnome-contacts gnome-maps gnome-music totem gnome-characters gnome-connections evince gnome-logs malcontent gnome-system-monitor gnome-console gnome-tour yelp simple-scan htop sushi gnome-user-docs epiphany htop 
 ```
 
+## vmware
+
+1. 安装缺少的依赖
+
+```
+yay -S vmware-keymaps
+```
+
+2. 安装本体
+
+```
+yay -S vmware-workstation
+```
+
+3. 开启服务
+
+```
+sudo systemctl enable --now vmware-networks.service
+sudo systemctl enable --now vmware-usbarbitrator.service
+```
+
+4. 重启电脑
