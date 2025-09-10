@@ -26,24 +26,30 @@
 2025.8.27 新增更换CachyOS源相关内容
 2025.8.31 新增专业软件替代品一栏
 2025.9.2  附录新增vmware相关内容
+2025.9.6  找到了steam下载时无法正常调用cpu的元凶——btrfs写时复制
+2025.9.6  新增snapper快照相关内容
+2025.9.10 新增KDE桌面安装和美化教程
 ```
 
 
 1. [安装前的准备](#安装前的准备)
-2. [手动安装](#手动安装)
-3. [脚本安装](#脚本安装)
-4. [配置系统](#配置系统)
-5. [美化](#美化)
-6. [显卡切换和电源管理](#显卡切换)
-7. [KVM虚拟机](#KVM虚拟机)
-8. [显卡直通](#显卡直通)
-9. [虚拟机性能优化](#虚拟机性能优化)
-10. [在linux上玩游戏](#在linux上玩游戏)
-11. [性能优化](#性能优化)
-12. [删除linux](#删除linux)
-13. [小技巧](#小技巧)
-13. [专业软件平替](#专业软件平替)
-14. [issues](#issues)
+2. [手动安装系统](#手动安装)
+3. [脚本安装系统](#脚本安装)
+4. [配置系统（创建用户、显卡驱动）](#配置系统)
+5. [GNOME桌面安装](#GNOME)
+6. [GNOME美化](#GNOME美化)
+7. [KDE桌面安装](#KDE)
+8. [KDE系统设置和美化](#KDE系统设置和美化)
+9. [显卡切换](#显卡切换)
+10. [虚拟机](#虚拟机)
+11. [显卡直通](#显卡直通)
+12. [虚拟机性能优化](#KVM/QEMU虚拟机性能优化和伪装)
+13. [在linux上玩游戏](#在linux上玩游戏)
+14. [性能优化](#性能优化)
+15. [删除linux](#删除linux)
+16. [小技巧](#小技巧)
+17. [专业软件平替](#专业软件平替)
+18. [issues](#issues)
 15. [附录](#附录)
 
 ## vim基础操作
@@ -70,17 +76,31 @@ Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsU
 ```
 这条命令修改注册表把时间从硬件时间改为UTC时间。
 
-## 关于CachyOS
+## 开箱即用的基于arch发行版
 
-如果你设备较新且不要续航不要稳定只想要**极致的性能**，或者你又想用Arch又想**开箱即用**，那么我强烈建议安装CachyOS。它默认搭载了KDE桌面，如果你想用其他的可以自行选择。如果你不喜欢CachyOS对gnome的自定义设计，可以选择no desktop不安装桌面环境，然后按照本文的流程进行gnome的安装和配置。
+## EndeavourOS
+
+[Home - EndeavourOS](https://endeavouros.com/)
+
+仅帮你做好初期配置，提供了一些便利工具，没有对系统做调整。不过这个发行版把initramfs生成工具从mkinitcpio改成了dracut，本文中一切关于mkinitcpio的操作都不适用于dracut。dracut重视自动化和智能检测，提供更好的UKI（Unified Kernel Image）支持。mkinicpio更透明、可控，比dracut更符合arch的设计理念。
+
+### CachyOS
 
 [下载 — CachyOS --- Download — CachyOS](https://cachyos.org/download/)
 
+应该是最火的arch-based发行版，做了很多性能方面的优化。也把mkinitcpio改成了dracut，本文中关于mkinicpio的操作不适用于dracut。如果你不要续航不要稳定只想要**极致的性能**，那么建议安装CachyOS。它默认搭载了KDE桌面，如果你不喜欢CachyOS的桌面设计，可以选择no desktop不安装桌面环境，然后自己安装。
+
 PS：handheld是掌机版，类似steamdeck上的steamos，不过也可以当桌面用，因为是KDE桌面环境。
 
+## Garuda Linux
+
+[Garuda Linux | Downloads](https://garudalinux.org/editions)
+
+这个发行版真的超级漂亮，而且提供了超级方便的工具，只需要打打勾就能帮你把很多事情自动处理好。
 
 
-如果你想要完全精简的archlinux，或者想学习linux知识，或者设备老旧，或者不喜欢CachyOS，继续往下看。
+
+如果你想要完全精简的archlinux，或者想学习linux知识，继续往下看。
 
 ## 下载iso文件
 
@@ -105,8 +125,6 @@ windows系统内win+x键，选择磁盘管理。找到想安装archlinux的位�
 ventoy制作的系统盘可以存放多个系统镜像，推荐。
 
 ---
-
-
 
 
 
@@ -585,6 +603,18 @@ vim /etc/fstab
    :wq 冒号小写wq保存并退出
    ```
 
+5. 禁用watchdog
+
+   在GRUB_CMDLNE_LINUX_DEFAULT=""里面添加参数
+
+   ```
+   nowatchdog modprobe.blacklist=sp5100_tco
+   ```
+
+    intelcpu用户把sp5100_tco换成iTCO_wdt
+
+5. GRUB_DEFAULT=0改成saved，再取消GRUB_SAVEDEFAULT=true的注释。这一步是记住开机的选择。
+
 5. 生成grub的配置文件
 
    ```
@@ -597,15 +627,10 @@ vim /etc/fstab
 
 8. 更改bios启动项
 
----
-
-
-
-
-
 # 配置系统
 
 ## 创建普通用户
+
 没有普通用户无法登入桌面环境，有些软件会拒绝在root权限下运行，所以普通用户是必须的。
 
 (archinstall安装的可以跳过)
@@ -630,7 +655,7 @@ EDITOR=vim visudo
 ```
 %wheel ALL=（ALL：ALL） ALL
 ```
-### 开启32位源 (archinstall可以跳过)
+## 开启32位源
 
 32位源建议开启，因为steam需要，wine运行exe也需要
 
@@ -649,11 +674,75 @@ vim /etc/pacman.conf
 pacman -Sy
 ```
 
-## Gnome桌面环境
+## 中文字体
+
+```
+sudo pacman -S wqy-zenhei
+```
+
+## 显卡驱动和硬件编解码
+
+以4060和780m为例
+
+参考链接：[NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)、[AMDGPU](https://wiki.archlinux.org/title/AMDGPU)
+
+### 检查头文件
+
+```
+sudo pacman -S linux-headers
+```
+
+linux替换为自己的内核，比如zen内核是linux-zen-headers
+
+### 安装显卡驱动 
+
+- Nvidia
+
+  ```
+  sudo pacman -S nvidia-open nvidia-utils lib32-nvidia-utils
+  ```
+
+  显卡驱动的选择在[CodeNames · freedesktop.org](https://nouveau.freedesktop.org/CodeNames.html)这个页面搜索自己的显卡，看看对应的family是什么。然后在[NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)这个页面查找对应的显卡驱动。nv160family往后的显卡用nvidia-open，nv110到190如果nvidia-open表现不佳的话可以使用nvidia。nvidia-open是内核模块开源的驱动，不是完全的开源驱动。非stable内核要安装的驱动不一样，具体看wiki，例如zen内核装nvidia-open-dkms。
+
+- AMD
+
+  A卡不需要自己安装驱动，检查一下vulkan驱动就行
+
+  ```
+  sudo pacman -S --needed vulkan-radeon vulkan-mesa-layers
+  ```
+
+
+### 硬件编解码
+
+ - nvidia
+
+   ```
+   suodo pacman -S libva-nvidia-driver
+   ```
+
+* amd
+
+  已经安装
+
+* 重启激活显卡驱动和字体
+
+  ```
+  reboot 
+  ```
+
+## 桌面环境 
+
+### [KDE](#KDE)和[GNOME](#GNOME) 自己选择一个安装 点击即可跳转
+
+kde和gnome的区别可以自行去网上搜索
+
+##  GNOME
 
 ```
 pacman -S gnome-desktop gdm ghostty gnome-control-center gnome-software flatpak
 ```
+
 jack选择pipewire-jack
 
 ```
@@ -664,12 +753,12 @@ jack选择pipewire-jack
 #software和flatpak是软件商城
 #flatpak是flathub软件
 ```
+
 * 临时开启GDM
+
 ```
 systemctl start gdm 
 ```
-即使出了问题重启也能恢复，避免进不了tty的情况
-N卡如果不装驱动可能进不了桌面环境
 
 * 正常开启后设置gdm开机自启
 
@@ -677,177 +766,82 @@ N卡如果不装驱动可能进不了桌面环境
 systemctl enable gdm
 ```
 
-## 安装显卡驱动和硬件编解码
-
-我的配置是4060+7940h，所以以4060和780m为例子
-
-参考链接：[NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)、[AMDGPU](https://wiki.archlinux.org/title/AMDGPU)
-
-### 检查头文件
-```
-sudo pacman -S linux-headers
-```
-linux替换为自己的内核，比如zen内核是linux-zen-headers
-
-### 安装显卡驱动 
-
-```
-sudo pacman -S nvidia-open nvidia-utils lib32-nvidia-utils
-```
-lib32-nvidai-utils玩游戏要用。
-
-显卡驱动的选择在[CodeNames · freedesktop.org](https://nouveau.freedesktop.org/CodeNames.html)这个页面搜索自己的显卡，看看对应的family是什么。然后在[NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)这个页面查找对应的显卡驱动。nv160family往后的显卡用nvidia-open，nv110到190如果nvidia-open表现不佳的话可以使用nvidia。nvidia-open是内核模块开源的驱动，不是完全的开源驱动。
-
-非stable内核要安装的驱动不一样，具体看wiki，例如zen内核装nvidia-open-dkms。后续开启32位源之后如果需要用steam的话安装时选择lib32-nvidia开头的包。
-
-#### AMD显卡建议检查是否安装vulkan驱动
-```
-sudo pacman -S vulkan-radeon 
-```
-- 可选：混合模式软件还是跑在N卡上
-
-  参考链接：[gnome-shell uses dgpu instead of igpu : r/gnome](https://www.reddit.com/r/gnome/comments/1irvmki/gnomeshell_uses_dgpu_instead_of_igpu/)
-
-  检查有没有安装vulkan-mesa-layers
-
-  ```
-  sudo pacman -S vulkan-mesa-layers
-  ```
-
-
-### 硬件编解码
-
-- 可选：libva-utils包提供了测试硬件编解码的工具，比如vainfo命令可以显示当前硬件编解码支持
-
- - nvidia 4060
-```
-suodo pacman -S libva-nvidia-driver
-```
-- intel xe核显
-```
-sudo pacman -S intel-media-driver libva
-```
-* amd 780M
-开箱即用，不需要配置。出问题可以确认是否安装了libva-mesa-driver
-```
-sudo pacman -Q libva-mesa-driver
-```
-* 可选：设置环境变量（不需要手动设置，只在指定某块gpu时使用）
-```
-LIBVA_DRIVER_NAME=nvidia #nvidia
-LIBVA_DRIVER_NAME=radeonsi #amd
-```
-
-* 安装字体
-```
-sudo pacman -S wqy-zenhei noto-fonts noto-fonts-emoji
-```
-* 重启激活显卡驱动和字体
-```
-reboot 
-```
-
-## 可选：更换flatpak上海交大源
-
-国内可能连不上flatpak导致gnome的商店一直转圈圈，可以换国内flatpak源解决 
-
-```
-sudo flatpak remote-modify flathub --url=https://mirror.sjtu.edu.cn/flathub
-```
-
-
-## 生成home下目录（如果没有的话）
+### 生成home下目录（如果没有的话）
 
 ```
 xdg-user-dirs-update
 ```
 
-## 设置系统语言
+### 设置系统语言
 
 右键桌面选择setting，选择system，选择region&language
 
 如果是archinstall安装，这里只有英文选项，解决办法：
 
 * 本地化设置
+
 ```
 sudo vim /etc/locale.gen 
 ```
+
 ```
 取消zh_CN.UTF-8的注释
 ```
+
 ```
 sudo locale-gen
 ```
 
-## 删除或隐藏不必要的快捷方式
-
-- 方法一：pinapp
-
-  从应用商店搜索pinapp安装pins，图标是个图钉钉在蓝色的板子上。
-
-  也可以用命令安装，更方便：
-
-  ```
-  flatpak install flathub io.github.fabrialberio.pinapp
-  ```
-
-  选择想隐藏的图标激活invisible即可
-
-- 方法二：menulibre
-
-  使用pacman安装
-
-  ```
-  sudo pacman -S menulibre
-  ```
-
-  选择想隐藏的图标激活invisible，然后保存即可
-
-- 方法三：gnome扩展
-
-  商店搜索extension，安装扩展管理器。然后安装apphider扩展。就可以右键概览里的快捷方式隐藏了。
-
-## 安装声音固件和声音服务
+### 安装声音固件和声音服务
 
 - 安装声音固件
 
 ```
 sudo pacman -S --needed sof-firmware alsa-firmware alsa-ucm-conf
 ```
+
 - 安装声音服务
+
 ```
 sudo pacman -S --needed pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber
 ```
+
 * 启用服务
+
 ```
 systemctl --user enable --now pipewire pipewire-pulse wireplumber
 ```
+
 * 可选：安装GUI（图形界面管理工具）
+
 ```
 sudo pacman -S pavucontrol 
 ```
 
-## 启用蓝牙
+### 启用蓝牙
 
 ```
 sudo pacman -S --needed bluez
 ```
+
 ```
 sudo systemctl enable --now bluetooth
 ```
 
-## 安装高级网络配置工具nm-connection-editor
+### 安装高级网络配置工具nm-connection-editor
 
 ```
 sudo pacman -S --needed network-manager-applet dnsmasq
 ```
+
 * 设置跃点
+
 ```
 启动安装的软件或终端输入nm-connection-editor
 跃点需手动设置为100,默认的-999会导致网络速率异常
 ```
 
-## 安装yay
+### 安装yay
 
 yay是aur助手，可以从aur安装软件（paru也是一个aur助手，但是会出现有些软件无法安装的情况，所以建议还是用yay）
 
@@ -886,30 +880,34 @@ yay是aur助手，可以从aur安装软件（paru也是一个aur助手，但是�
   ```
   sudo pacman -S git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
   ```
-  
+
   这条命令有四步，每步之间用&&隔开。第一步用pacman安装git和base-devel。这是git管理工具和编译软件需要的包。第二步git clone把链接里的文件下载到本地。第三步cd 进入yay目录。第四步makepkg编译包。
-  
+
 - 方法三：从cachyos源安装
 
   见[更换CachyOS源](#更换CachyOS源)
-  
+
   ```
   sudo pacman -S yay
   ```
 
-## 安装输入法
+### 安装输入法
 
-### ibus-rime
+[ibus](#ibus-rime)和[fcitx5](#fcitx5)，按喜好选择。fcitx5跟gnome的兼容性一般。
+
+#### ibus-rime
 
 参考：[Rime - Arch Linux 中文维基](https://wiki.archlinuxcn.org/zh-hant/Rime) | [可选配置（基础篇） | archlinux 简明指南](https://arch.icekylin.online/guide/advanced/optional-cfg-1#%F0%9F%8D%80%EF%B8%8F-%E8%BE%93%E5%85%A5%E6%B3%95) | [RIME · GitHub](https://github.com/rime)
 
-ibus输入法在gnome的兼容性极佳，无须配置环境变量即可使用，rime可以解决ibus-libpinyin词库垃圾的问题，扩展可以解决ibus自定义的问题，故弃用fcitx5。如果一定要使用fcitx5的话，看附录的[fcitx5](#fcitx5)
+已知问题：amber-ce-bookworm（后面星火应用商店的部分会用到）里安装的qt应用无法使用ibus输入法
 
 1. 安装ibus-rime
 
 ```
-yay -S ibus ibus-rime rime-ice-pinyin-git ibus-mozc
+sudo pacman -S ibus ibus-rime rime-ice-pinyin-git 
+yay -S ibus-mozc
 ```
+
 ```
 ibus是ibus输入法的基本包
 ibus-rime是中州韵
@@ -933,22 +931,9 @@ ibus-mozc是日语输入法
      __include: rime_ice_suggestion:/
    ```
 
-   可选：添加萌娘百科词库
+   默认使用super+空格切换输入法，可以在设置里修改。第一次切换至rime输入法需要等待部署完成。
 
-   ```
-   yay -S rime-pinyin-moegirl
-   ```
-   ```
-   sudo vim /usr/share/rime-data/rime_ice.dict.yaml 
-   ```
-   按照指引在合适的位置添加
-   ```
-   - moegirl
-   ```
-
-4. 默认使用super+空格切换输入法，可以在设置里修改。第一次切换至rime输入法需要等待部署完成。
-
-5. 安装扩展自定义ibus
+4. 安装扩展自定义ibus
 
    商店搜索extension安装蓝色的扩展管理器，或者用命令安装
 
@@ -959,19 +944,118 @@ ibus-mozc是日语输入法
    安装两个扩展：
 
    - ibus tweaker
-   
+
      设置里激活“隐藏页按钮”
-   
+
    - Customize IBus
-   
+
      需要登出一次
-     
-     设置里，常规页面取消“候选框调页按钮”。主题页面可导入css自定义主题，[GitHub - openSUSE/IBus-Theme-Hub: This is the hub for IBus theme that can be used by Customize IBus GNOME Shell Extension.(可被自定义IBus GNOME Shell 扩展使用的IBus主题集合)](https://github.com/openSUSE/IBus-Theme-Hub)，这个网站有一些预设主题。背景页面可以自定义背景（这个无敌了，什么美化都比不过gtk默认主题加一张合适的自定义背景）。其他的选项就自己探索吧。
+
+     设置里，常规页面取消“候选框调页按钮”。主题页面可导入css自定义主题，[GitHub - openSUSE/IBus-Theme-Hub: This is the hub for IBus theme that can be used by Customize IBus GNOME Shell Extension.(可被自定义IBus GNOME Shell 扩展使用的IBus主题集合)](https://github.com/openSUSE/IBus-Theme-Hub)，这个网站有一些预设主题。背景页面可以自定义背景（这个无敌了，什么美化都比不过一张合适的自定义背景）。其他的选项就自己探索吧。
+
+- 删除ibus输入法
+
+1. 系统设置>键盘 移除输入源
+
+2. 删除包
+
+   ```
+   yay -Rns ibus-mozc ibus ibus-rime rime-ice-pinyin-git
+   ```
+
+3. 删除残留
+
+   ```
+   sudo rm -rfv ~/.config/ibus /usr/share/rime-data
+   ```
+
+4. 登出
+
+#### fcitx5
+
+已知问题：在某些应用里面会吞字，或者某个按键没能被输入法获取直接变成英文字母输入。
+
+```
+sudo pacman -S fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
+```
+
+```
+fcitx5-im 包含了fcitx5的基本包
+fcitx5-mozc是开源谷歌日语输入法
+fcitx5-rime是输入法引擎
+rime-ice-pinyin-git是雾凇拼音输入法
+```
+
+- 打开fcitx 5 configuration添加rime和mozc输入法，没有的话登出一次
+
+- 编辑rime的配置文件设置输入法方案为雾凇拼音，如果没有文件夹和文件的话自己创建文件夹，然后编辑配置文件
+
+```
+vim ~/.local/share/fcitx5/rime/default.custom.yaml 
+```
+
+```
+写入：
+
+patch:
+  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
+  __include: rime_ice_suggestion:/
+```
+
+- 商店搜索extension，安装蓝色的extensionmanager
+
+- 安装扩展：input method panel
+  https://extensions.gnome.org/extension/261/kimpanel/
+
+- 编辑环境变量
+
+```
+sudo vim /etc/environment
+```
+
+```
+XIM="fcitx" #解决wechat用不了输入法的问题
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
+```
 
 
-## 自定义安装软件
 
-### 我会安装的软件
+- 美化
+
+1. 关闭“Input Method Panel”扩展
+
+2. 浏览器搜索fcitx5 themes，下载自己喜欢的，存放路径为：~/.local/share/fcitx5/themes
+
+3. 打开fcitx配置 选择附组件，点击“经典用户界面”右边的扳手螺丝刀图标，设置主题。这里有一大堆自定义的选项，自己研究吧。
+
+   
+
+- 卸载fcitx5
+
+1. 删除包
+
+   ```
+   sudo pacman -Rns fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
+   ```
+
+2. 删除残留文件
+
+   ```
+   sudo rm -rfv ~/.config/fcitx5 ~/.local/fcitx5
+   ```
+
+3. 清理环境变量
+
+   ```
+   sudo vim /etc/environment
+   ```
+
+4. 如果之前禁用过系统设置里的打字快捷键记得恢复
+
+### 自定义安装软件
 
 这是我会安装的，你可以按自己的需求安装
 
@@ -982,6 +1066,7 @@ ibus-mozc是日语输入法
   ```
   sudo pacman -S --needed mission-center gnome-text-editor gnome-disk-utility gnome-font-viewer gnome-clocks gnome-weather gnome-calculator loupe snapshot baobab celluloid fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib decibels wofi gnome-font-viewer
   ```
+
   ```
   mission-center 类似win11的任务管理器
   gnome-text-ditor记事本
@@ -1004,7 +1089,7 @@ ibus-mozc是日语输入法
   decibels是音频播放器，我一般在网页上听音乐，所以就装个轻量化的。其实用celluloid也能放音频，但是这个软件可以显示波形，很酷。本地播放音乐的话推荐amberol。
   #wofi 这是一个快捷搜索工具
   ```
-  
+
 - 从aur安装常用软件
 
   [WPS Office - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/WPS_Office)
@@ -1012,6 +1097,7 @@ ibus-mozc是日语输入法
   ```
   yay -S linuxqq-appimage wechat-appimage wps-office-cn wps-office-mui-zh-cn typora-free
   ```
+
   ```
   linuxqq-appimage是appimgae版qq
   wechat-appimage是appimage版微信
@@ -1028,13 +1114,14 @@ ibus-mozc是日语输入法
     fc-cache --force
     ```
 
-- flathub
+- flatpak
 
   这里都是些有趣或者实用的工具，可以从商店搜索安装，也可以用命令
 
   ```
-  flatpak install flathub be.alexandervanhee.gradia io.github.Predidit.Kazumi io.gitlab.theevilskeleton.Upscaler com.github.unrud.VideoDownloader io.github.ilya_zlobintsev.LACT xyz.ketok.Speedtest com.geeks3d.furmark com.rafaelmardojai.Blanket com.google.Chrome io.github.flattool.Warehouse com.github.tchx84.Flatseal
+  flatpak install flathub be.alexandervanhee.gradia io.github.Predidit.Kazumi io.gitlab.theevilskeleton.Upscaler com.github.unrud.VideoDownloader io.github.ilya_zlobintsev.LACT xyz.ketok.Speedtest com.geeks3d.furmark com.google.Chrome io.github.flattool.Warehouse com.github.tchx84.Flatseal
   ```
+
   ```
   gradia编辑截图
   kazumi追番
@@ -1043,21 +1130,26 @@ ibus-mozc是日语输入法
   LACT 显卡超频、限制功率、风扇控制等等
   speedtest 测试网速
   furmark 显卡烤鸡
-  Blanket 白噪音播放器
   chrome 浏览器。有些网站或者浏览器功能在firefox下无法正常运行，所以装一个chromium的浏览器做备用
   Warehouse 用来管理flatpak的源、软件、属性、用户数据之类的
   Flatseal 管理flatpak应用的权限、环境变量之类的
   ```
-  
+
   - gradia可以对截图进行一些简单的添加文字、马赛克、图表、背景之类的操作
-  
+
     使用方法：
-  
+
     设置自定义快捷键的时候命令写
-  
+
     ```
     flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
     ```
+
+- 如果flatpak没速度或者加载不出来的话更换flatpak国内源，这里举例的是上交大的
+
+  ```
+  sudo flatpak remote-modify flathub --url=https://mirror.sjtu.edu.cn/flathub
+  ```
 
 #### 视频播放器开启硬件编解码
 
@@ -1068,8 +1160,9 @@ ibus-mozc是日语输入法
   ```
   vim ~/.config/mpv/mpv.config
   ```
-  
+
   写入：
+
   ```
   #使用vulkan后端
   gpu-api=vulkan
@@ -1087,20 +1180,52 @@ ibus-mozc是日语输入法
   hwdec=yes
   ```
 
-## 星火应用商店（国产系统的应用商店）
+### 删除或隐藏不必要的快捷方式
+
+- 方法一：pinapp
+
+  从应用商店搜索pinapp安装pins，图标是个图钉钉在蓝色的板子上。
+
+  也可以用命令安装，更方便：
+
+  ```
+  flatpak install flathub io.github.fabrialberio.pinapp
+  ```
+
+  选择想隐藏的图标激活invisible即可
+
+- 方法二：menulibre
+
+  使用pacman安装
+
+  ```
+  sudo pacman -S menulibre
+  ```
+
+  选择想隐藏的图标激活invisible，然后保存即可
+
+- 方法三：gnome扩展
+
+  商店搜索extension，安装扩展管理器。然后安装apphider扩展。就可以右键概览里的快捷方式隐藏了。
+
+### amber-ce和星火应用商店（国产商店）
+
+[Amber CE: 琥珀兼容环境：一款Bubblewrap容器，极轻量系统容器](https://gitee.com/amber-ce)
 
 [amber-ce-bookworm: 使用bwrap的Debian 12容器](https://gitee.com/amber-ce/amber-ce-bookworm)
 
 [Spark Store](https://www.spark-app.store/)
 
+2025.9.7已知问题：ibus输入法只能在gtk应用中使用，qt应用中无法使用。
+
 由于特殊国情，星火应用商店里的应用可能比aur上的都好用，建议安装。
 
-1. 安装ace bookworm
+1. 安装ace容器
 
-   这是一个极其轻量的debian容器，系统占用可以忽略不计。
+   这是一个极其轻量的debian容器，系统占用可以忽略不计。trixie是debian13，bookworm是debian12
 
    ```
-   yay -S amber-ce-bookworm
+   yay -S amber-ce-trixie
    ```
 
 2. 安装完成后重启电脑
@@ -1109,45 +1234,76 @@ ibus-mozc是日语输入法
 
    [Spark Store](https://www.spark-app.store/)
 
-4. 打开ace booworm（蓝色图标）
+4. 打开ace（蓝色图标）
 
 5. 安装星火应用商店
 
    ```
    sudo apt install /home/shorin/Downloads/spark-store_4.8.0_amd64.
    ```
+
    ```
    apt是debian的包管理器
    install代表安装
    后面指定了安装包的绝对路径，可以手动输入，也可以把安装包拖拽进终端里输入路径
    ```
 
-6. 之后正常使用就可以了，什么flameshot之类没法在gnome下面正常使用的软件也可以正常使用。
+#### 启用输入法
+
+- ibus
+
+  仅gtk应用可用，解决办法暂时未知
+
+- fcitx5
+
+  ```
+  sudo apt install fcitx5-frontend-gtk2 fcitx5-frontend-gtk3 fcitx5-frontend-gtk4 fcitx5-frontend-qt5 fcitx5-frontend-qt6
+  ```
 
 #### 卸载
 
-只需要删除ace bookworm就可以了，这是个容器，删除容器之后里面的所有东西都不会留下。
+使用ace bookworm软件卸载器卸载软件，或者sudo apt remove 【包名】，或者直接删除整个容器，删除容器之后里面的所有东西都不会留下。
 
 ```
-yay -Rns amber-ce-bookworm
+yay -Rns amber-ce-trixie
 ```
 
-## 快照
+### 快照
 
 **快照相当于存档，每次做自己不了解的事情之前都存个档**
 
-#### ⚠️**！！！警告！！！timeshitf里删除已创建快照必须一个一个删除，否则大概率崩盘。**
+timeshift操作简单，但是速度很慢，建议用snapper
 
-1. 安装timeshift
-
-```
-sudo pacman -S timeshift 
-```
-2. 开启自动备份服务
+#### 方法一：snapper
 
 ```
-sudo systemctl enable --now cronie.service 
+sudo pacman -S snapper snap-pac btrfs-assistant
 ```
+
+```
+snapper 是创建快照的主要程序
+snap-pac 是利用钩子在进行一些pacman命令的时候自动创建快照
+btrfs-assistant 是图形化管理btrfs和快照的软件
+```
+
+- 自动生成快照启动项
+
+```
+sudo pacman -S grub-btrfs inotify-tools
+```
+
+```
+sudo systemctl enable --now grub-btrfsd
+```
+
+##### 具体使用方法
+
+打开btrfs assistant，切换到snapper settings页面。我们创建子卷的时候创建了一个@（root）子卷和一个@home（home）子卷，所以需要两个config（配置）。创建一个root配置，再创建一个home配置。然后到snapper页面下的New/Delete页面就可以新建和管理快照了，Browse/Restore页面选中快照后点restore可以恢复到那个快照的状态。如果你要同时快照root和home的话就分别创建一个root快照和home快照，恢复的时候各自恢复就行了。
+
+#### 方法二：[timeshift](#timeshift)
+
+我已弃用，有需要的可以看附录。
+
 ### 关于滚挂和良好的系统使用习惯
 
 - 滚挂
@@ -1164,40 +1320,43 @@ sudo systemctl enable --now cronie.service
 
   2. **明白自己的行为会造成怎样的后果，做不了解的事情前创建快照**
 
-### 关于创建快照时自动创建启动项
-
-意义不大，我已经弃用。想配置的看[创建快照时自动生成快照启动项](#创建快照时自动生成快照启动项)
-
-## open in any terminal
+### open in any terminal
 
 [GitHub - Stunkymonkey/nautilus-open-any-terminal](https://github.com/Stunkymonkey/nautilus-open-any-terminal)
 
 这是一个在文件管理器“右键在此处打开终端”的功能
 
 - 如果用的是ghostty
+
 ```
 sudo pacman -S nautilus-python
 ```
+
 - 其他终端仿真器
+
 ```
 yay -S nautilus-open-any-terminal 
 ```
+
 ```
 sudo glib-compile-schemas /usr/share/glib-2.0/schemas 
 ```
+
 ```
 sudo pacman -S dconf-editor
 ```
+
 ```
 修改配置，路径为/com/github/stunkymonkey/nautilus-open-any-terminal
 ```
+
 重载nautilus
 
 ```
 nautilus -q 
 ```
 
-## 可变刷新率和分数缩放
+### 可变刷新率和分数缩放
 
 商店安装refine修改
 
@@ -1205,7 +1364,8 @@ nautilus -q
 flatpak install flathub page.tesk.Refine
 ```
 
-## 配置系统快捷键
+### 配置系统快捷键
+
 - 可选：交换大写锁定键和esc键
 
   安装gnome-tweaks
@@ -1216,8 +1376,7 @@ flatpak install flathub page.tesk.Refine
 
   在键盘→其他布局里面交换CAPSLOCK和ESC键
 
-
-### 我的快捷键配置：
+#### 我的快捷键配置：
 
 设置>键盘>查看自定义快捷键
 
@@ -1231,27 +1390,36 @@ ps：gnome默认super+滚轮上下可以左右切换工作区
 alt+tab #切换应用程序
 alt+` #在应用程序的窗口之间切换窗口
 ```
+
 * 截图
 
 ```
 ctrl+alt+A #交互式截图
 ```
+
  * 无障碍
+
 ```
 全部backspace退格键禁用
 ```
+
 * 窗口
+
 ```
 super+Q #关闭窗口
 super+F #切换最大化
 super+alt+F #切换全屏
 ```
+
 * 系统
+
 ```
 ctrl+super+S #打开快速设置菜单
 super+G #显示全部应用
 ```
+
 * 自定义快捷键<快捷键>   <命令>
+
 ```
 super+B   zen
 super+T   ghostty
@@ -1262,7 +1430,7 @@ super+R wofi --show drun
 super+M gnome-text-editor
 ```
 
-## 功能性扩展
+### 功能性扩展
 
 #### ⚠️ 警告：扩展在gnome桌面环境大版本更新的时候大概率会大面积失效，如果出现gnome桌面环境的更新，一定要先关闭所有扩展，谨慎行事
 
@@ -1323,131 +1491,50 @@ flatpak install flathub com.mattjakeman.ExtensionManager
 - Top Panel Workspace Scroll
 
   在顶部面板上滚动滚轮切换工作区
-  
+
 - dask to dock 
 
   把概览里的快捷栏放到桌面上
 
 其他有用扩展见[其他有用的扩展](#其他有用的扩展)和[实现windows布局](#实现windows布局)
 
-## 显卡切换
+### 电源管理
 
-linux由于没有厂家专门做显卡切换工具，只能用通用工具，所以功能通常不完整，可能只能做到从混合模式切换到核显模式。
-
-#### 从混合模式切换为核显模式
-
-- asus华硕用户可以用supergfxctl
-
-[Linux for ROG Notebooks](https://asus-linux.org/)
-
-```
-yay -S supergfxctl
-```
-
-```
-sudo systemctl enable --now supergfxd
-```
-
-```
-扩展下载GPU supergfxctl switch
-```
-
-- 非华硕用户使用envycontrol
-
-[GitHub - bayasdev/envycontrol: Easy GPU switching for Nvidia Optimus laptops under Linux](https://github.com/bayasdev/envycontrol)
-
-1. 笔记本BIOS内切换为混合模式
-
-2. 安装
-
-   ```
-   yay -S envycontrol 
-   ```
-
-3. 安装gnome插件 GPU Profile Selector
-4. 在右上角切换显卡至integrated
-
-#### 混合模式下用独显运行程序
-
-####  PRIME
-
-```
-sudo pacman -S nvidia-prime
-```
-
-- 命令行内使用 prime-run命令使用独显运行软件
-
-```
-prime-run firefox 
-```
-
-- 使用pinapp修改.desktop文件，在command的最前面加上 prime-run 
-
-#### 右键快捷方式选择使用独显运行
-
-```
-sudo pacman -S switcheroo-control 
-```
-
-```
-sudo systemctl enable --now switcheroo-control 
-```
-
-## 电源管理
 [Power management/Suspend and hibernate - ArchWiki](https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate)
 
 ### 休眠到硬盘
+
 硬盘上必须有交换空间才能休眠到硬盘
+
 - 添加hook
+
 ```
 sudo vim /etc/mkinitcpio.conf
 ```
+
 ```
 在HOOKS()内添加resume,注意需要添加在udev的后面
 ```
+
 - 重新生成initramfs
+
 ```
 sudo mkinitcpio -P
 ```
+
 - reboot
+
 ```
 reboot
 ```
+
 - 使用命令进行休眠
+
 ```
 systemctl hibernate
 ```
 
-### 修改内核参数
 
-[[HowTo] Disable watchdogs (and silence "watchdog did not stop!") - Contributions / Tutorials - Manjaro Linux Forum](https://forum.manjaro.org/t/howto-disable-watchdogs-and-silence-watchdog-did-not-stop/148561/4)
-
-```
-sudo vim /etc/default/grub
-```
-
-1. 禁用watchdog
-
-   在GRUB_CMDLNE_LINUX_DEFAULT=""里面添加参数
-
-   ```
-   nowatchdog modprobe.blacklist=sp5100_tco
-   ```
-   
-    intelcpu用户把sp5100_tco换成iTCO_wdt
-   
-   可选参数：
-   
-   ```
-   pcie_aspm=force
-   ```
-   强制pcie活动电源管理，可以略微降低功耗
-   
-2. 重新生成grub的配置文件
-
-   ```
-   sudo grub-mkconfig -o /boot/grub/grub.cfg
-   ```
 
 ### 性能模式切换工具 power-profiles-daemon
 
@@ -1477,17 +1564,17 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
 
 
+### GNOME美化
 
+#### 更换壁纸
 
-# 美化
-
-## 更换壁纸
 ```
 右键桌面选择更换背景
 ```
-## 扩展美化
 
-#### ⚠️ 警告：扩展在gnome桌面环境大版本更新的时候大概率会大面积失效，如果出现gnome桌面环境的更新，一定要先关闭所有扩展，谨慎行事
+#### 扩展美化
+
+##### ⚠️ 警告：扩展在gnome桌面环境大版本更新的时候大概率会大面积失效，如果出现gnome桌面环境的更新，一定要先关闭所有扩展，谨慎行事
 
 我会使用的扩展：
 
@@ -1507,17 +1594,17 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
 - logo menu 
 
-   在面板（panel，任务栏）显示一个logo，好玩
+  在面板（panel，任务栏）显示一个logo，好玩
 
 - desktop cube 
 
   把工作区切换从平铺变成一个可以旋转的方块的面。设置的overview里把透明度（opacity）都改成50%，超级酷！
-  
+
 - rounded window corners reborn 
 
   让所有窗口变成圆角。这个扩展是真神。 设置里取消激活skip libadwaita applications，然后把corner radius改成14，这样就和gnome的圆角没区别了。
 
-## 实现windows布局
+#### 实现windows布局
 
 可以通过扩展把gnome变成windows布局
 
@@ -1538,7 +1625,7 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
    - 可选：just perfection
 
      功能强大的自定义扩展，可以设置gnome各个元素的开关。不过根据gnome版本的不同能设置的选项会有所不同。
-     
+
    - 可选：用dash to panel 替换app icons taskbar
 
      dash to panel设置更简单，但没有app icons taskbar好看
@@ -1546,161 +1633,141 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 2. 修改扩展的设置
 
    - app icons taskbar
-   
+
      settings页面里：
-   
+
      激活hide dash in overview（隐藏概览里的快捷栏）
-   
+
      app icons position in panel （软件图标在面板上的位置）改成center
-   
+
      激活show all apps button（显示所有软件按钮），位置选right（右边）
-   
+
      icon size（图标大小）和padding（间距） 按需调整
-   
+
      panel里激活intllihide（智能隐藏），设置里把only focused window （仅选中的窗口）改成all windows（所有窗口）
-   
+
       panel location（面板位置）选bottom（底部）
-   
+
      panel height（面板高度）调整到合适的数值。
-   
+
      取消激活show activities button（显示活动按钮）
-   
+
      show weather near clock（在时钟旁显示天气）选right（右边）
-   
+
      clock posisiton in panel（时钟在面板中的位置）改成right
-   
+
      这样布局就和win11一模一样了。
-   
+
    - desktop icons ng
-   
+
      取消激活显示个人文件夹、回收站图标
-   
+
    （待施工…………）
-   
-   
 
-## 主题美化
 
-- 可选：去掉标题栏用来关闭窗口的x。可以使用命令，也可以用refine
-```
-gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:'
-```
+#### 光标主题
 
-### 光标主题
 主题下载网站 https://www.gnome-look.org/browse?cat=107&ord=latest
 
 将下载的.tar.gz文件里面的文件夹放到～/.local/share/icons/目录下，没有icons文件夹的话自己创建一个
 
-### gnome主题
+#### gnome主题
+
 gnome的默认主题已经相当漂亮，如果有修改主题的需要的话去这个网站：
 
 https://www.gnome-look.org/browse?cat=134&ord=latest
 
 通常下载页面都有指引，文件路径是~/.themes/，放进去之后在user themes扩展的设置里面改可以改
 
-## 终端美化
+
+
+#### shell美化
+
+##### 更换终端为fish，想用ZSH可以看附录：[zsh](#zsh)
 
 - 安装终端字体
+
 ```
 sudo pacman -S ttf-jetbrains-mono-nerd
 ```
- - 安装zsh
+
+- 安装fish
+
 ```
-sudo pacman -S zsh
-```
-- 修改shell为zsh
-```
-chsh -s /usr/bin/zsh
-```
-```
-#登出
-```
-```
-#启动终端按0生成默认的配置文件
+sudo pacman -S fish 
 ```
 
-### starship
+更改shell
+
+```
+chsh -s /usr/bin/fish
+```
+
+```
+reboot 
+```
+
+编辑配置文件去掉默认的启动文字
+
+```
+vim ~/.config/fish/config.fish
+```
+
+写入
+
+```
+set fish_greeting ""
+```
+
+#### starship Shell主题
+
 [Starship](https://starship.rs/)
 
 ```
 sudo pacman -S starship
 ```
+
 ```
-vim ~/.zshrc
-```
-写入
-```
-eval "$(starship init zsh)"
+vim ~/.config/fish/config.fish
 ```
 
-#### starship preset 预设主题
+在文件末尾写入
+
+```
+starship init fish | source
+```
+
 https://starship.rs/presets/
-挑一个自己喜欢的，下载后改名为starship.toml，移动到~/.config/目录下
+挑一个自己喜欢的预设主题，下载后改名为starship.toml，移动到~/.config/目录下，重启终端即可
 
-### 终端语法高亮和自动补全
-- 语法检查、补全、tab选择
-```
-sudo pacman -S zsh-syntax-highlighting zsh-autosuggestions zsh-completions
-```
+#### ghostty美化
 
-```
-vim ~/.zshrc
-```
-写入
-```
-#语法检查和高亮
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-
-#开启tab上下左右选择补全
-zstyle ':completion:*' menu select
-autoload -Uz compinit
-compinit
-
-# 设置历史记录文件的路径
-HISTFILE=~/.zsh_history
-
-# 设置在会话（内存）中和历史文件中保存的条数，建议设置得大一些
-HISTSIZE=1000
-SAVEHIST=1000
-
-# 忽略重复的命令，连续输入多次的相同命令只记一次
-setopt HIST_IGNORE_DUPS
-
-# 忽略以空格开头的命令（用于临时执行一些你不想保存的敏感命令）
-setopt HIST_IGNORE_SPACE
-
-# 在多个终端之间实时共享历史记录 
-# 这是实现多终端同步最关键的选项
-setopt SHARE_HISTORY
-
-# 让新的历史记录追加到文件，而不是覆盖
-setopt APPEND_HISTORY
-# 在历史记录中记录命令的执行开始时间和持续时间
-setopt EXTENDED_HISTORY
-```
-```
-source ~/.zshrc
-```
-
-### ghostty美化
 - 下载catppuccin颜色配置，粘贴到~/.config/ghostty/themes/
+
 ```
 https://github.com/catppuccin/ghostty?tab=readme-ov-file
 ```
+
 - 修改~/.config/ghostty/conf 配置文件，例如下载的是frappe的话：
+
 ```
 theme = /home/shorin/.config/ghostty/catppuccin-frappe.conf
 ```
+
 - 隐藏标题栏
+
 ```
 window-decoration = none
 ```
+
 - 设置透明度
+
 ```
 background-opacity=0.8
 ```
+
 - 设置字体和字体大小
+
 ```
 font-family = "Adwaita Mono" 
 font-size = 15
@@ -1710,9 +1777,787 @@ font-size = 15
 
 
 
+## KDE
+
+[KED-Archwiki](https://wiki.archlinux.org/title/KDE)
+
+```
+pacman -S plasma-meta konsole dolphin flatpak flatpak-kcm kate
+```
+
+出现选项的话选有pipewire和ffmpeg的，字体选noto-fonts
+
+```
+konsole 是kde标配终端仿真器
+dolphin 是kde标配文档管理器
+flatpak 是flatpak软件
+flatpak-kcm 通过系统设置管理flatpak应用的权限
+kate 是标配文本编辑器
+```
+
+- 开启显示管理器
+
+```
+systemctl start sddm
+```
+
+- 登录普通用户
+- 成功后打开konsole设置显示管理器开机自启
+
+```
+sudo systemctl enable sddm 
+```
+
+- 卸载用不上的软件
+
+```
+sudo pacman -Rdd plasma-welcome plasma-systemmonitor 
+```
+
+-Rdd代表无视依赖关系强制删除
+
+### 生成home下目录（如果没有的话）
+
+```
+xdg-user-dirs-update
+```
+
+### 设置系统语言
+
+- 系统设置 > regin&language > 添加简体中文，移动到english上方
+- 登出
+
+### 安装声音固件和声音服务
+
+- 安装声音固件
+
+```
+sudo pacman -S --needed sof-firmware alsa-firmware alsa-ucm-conf
+```
+
+- 安装声音服务
+
+```
+sudo pacman -S --needed pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber
+```
+
+* 启用服务
+
+```
+systemctl --user enable --now pipewire pipewire-pulse wireplumber
+```
+
+### 启用蓝牙 
+
+```
+sudo systemctl enable --now bluetooth
+```
+
+### 性能模式切换
+
+```
+sudo pacman -S power-profiles-daemon
+sudo systemctl enable --now power-profiles-daemon
+```
+
+### 安装yay
+
+##### 方法一 ：archlinuxCN
+
+- 编辑pacman配置文件
+
+```
+sudo vim /etc/pacman.conf
+```
+
+- 在文件底部写入以下内容
+
+```
+[archlinuxcn]
+Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch 
+Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch 
+Server = https://mirrors.hit.edu.cn/archlinuxcn/$arch 
+Server = https://repo.huaweicloud.com/archlinuxcn/$arch 
+```
+
+- 安装密钥
+
+```
+sudo pacman -Sy archlinuxcn-keyring 
+```
+
+- 安装yay
+
+```
+sudo pacman -S yay 
+```
+
+##### 方法二：从github安装
+
+[GitHub - Jguer/yay: Yet another Yogurt - An AUR Helper written in Go](https://github.com/Jguer/yay)
+
+```
+sudo pacman -S git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+```
+
+### 输入法
+
+（用fcitx，别在kde使用ibus输入法）
+
+### fcitx5-rime 雾凇拼音
+
+[Using Fcitx 5 on Wayland - Fcitx](https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland#KDE_Plasma)
+
+```
+sudo pacman -S fcitx5-im fcitx5-rime rime-ice-pinyin-git fcitx5-mozc
+```
+
+```
+fcitx5-im 包含了fcitx5的基本包
+fcitx5-rime是中州韵输入法引擎
+rime-ice-pinyin-git是雾凇拼音输入法,这个包在archlinuxcn里面
+fcitx5-mozc是开源谷歌日语输入法
+```
+
+- 打开系统设置 > 键盘 > 虚拟键盘， 选择fcitx5，记得应用
+
+- 系统设置 > 语言和时间 > 输入法，添加rime和mozc
+
+- 编辑rime的配置文件设置输入法方案为雾凇拼音，如果没有文件夹和文件的话自己创建文件夹，然后运行如下命令编辑配置文件
+
+```
+vim ~/.local/share/fcitx5/rime/default.custom.yaml 
+```
+
+```
+patch:
+  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
+  __include: rime_ice_suggestion:/
+```
+
+- 编辑环境变量
+
+```
+sudo vim /etc/environment
+```
+
+```
+XMODIFIERS=@im=fcitx
+```
+
+- 如果输入法在某个软件出现吞字之类异常，在开始菜单右键该软件>编辑应用程序>修改命令行参数
+
+  先试试仅添加这一段，添加位置为程序名后面，%U之类的字符前面，比如typora 【此处】%U
+
+  ```
+  --enable-wayland-ime
+  ```
+
+  如果不行的话改成这一段：
+
+  ```
+  --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-wayland-ime
+  ```
+
+  还不行的话改成在环境变量里添加这一段：
+
+  ```
+  GTK_IM_MODULE=fcitx
+  QT_IM_MODULE=fcitx
+  XMODIFIERS=@im=fcitx
+  ```
+
+- 更换切换输入法快捷键
+
+```
+系统设置 > 输入法 > 配置全局选项
+```
+
+#### 美化
+
+1. 浏览器搜索fcitx5 themes，下载自己喜欢的，存放路径为：~/.local/share/fcitx5/themes
+
+2. 打开fcitx配置，选择附加组件，设置经典用户界面，设置主题。这里有一大堆自定义的选项，自己研究吧。
+
+### 自定义安装软件
+
+这是我会安装的，你可以按需求选择
+
+- 安装后没显示图标的话登出一次
+
+```
+sudo pacman -S --needed mission-center zen-browser zen-browser-i18n-zh-cn ark gwenview kcalc kate pacman-contrib gnome-disk-utility baobab haruna
+```
+
+```
+mission-center 类win11任务管理器
+zen-browser zen浏览器，也可以安装firefox或者discover商店搜索chrome或edge
+zen-browser-i18n-zh-cn zen的中文语言包
+ark kde标配解压缩工具
+gwenview 图片编辑查看工具
+kcalc 计算器
+pacman-contrib 提供pacman的一些额外功能，比如checkupdates用来检查更新
+gnome-disk-utility磁盘管理器
+baobab磁盘使用情况分析工具
+haruna是基于mpv的视频播放器
+```
+
+- qq、微信、wps
+
+```
+yay -S linuxqq-appimage wechat-appimage wps-office-cn wps-office-mui-zh-cn
+```
+
+```
+linuxqq-appimage是appimgae版qq
+wechat-appimage是appimage版微信
+wps-office-cn是wps
+wps-office-mui-zh-cn是wps的中文语言包
+```
+
+- markdown编辑器
+
+```
+yay -S typora-free
+```
+
+- flathub
+
+```
+flatpak install io.github.Predidit.Kazumi io.gitlab.theevilskeleton.Upscaler com.github.unrud.VideoDownloader io.github.ilya_zlobintsev.LACT com.geeks3d.furmark com.google.Chrome
+```
+
+```
+kazumi追番
+upscaler图片超分
+video downloader下载youtube/bilibili 144p～8k视频
+LACT 显卡超频、限制功率、风扇控制等等
+furmark 显卡烤鸡
+chrome 浏览器。有些网站或者浏览器功能在firefox下无法正常运行，所以装一个chromium的浏览器做备用
+```
+
+- 如果flatpak没速度或者加载不出来的话更换flatpak国内源，这里举例的是上交大的
+
+```
+sudo flatpak remote-modify flathub --url=https://mirror.sjtu.edu.cn/flathub
+```
+
+### 删除或隐藏不必要的快捷方式
+
+- 方法一：pinapp
+
+  从应用商店搜索pinapp安装pins，图标是个图钉钉在蓝色的板子上。
+
+  也可以用命令安装，更方便：
+
+  ```
+  flatpak install flathub io.github.fabrialberio.pinapp
+  ```
+
+  选择想隐藏的图标激活invisible即可
+
+- 方法二：menulibre
+
+  使用pacman安装
+
+  ```
+  sudo pacman -S menulibre
+  ```
+
+  选择想隐藏的图标激活invisible，然后保存即可
+
+### amber-ce和星火应用商店（国产商店）
+
+[Amber CE: 琥珀兼容环境：一款Bubblewrap容器，极轻量系统容器](https://gitee.com/amber-ce)
+
+[amber-ce-bookworm: 使用bwrap的Debian 12容器](https://gitee.com/amber-ce/amber-ce-bookworm)
+
+[Spark Store](https://www.spark-app.store/)
+
+由于特殊国情，星火应用商店里的应用可能比aur上的都好用，建议安装。
+
+1. 安装ace容器
+
+   这是一个极其轻量的debian容器，系统占用可以忽略不计。trixie是debian13，bookworm是debian12
+
+   ```
+   yay -S amber-ce-trixie
+   ```
+
+2. 安装完成后重启电脑
+
+3. 官网下载星火应用商店的deb包
+
+   [Spark Store](https://www.spark-app.store/)
+
+4. 打开ace（蓝色图标）
+
+5. 安装星火应用商店
+
+   ```
+   sudo apt install /home/shorin/Downloads/spark-store_4.8.0_amd64.
+   ```
+
+   ```
+   apt是debian的包管理器
+   install代表安装
+   后面指定了安装包的绝对路径，可以手动输入，也可以把安装包拖拽进终端里输入路径
+   ```
+
+#### 启用输入法
+
+```
+sudo apt install fcitx5-frontend-gtk2 fcitx5-frontend-gtk3 fcitx5-frontend-gtk4 fcitx5-frontend-qt5 fcitx5-frontend-qt6
+```
+
+#### 卸载
+
+使用ace bookworm软件卸载器卸载软件，或者sudo apt remove 【包名】，或者直接删除整个容器，删除容器之后里面的所有东西都不会留下。
+
+```
+yay -Rns amber-ce-trixie
+```
+
+### 快照
+
+**快照相当于恢复点，每次试验什么之前最好都创建一下快照**
+
+#### 方法一：snapper
+
+```
+sudo pacman -S snapper snap-pac btrfs-assistant 
+```
+
+```
+snapper 是创建快照的主要程序
+snap-pac 是利用钩子在进行一些pacman命令的时候自动创建快照
+btrfs-assistant 是图形化管理btrfs和快照的软件
+```
+
+- 自动生成快照启动项
+
+```
+sudo pacman -S grub-btrfs inotify-tools
+```
+
+```
+reboot
+```
+
+```
+sudo systemctl enable --now grub-btrfsd
+```
+
+##### 具体使用方法
+
+打开btrfs assistant，切换到snapper settings页面。我们创建子卷的时候创建了一个@（root）子卷和一个@home（home）子卷，所以需要两个config（配置）。创建一个root配置，再创建一个home配置。然后到snapper页面下的New/Delete页面就可以新建和管理快照了，Browse/Restore页面选中快照后点restore可以恢复到那个快照的状态。如果你要同时快照root和home的话就分别创建一个root快照和home快照，恢复的时候各自恢复就行了。
+
+#### 方法二：[附录 timeshift](#timeshift)
+
+虽然简单易用，但是比snapper慢且容易出bug，有需要的看附录
+
+### 关于滚挂和良好的系统使用习惯
+
+- 滚挂
+
+  archlinux是滚动发行版。滚动是英文直译，原词是rolling，指一种推送更新的方式，只要有新版本就会推送，由用户管理更新。对应的另一种更新方式是定期更新一个大版本，例如fedora是六个月一更新，由发行方管理更新。 滚挂，指的是滚动更新的发行版因为更新导致系统异常。这通常是用户操作不当、忽略官方公告等原因导致的。只要学习一下正确的更新方式和快照的使用方法就不用担心滚挂问题。 
+
+  通常软件更新不用担心。**出现密钥（keyring）、内核、驱动、固件、引导程序之类的更新要留个心眼，先不第一时间更新，等一手社区或者官方消息。** 另一个重点是滚动更新的发行版的软件通常会适配最新的依赖，如果长期不更新可能会无法使用软件。
+
+- 良好的使用习惯
+
+  btrfs文件系统已经足够稳定，“不作死就不会死”。使用时遵循以下几点：
+
+  1. **别第一时间更新，别长时间不更新，密钥单独更新，重要程序更新前创建快照**
+
+  2. **明白自己的行为会造成怎样的后果，做不了解的事情前创建快照**
+
+
+
+### KDE系统设置和美化
+
+以下都是我的设置，你可以按照自己的来。
+
+#### 快捷键
+
+系统设置 > 输入和输出 > 键盘 > 快捷键
+
+- 应用程序
+
+  kruner: meta+R
+
+  浏览器： meta+B
+
+  系统设置：Ctrl+alt+S
+
+  任务中心（missioncenter）： meta+esc
+
+  konsole终端：Meta+T
+
+
+- 窗口管理：
+
+  窗口右移一个桌面：meta+shift+D
+
+  窗口左移一个桌面：meta+shift+A
+
+  磁铁编辑开关：任意一个别的
+
+  关闭窗口：meta+Q
+
+  强制终止窗口：meta+crtl+Q
+
+  切换到右侧桌面：meta+shift+E
+
+  切换到左侧桌面：meta+shift+Q
+
+  全屏显示窗口：meta+alt+F
+
+  显示隐藏标题栏和框架：meta+shift+T
+
+  显示隐藏桌面总览：meta
+
+  移动窗口到屏幕中央：meta+C
+
+  暂时显示桌面：meta+M
+
+  自定义快速铺放窗口到上下左右：meta+WASD；然后打开磁铁编辑器编辑一个自己喜欢的布局
+
+  最大化窗口：meta+F
+
+  最小化窗口：meta+H
+
+- plasma工作空间
+
+  激活应用程序启动器： alt
+
+  显示活动切换器： meta+TAB
+
+#### 无障碍辅助
+
+“抖动后放大光标”调到最大 
+
+#### 窗口管理
+
+系统设置>窗口和应用>窗口管理
+
+#### 窗口行为
+
+标题栏操作
+
+鼠标滚轮：移动到上个/下个桌面
+
+#### 桌面特效
+
+- 惯性晃动
+
+  激活窗口惯性晃动，启用高级设置，调整效果到自己喜欢的程度。我的设置是25、70、15
+
+- geometry change
+
+  点击获取新效果，下载geometry change，或者从aur安装。这可以给窗口的快捷键平铺添加动画。动画速度设置为500ms
+
+  ```
+  yay -S kwin-effects-geometry-change
+  ```
+
+- 窗口透明度
+
+  激活窗口透明度，按照喜好设置
+
+- 窗口背景虚化和背景对比度
+
+  按需设置
+
+- rounded corners（圆角）
+
+  ```
+  yay -S kwin-effect-rounded-corners-git
+  ```
+
+  ```
+  reboot
+  ```
+
+  - 圆角页面
+
+    圆角半径都改为15，取消激活平铺时禁用圆角
+
+  - 轮廓
+
+    取消主轮廓的激活
+
+    secondary outline的活动窗口轮廓粗细改成3，激活使用装饰色；非活动窗口的粗细改成0；取消激活平铺时禁用轮廓。
+
+#### 虚拟桌面
+
+按需增加，激活切换时显示屏幕提示，改成500ms
+
+#### 更换桌面壁纸
+
+系统设置>外观和样式>壁纸
+
+按需选择壁纸类型
+
+这里有一个小技巧，如果你按住左键把一张图片从dolphin拖放到桌面上，会跳出来一个菜单。
+
+#### 更换锁屏壁纸
+
+系统设置>安全和隐私>锁屏>配置外观
+
+按需选择壁纸类型
+
+#### 主题美化
+
+这里是我自己的配置，你可以按照你的喜好来。
+
+#### 全局主题
+
+点击右上角获取全局主题，下载apple macos(whitesur-dark)。nordic也不错。商店加载不出来的话可以从aur安装
+
+```
+yay -S whitesur-kde-theme
+```
+
+- 颜色
+
+​		选择自定义强调色，从壁纸上提取一个合适的颜色
+
+​		更换为whiteSur
+
+- 应用程序外观样式
+
+​		选择默认的breeze 微风，点击右下角的画笔配置，菜单透明度往左一格
+
+- plasma 外观和样式
+
+​		breeze微风深色
+
+- 窗口装饰元素
+
+​		whitesur-sharp。点击右下角的笔，设置按钮大小
+
+​		配置标题栏按钮，按需调整
+
+- 光标
+
+​		breeze 微风深色，大小30
+
+- 登录屏幕
+
+​		whitesur-dark，换一个壁纸
+
+#### 文字和字体
+
+按需调整
+
+### konsole美化和配置
+
+菜单>设置>显示工具栏>去掉两个勾选
+
+常规页面里激活“移除窗口标题和框架”
+
+设置里新建一个配置方案；外观里下载一个自己喜欢的，我使用catppuccin frappe
+
+```
+yay -S catppuccin-konsole-colorscheme-frappe-git
+```
+
+点击编辑可以设置透明度和背景图片；设置字体；光标页面里激活闪烁；杂项里取消激活调整大小后显示终端大小提示。
+
+滚动里隐藏滚动条，取消激活高亮显示刚刚进入视图的行。
+
+设置为默认
+
+重启终端
+
+#### 更换终端为fish
+
+想用ZSH可以看附录：[zsh](#zsh)
+
+- 安装终端字体
+
+```
+sudo pacman -S ttf-jetbrains-mono-nerd
+```
+
+- 安装fish
+
+```
+sudo pacman -S fish 
+```
+
+```
+chsh -s /usr/bin/fish
+```
+
+```
+reboot 
+```
+
+编辑配置文件去掉默认的启动文字
+
+```
+vim ~/.config/fish/config.fish
+```
+
+写入
+
+```
+set fish_greeting ""
+```
+
+
+
+starship Shell主题
+
+[Starship](https://starship.rs/)
+
+```
+sudo pacman -S starship
+```
+
+```
+vim ~/.config/fish/config.fish
+```
+
+在文件末尾写入
+
+```
+starship init fish | source
+```
+
+https://starship.rs/presets/
+挑一个自己喜欢的预设主题，下载后改名为starship.toml，移动到~/.config/目录下，重启终端即可
+
+
+
+### 桌面组件
+
+##### wallpaper effects
+
+这个组件可以在聚焦窗口时模糊桌面
+
+右键进入编辑模式>左上角添加组件>获取新挂件>下载plasma挂件>搜索安装wallpaper effects，或者从aur安装
+
+```
+yay -S plasma6-applets-wallpaper-effects
+```
+
+添加到桌面后进行配置：blur radius 改成 30；pixelate effect的enbale改成never；grain改成never；color effects改成never；激活rounded corners，radius改成15
+
+### 桌面面板（任务栏）
+
+右键任务栏（kde里叫面板），显示面板配置。设置为半透明；悬浮改成仅小程序；显示隐藏改成避开窗口；删除工作区相关组件；添加两个间隔，把开始菜单和软件移动到中心。
+
+#### 右下角组件
+
+点击时间左边的上箭头，在弹出来的窗口的右上角开启系统托盘设置，项目里面按需设置。我会设置电量和电池总是显示，蓝牙总是隐藏。
+
+---
+
+
+
+## 显卡切换
+
+linux由于没有厂家专门做显卡切换工具，只能用通用工具，所以功能通常不完整，可能只能做到从混合模式切换到核显模式。以下是几个常用的工具，可以自己试试看能不能用。建议安装时处在混合模式。从混合切到独显直连要动bios，所以大概率会失败，谨慎操作。
+
+### supergfxctl
+
+asus华硕用户可以用supergfxctl
+
+[Linux for ROG Notebooks](https://asus-linux.org/)
+
+```
+yay -S supergfxctl
+```
+
+```
+sudo systemctl enable --now supergfxd
+```
+
+gnome从扩展里下载GPU supergfxctl switch
+
+kde从aur安装这个```plasma6-applets-supergfxctl```
+
+```
+yay -S plasma6-applets-supergfxctl
+```
+
+
+
+### envycontrol
+
+[GitHub - bayasdev/envycontrol: Easy GPU switching for Nvidia Optimus laptops under Linux](https://github.com/bayasdev/envycontrol)
+
+```
+yay -S envycontrol 
+```
+
+gnome装扩展 GPU Profile Selector
+
+kde在桌面右键进如编辑模式，挂件商店里下载Optimus GPU Switcher
+
+## 混合模式下用独显运行程序
+
+KDE桌面可以直接开始菜单右键编辑应用程序设置用独显运行
+
+### PRIME
+
+```
+sudo pacman -S nvidia-prime
+```
+
+- 命令行内使用 prime-run命令使用独显运行软件
+
+```
+prime-run firefox 
+```
+
+- 使用软件修改.desktop文件，加上 prime-run 
+
+### switcheroo-control
+
+gnome装这个可以右键桌面快捷方式选择使用独显运行
+
+```
+sudo pacman -S switcheroo-control 
+```
+
+```
+sudo systemctl enable --now switcheroo-control 
+```
+
+
+
   
 
-# KVM虚拟机
+# 虚拟机
+
+## VMware
+
+1. 安装缺少的依赖
+
+```
+yay -S vmware-keymaps
+```
+
+2. 安装本体
+
+```
+yay -S vmware-workstation
+```
+
+3. 开启服务
+
+```
+sudo systemctl enable --now vmware-networks.service
+sudo systemctl enable --now vmware-usbarbitrator.service
+```
+
+4. 重启电脑
+
+## KVM/QEMU虚拟机
 
 [[已解决] KVM Libvirt 中无法访问存储文件，权限被拒绝错误](https://cn.linux-terminal.com/?p=4593)
 
@@ -1944,9 +2789,9 @@ sudo mkinitcpio -P
 
   重启
 
-
 ## 远程桌面
-三种方案，parsec、sunshineo+moonlight、looking glass，配置难度和最终效果逐级上升
+
+三种方案，parsec、sunshineo+moonlight、looking glass，配置难度和最终效果逐级上升。looking glass仅显卡直通虚拟机可用
 
 ### parsec
 - windows上浏览器搜索安装
@@ -2081,10 +2926,10 @@ escapeKey=KEY_F9
 fullScreen = yes 
 ```
 
-- 关于虚拟机性能优化，见[虚拟机性能优化](#虚拟机性能优化)
+- 关于虚拟机性能优化，见[虚拟机性能优化](#KVM/QEMU虚拟机性能优化和伪装)
 - 推荐： 配置完looking glass之后克隆虚拟机，用克隆机而不是初号机，好处不用多说了吧
 
-## 虚拟机性能优化
+## KVM/QEMU虚拟机性能优化和伪装
 
 优化后可以做到原生九成五的性能。
 
@@ -2363,20 +3208,7 @@ reboot
 
 ## 游玩前的准备
 
-- gamemode
-
-可以为游戏优化cpu资源使用的软件，有助于提高low帧
-
-```
-sudo pacman -S gamemode
-```
-```
-sudo systemctl --user enable --now gamemoded
-```
-
-启动参数： gamemoderun %command%
-
-- 32位显卡工具和驱动
+- 检查32位显卡工具和驱动
 
 [docs/InstallingDrivers.md at master · lutris/docs](https://github.com/lutris/docs/blob/master/InstallingDrivers.md)
 
@@ -2456,26 +3288,39 @@ ge-proton比proton更加强大
 yay -S protonup-qt
 ```
 
-- 可选：下载速度慢的话试试
+- 禁用游戏存放目录的btrfs的写时复制（CoW），这可以解决下载速度异常的问题。默认目录是~/.local/share/Steam/，通常禁用steamapps目录的CoW就行了
+
+
+```
+sudo chattr +C ~/.local/share/Steam/steamapps
+```
+
+- 可选：还是下载速度慢的话试试
 
 ```
 vim ~/.steam/steam/steam_dev.cfg
 ```
-写入：
+​		写入：
 ```
 @nClientDownloadEnableHTTP2PlatformLinux 0
 @fDownloadRateImprovementToAddAnotherConnection 1.0
 ```
 
+- 卸载steam
+
+```
+sudo pacman -R steam
+sudo rm -rfv ~/.steam ~/.local/share/Steam
+```
+
 ## 玩minecraft
-- 从aur安装
+
+- 从aur安装启动器，推荐使用xmcl
 ``` 
 yay -S minecraft-launcher #官方启动器
 yay -S hmcl-bin #hmcl
 yay -S xmcl #xmcl
 ```
-安装时选择最新的jdk
-
 ## 玩安卓手游
 ### waydroid
 [Install Instructions | Waydroid](https://docs.waydro.id/usage/install-on-desktops)
@@ -2575,7 +3420,6 @@ systemctl restart waydroid-container
 ```
 
 #### 卸载waydroid
-- 
 ```
 waydroid session stop
 ```
@@ -2585,12 +3429,16 @@ sudo systemctl disable --now waydroid-container.service
 ```
 yay -Rns waydroid
 ```
-如果下载了waydroid-image的话需要一并删除
+如果下载了waydroid-image的话需要用yay一并卸载。
+
+卸载完后清理残留文件
+
 ```
 sudo rm -rf /var/lib/waydroid ~/.local/share/waydroid ~/.local/share/applications/waydroid*
 ```
 
-## wine/proton 兼容层运行
+## wine/proton 兼容层运行windows软件
+
 wine是在linux下运行windows程序的兼容层，proton是steam的母公司v社基于wine开发的专门用来玩游戏的兼容层。原理是把window程序发出的请求翻译成linux系统下的等效请求。通常使用最新的wine或者proton版本即可，或者使用GE-proton，这是GE大佬修改的proton。
 
 wine、proton这些兼容层有一大特点叫prefix，相当于一个虚拟的c盘环境，程序的所有操作都在这个prefix中进行，完全不会影响到主机的linux。当你想卸载软件的时候，可以直接把这个prefix扬了，相当于用删除c盘的方式卸载软件，相当相当干净。
@@ -2602,7 +3450,7 @@ wine、proton这些兼容层有一大特点叫prefix，相当于一个虚拟的c
 
 lutris是一个专为玩游戏设计的管理工具，可以完全取代steam的“添加非steam游戏”功能。当然也可以用来管理普通软件。
 
-- 安装
+- 安装（kde桌面要重启一次）
 ```
 sudo pacman -S lutris
 ```
@@ -2676,25 +3524,13 @@ sudo systemctl enable --now nvidia-powerd.service
 
 [linux - ZRAM vs ZSWAP for lower end hardware? - Super User](https://superuser.com/questions/1727160/zram-vs-zswap-for-lower-end-hardware)
 
-[Zswap or Zram: at this time, which one is more efficient? : r/archlinux](https://www.reddit.com/r/archlinux/comments/13ujemv/zswap_or_zram_at_this_time_which_one_is_more/)
-
-[Zram, zswap and hibernation - Support - Manjaro Linux Forum](https://forum.manjaro.org/t/zram-zswap-and-hibernation/82348)
-
-[kernel - zram vs zswap vs zcache Ultimate guide: when to use which one - Ask Ubuntu](https://askubuntu.com/questions/471912/zram-vs-zswap-vs-zcache-ultimate-guide-when-to-use-which-one/472227#472227)
-
-[zswap — The Linux Kernel documentation](https://www.kernel.org/doc/html/v4.18/vm/zswap.html)
-
-[zram: Compressed RAM-based block devices — The Linux Kernel documentation](https://docs.kernel.org/admin-guide/blockdev/zram.html)
-
 简单来说，硬盘swap交换空间会频繁的读写硬盘，导致硬盘寿命下降。故使用内存作为交换空间。有两种方法，zswap和zram。
 
 zswap依托于swap运行，是硬盘swap的缓存，还是会有硬盘读写，虽然可以关闭zswap的写回，但zram更加优雅、简洁。
 
 zram是把内存的一部分动态地作为swap交换空间，和硬盘swap一样都是swap设备。zram占满前完全不会有硬盘swap的读写。
 
-### 不需要休眠的话
-
-如果不需要休眠功能可以禁用硬盘swap，然后开启zram
+### 不需要休眠的话删除硬盘swap后开启zram
 
 1. 关闭swap
 
@@ -2880,27 +3716,25 @@ ps：谨慎更换cachyos的内核```linux-cachyos```，内核恐慌（kernel pan
 
 
 
-
 # 小技巧
 
-## super+左键按住窗口的任意位置移动窗口
+- super+左键按住窗口的任意位置移动窗口
 
-## super+中间按住窗口的边缘和角落可以调整窗口大小
+- gnome桌面，super+中键可以调整窗口大小，ctrl+c复制文件后ctrl+m可以粘贴一个链接，super+滚轮切换工作区
 
-## ctrl+c复制文件后ctrl+m可以粘贴一个链接
+- kde桌面，super+右键可以可以调整窗口大小，ctrl+super+滚轮可以缩放，super+alt+滚轮切换工作区
 
-[Creating Symlinks in Files under Wayland : r/gnome](https://www.reddit.com/r/gnome/comments/10qayrs/creating_symlinks_in_files_under_wayland/)
+- time命令可以计算一个程序启动的时间
 
-## time命令可以计算一个程序启动的时间
+  示例：
 
-示例：
-
-```
-time firefox
-```
-然后你会看到firefox的启动时间
+  ```
+  time firefox
+  ```
 
 ---
+
+
 
 # 专业软件平替
 
@@ -2923,6 +3757,8 @@ kdenlive
 shotcut
 
 以及各类线上剪辑网站，比如flixier
+
+
 
 # issues
 
@@ -2985,7 +3821,19 @@ sudo vim /etc/environment
 VIRSH_DEFAULT_CONNECT_URI=qemu:///system
 ```
 
----
+## wps用不了fcitx5
+
+手动设置变量，使用任意文本编辑器打开以下文件
+
+- 文字 (Writer): `/usr/bin/wps`
+- 表格 (Spreadsheets): `/usr/bin/et`
+- 演示 (Presentation): `/usr/bin/wpp`
+
+```
+export XMODIFIERS=@im=fcitx 
+export QT_IM_MODULE=fcitx 
+export GTK_IM_MODULE=fcitx
+```
 
 
 
@@ -3034,130 +3882,6 @@ sudo pacman -Rns $(pacman -Qdt)
 - 无视依赖关系强制删除某个包
 ```
 sudo pacman -Rdd
-```
-
-## 创建快照时自动生成快照启动项
-
-（意义不大，故弃用）
-
-- 安装必要组件
-
-```
-sudo pacman -S grub-btrfs 
-```
-
-- 开启服务
-
-```
-sudo systemctl enable --now grub-btrfsd.service 
-```
-
-- 修改配置文件
-
-```
-sudo systemctl edit grub-btrfsd.service 
-```
-
-- 在默认位置添加
-
-```
-[Service]
-ExecStart=
-ExecStart=/usr/bin/grub-btrfsd --syslog --timeshift-auto
-```
-
-- 重启服务
-
-```
-sudo systemctl daemon-reload
-sudo systemctl restart grub-btrfsd.service
-```
-
-- 避免id变更导致挂载失败
-
-```
-sudo sed -i -E 's/(subvolid=[0-9]+,)|(,subvolid=[0-9]+)//g' /etc/fstab
-```
-
-## fcitx5
-
-（ 因为ibus-rime的表现优于fcitx5-rime，扩展解决了ibus的自定义问题，故弃用。）
-
-```
-sudo pacman -S fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
-```
-```
-fcitx5-im 包含了fcitx5的基本包
-fcitx5-mozc是开源谷歌日语输入法
-fcitx5-rime是输入法引擎
-rime-ice-pinyin-git是雾凇拼音输入法
-```
-
-- 打开fcitx 5 configuration添加rime和mozc输入法，没有的话登出一次
-
-- 编辑rime的配置文件设置输入法方案为雾凇拼音，如果没有文件夹和文件的话自己创建文件夹，然后运行如下命令
-
-```
-vim ~/.local/share/fcitx5/rime/default.custom.yaml 
-```
-
-```
-写入：
-
-patch:
-  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
-  __include: rime_ice_suggestion:/
-```
-
-- 商店搜索extension，安装蓝色的extensionmanager
-
-- 安装扩展：input method panel
-  https://extensions.gnome.org/extension/261/kimpanel/
-  
-- 编辑环境变量
-
-```
-sudo vim /etc/environment
-```
-```
-XIM="fcitx" #解决wechat用不了输入法的问题
-GTK_IM_MODULE=fcitx
-QT_IM_MODULE=fcitx
-XMODIFIERS=@im=fcitx
-XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
-```
-### fcitx5输入法美化
-
-- 关闭“Input Method Panel”扩展
-
-- 浏览器搜索fcitx5 themes，下载自己喜欢的，存放路径为：~/.local/share/fcitx5/themes
-
-- 打开fcitx配置 选择附组件，点击经典用户界面右边的扳手螺丝刀图标，设置主题。还可以设置字体大小
-
-### 卸载fcitx5
-
-```
-sudo pacman -Rns fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
-```
-- 编辑环境变量
-```
-sudo vim /etc/environment
-```
-删除或者注释fcitx5相关的环境变量
-
-- 如果之前禁用过系统设置里的打字快捷键记得恢复
-
-### 如果wps用不了fcitx5
-
-由于wps自身的问题，我们需要手动设置变量：
-- 文字 (Writer): `/usr/bin/wps`
-- 表格 (Spreadsheets): `/usr/bin/et`
-- 演示 (Presentation): `/usr/bin/wpp`
-
-```
-export XMODIFIERS=@im=fcitx 
-export QT_IM_MODULE=fcitx 
-export GTK_IM_MODULE=fcitx
 ```
 
 ## cpu资源优先级
@@ -3214,36 +3938,6 @@ BAT deep
 sudo systemctl enable --now tlp
 ```
 
-## 安装alhp 
-（下载太慢，容易下载失败，遂弃用。2025年8月29日记：换cachyos源可以做到相同的效果，这个已经完全没有意义了。）
-*参考链接: [ALHP：优化你的archlinux性能 - 哔哩哔哩](https://www.bilibili.com/opus/745324585822453908?from=search&spm_id_from=333.337.0.0%2a)
-
-* 检查芯片支持,记住结果里是x86-64-v几
-```
-/lib/ld-linux-x86-64.so.2 --help
-```
-* 安装密钥和镜像列表
-```
-yay -S alhp-keyring alhp-mirrorlist
-```
-* 编辑配置文件
-```
-sudo vim /etc/pacman.conf
-```
-- 搜索core，在core上方加入
-```
-   [core-x86-64-v4]
-   Include = /etc/pacman.d/alhp-mirrorlist
-   [extra-x86-64-v4]
-   Include = /etc/pacman.d/alhp-mirrorlist
-   [multilib-x86-64-v4]
-   Include = /etc/pacman.d/alhp-mirrorlist
-```
-* 刷新源
-```
-sudo pacman -Syyu
-```
-
 ## ranger预览图片
 
 （rander是一款终端文档管理器，yazi比ranger更好用，故弃用）
@@ -3293,9 +3987,9 @@ font_size 14
 #重启终端
 ```
 
-## appimage
+## appimagelauncher
 
-（appimgae文件依旧足够方便了，这个意义不大，故弃用）
+（appimgae文件依旧足够方便了，这个意义不大且容易出bug，故弃用）
 
 appimage是一个下载即用、无需安装的文件。需要确认安装了fuse才能运行appimage。
 
@@ -3346,31 +4040,135 @@ yay -S appimagelauncher
 
   显示电量剩余可用时间
 
-### 用archinstall安装gnome后的一些清理
+## 用archinstall安装gnome后的一些清理
 
 ```
 sudo pacman -R gnome-contacts gnome-maps gnome-music totem gnome-characters gnome-connections evince gnome-logs malcontent gnome-system-monitor gnome-console gnome-tour yelp simple-scan htop sushi gnome-user-docs epiphany htop 
 ```
 
-## vmware
+## 麦克风降噪软件
 
-1. 安装缺少的依赖
+noisetorch
 
-```
-yay -S vmware-keymaps
-```
+easyeffect
 
-2. 安装本体
+## timeshift
 
-```
-yay -S vmware-workstation
-```
-
-3. 开启服务
+#### ！！！⚠️警告！！！删除timeshift创建的快照要一个个删，否则大概率崩盘
 
 ```
-sudo systemctl enable --now vmware-networks.service
-sudo systemctl enable --now vmware-usbarbitrator.service
+sudo pacman -S timeshift 
 ```
 
-4. 重启电脑
+```
+sudo systemctl enable --now cronie.service 
+```
+
+自动生成快照启动项
+
+```
+sudo pacman -S grub-btrfs inotify-tools
+```
+
+```
+sudo systemctl enable --now grub-btrfsd.service 
+```
+
+修改服务配置
+
+```
+sudo systemctl edit grub-btrfsd.service 
+```
+
+```
+[Service]
+ExecStart=
+ExecStart=/usr/bin/grub-btrfsd --syslog --timeshift-auto
+```
+
+重启服务
+
+```
+sudo systemctl daemon-reload
+sudo systemctl restart grub-btrfsd.service
+```
+
+避免id变更导致挂载失败
+
+```
+sudo sed -i -E 's/(subvolid=[0-9]+,)|(,subvolid=[0-9]+)//g' /etc/fstab
+```
+
+## zsh
+
+```
+ sudo pacman -S zsh
+```
+
+- 修改shell为zsh
+
+```
+chsh -s /usr/bin/zsh
+```
+
+- 激活starship
+
+```
+vim ~/.zshrc
+```
+
+写入
+
+```
+eval "$(starship init zsh)"
+```
+
+- 语法检查、自动补全、tab选择、历史记录
+
+```
+sudo pacman -S zsh-syntax-highlighting zsh-autosuggestions zsh-completions
+```
+
+```
+vim ~/.zshrc
+```
+
+写入
+
+```
+#语法检查和高亮
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+#开启tab上下左右选择补全
+zstyle ':completion:*' menu select
+autoload -Uz compinit
+compinit
+
+# 设置历史记录文件的路径
+HISTFILE=~/.zsh_history
+
+# 设置在会话（内存）中和历史文件中保存的条数，建议设置得大一些
+HISTSIZE=1000
+SAVEHIST=1000
+
+# 忽略重复的命令，连续输入多次的相同命令只记一次
+setopt HIST_IGNORE_DUPS
+
+# 忽略以空格开头的命令（用于临时执行一些你不想保存的敏感命令）
+setopt HIST_IGNORE_SPACE
+
+# 在多个终端之间实时共享历史记录 
+# 这是实现多终端同步最关键的选项
+setopt SHARE_HISTORY
+
+# 让新的历史记录追加到文件，而不是覆盖
+setopt APPEND_HISTORY
+# 在历史记录中记录命令的执行开始时间和持续时间
+setopt EXTENDED_HISTORY
+```
+
+```
+source ~/.zshrc
+```
+
