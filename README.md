@@ -2568,7 +2568,7 @@ sudo systemctl enable --now vmware-usbarbitrator.service
 1. 安装qemu，图形界面， TPM
 
 ```
-sudo pacman -S qemu-full virt-manager swtpm 
+sudo pacman -S qemu-full virt-manager swtpm dnsmasq
 ```
 2. 开启libvirtd系统服务
 
@@ -2633,7 +2633,7 @@ modprobe kvm_amd nested=1
 
 无线网卡无法配置桥接
 
-* 启动高级网络配置工具
+* 启动高级网络配置工具（KDE进设置里的wifi和网络）
 ```
 nm-connection-editor
 ```
@@ -3664,10 +3664,6 @@ ps：谨慎更换cachyos的内核```linux-cachyos```，内核恐慌（kernel pan
 
 
 
-
-
-
-
 # 删除linux
 
 ## 和windows共用efi分区时
@@ -3837,8 +3833,6 @@ export GTK_IM_MODULE=fcitx
 
 
 
-
-
 # 附录
 
 这里是一些有用但是被我弃用的内容，以及一些额外的补充内容。
@@ -3887,7 +3881,7 @@ sudo pacman -Rdd
 ## cpu资源优先级
 （没感觉到区别，故弃用。）
 ```
- yay -S ananicy-cpp cachyos-ananicy-rules
+yay -S ananicy-cpp cachyos-ananicy-rules
 ```
 ```
 sudo systemctl enable --now ananicy-cpp.service
