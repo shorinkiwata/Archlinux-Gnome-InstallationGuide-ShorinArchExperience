@@ -27,14 +27,15 @@
 2025.8.31 新增专业软件替代品一栏
 2025.9.2  附录新增vmware相关内容
 2025.9.6  找到了steam下载时无法正常调用cpu的元凶——btrfs写时复制
-2025.9.6  原timeshift移h至附录，换用snapper+btrfs assitent
+2025.9.6  原timeshift移至附录，换用snapper+btrfs assitent
 2025.9.10 新增KDE桌面安装和美化教程；原zsh内容移至附录，换用fish
+2025.9.11 更新archinstall相关内容
 ```
 
 
 1. [安装前的准备](#安装前的准备)
 2. [手动安装系统](#手动安装)
-3. [脚本安装系统](#脚本安装)
+3. [archintsall脚本安装系统](#脚本安装)
 4. [安装桌面环境前的准备（创建用户、显卡驱动）](#安装桌面环境前的准备)
 5. [GNOME桌面安装](#GNOME)
 6. [GNOME美化](#GNOME美化)
@@ -76,19 +77,21 @@ Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsU
 ```
 这条命令修改注册表把时间从硬件时间改为UTC时间。
 
-## 开箱即用的基于arch发行版
+## 开箱即用的基于arch的发行版
 
 ## EndeavourOS
 
 [Home - EndeavourOS](https://endeavouros.com/)
 
-仅帮你做好初期配置，提供了一些便利工具，没有对系统做调整。不过这个发行版把initramfs生成工具从mkinitcpio改成了dracut，本文中一切关于mkinitcpio的操作都不适用于dracut。dracut重视自动化和智能检测，提供更好的UKI（Unified Kernel Image）支持。mkinicpio更透明、可控，比dracut更符合arch的设计理念。
+仅帮你做好初期配置，提供了一些便利工具。不过这个发行版把initramfs生成工具从mkinitcpio改成了dracut，本文中一切关于mkinitcpio的操作都不适用于dracut。
+
+dracut重视自动化和智能检测，提供更好的UKI（Unified Kernel Image）支持。mkinicpio更透明、可控，比dracut更符合arch的设计理念。
 
 ### CachyOS
 
 [下载 — CachyOS --- Download — CachyOS](https://cachyos.org/download/)
 
-应该是最火的arch-based发行版，做了很多性能方面的优化。也把mkinitcpio改成了dracut，本文中关于mkinicpio的操作不适用于dracut。如果你不要续航不要稳定只想要**极致的性能**，那么建议安装CachyOS。它默认搭载了KDE桌面，如果你不喜欢CachyOS的桌面设计，可以选择no desktop不安装桌面环境，然后自己安装。
+应该是最火的arch-based发行版，做了很多性能方面的优化。也把mkinitcpio改成了dracut，本文中关于mkinicpio的操作不适用于dracut。如果你不要续航不要稳定只想要**极致的性能**，那么建议安装CachyOS。它默认搭载了KDE桌面，如果你不喜欢CachyOS的桌面设计，可以选择no desktop不安装桌面环境。
 
 PS：handheld是掌机版，类似steamdeck上的steamos，不过也可以当桌面用，因为是KDE桌面环境。
 
@@ -96,13 +99,13 @@ PS：handheld是掌机版，类似steamdeck上的steamos，不过也可以当桌
 
 [Garuda Linux | Downloads](https://garudalinux.org/editions)
 
-这个发行版真的超级漂亮，而且提供了超级方便的工具，只需要打打勾就能帮你把很多事情自动处理好。
+这个发行版真的超级漂亮，而且提供了超级方便的工具，只需要打打勾就能帮你把很多事情自动处理好，推荐。
 
 
 
-如果你想要完全精简的archlinux，或者想学习linux知识，继续往下看。
+### 如果你想要自己掌控archlinux的安装，继续往下看
 
-## 下载iso文件
+## 下载archlinux iso文件
 
 [官网下载](https://archlinux.org/download/)
 
@@ -112,11 +115,13 @@ PS：handheld是掌机版，类似steamdeck上的steamos，不过也可以当桌
 
 ### 方法一 ：压缩卷（没有u盘使用这个方法）
 
-windows系统内win+x键，选择磁盘管理。找到想安装archlinux的位置，选择压缩卷，空出磁盘空间。
+1. windows系统内win+x键，选择磁盘管理。找到想安装archlinux的位置，右键选择压缩卷，空出磁盘空间。
 
-右击新增简单卷，大小设置为4096MB（足够装下iso文件就行），盘符随意，格式化选择FAT32。然后把iso文件里面的内容解压进刚刚新建的盘符里。
+2. 右击空出的空间选择新增简单卷，大小设置为4096MB（足够装下iso文件就行），盘符随意，格式化选择FAT32。
 
-重启选择bios启动项
+3. 把iso文件里面的内容解压进刚刚新建的盘符里。
+
+4. 重启选择bios启动项
 
 ### 方法二：ventoy
 
@@ -139,15 +144,15 @@ ventoy制作的系统盘可以存放多个系统镜像，推荐。
 
 ### 确认网络
 ```
-ip a 查看网络连接信息
-ping bilibili.com 确认网络正常
+ip a #查看网络连接信息
+ping bilibili.com #确认网络正常
 ```
-#### iwctl连接wifi
+#### iwctl工具连接wifi
 ```
 iwctl
 ```
 ```
-station wlan0 connect <wifiname> #回车后会提升让输入密码
+station wlan0 connect <wifiname> 
 ```
 ```
 exit
@@ -160,11 +165,11 @@ timedatectl set-ntp true
 
 ### 硬盘分区
 ```
-lsblk -pf  查看当前分区情况
-fdisk -l /dev/想要查询详细情况的硬盘  小写字母l，查看详细分区信息
+lsblk -pf  #查看当前分区情况
+fdisk -l /dev/想要查询详细情况的硬盘  #小写字母l，查看详细分区信息
 ```
 ```
-cfdisk /dev/nvme0n1 选择自己要使用的硬盘进行分区
+cfdisk /dev/nvme0n1 #选择自己要使用的硬盘进行分区
 ```
 创建1g的分区，类型（type）选择efi system
 
@@ -173,8 +178,8 @@ cfdisk /dev/nvme0n1 选择自己要使用的硬盘进行分区
 
 #### 格式化分区
 ```
-lsblk -pf 查看分区情况
-fdisk -l /dev/想要查询详细情况的硬盘  小写字母l，查看详细分区信息
+lsblk -pf #查看分区情况
+fdisk -l /dev/想要查询详细情况的硬盘  #小写字母l，查看详细分区信息
 ```
 
 - 格式化efi启动分区
@@ -245,7 +250,7 @@ reflector -a 24 -c cn -f 10 --sort score --save /etc/pacman.d/mirrorlist --v
 ```
 vim /etc/pacman.d/mirrorlist
 
-拿出手机，浏览器搜索 archlinux中国镜像源，找一个镜像源添加
+拿出手机，浏览器搜索 archlinux中国镜像源，找合适的镜像添加
 ```
 
 - 更新密钥
@@ -278,7 +283,7 @@ sudo 和权限管理有关
 amd-ucode 是微码，用来修复和优化cpu，intel用户安装intel-ucode
 ```
 
-## 设置swap
+### swap交换空间
 
 参考链接：
 
@@ -286,11 +291,13 @@ amd-ucode 是微码，用来修复和优化cpu，intel用户安装intel-ucode
 
 [Swap - Manjaro](https://wiki.manjaro.org/index.php/Swap)
 
-swap与虚拟内存和休眠有关，可以创建swap分区或者swap文件，二选一，前者配置更简单，后者配置稍复杂，但是更加灵活。这里采用交换文件的方式。
+如果你不需要睡眠功能的话跳过这一步。睡眠指的是把系统当前状态写入硬盘，然后电脑完全断电，下一次开机恢复到睡眠前的状态。
+
+swap与虚拟内存和睡眠有关。建议设置zram作为日常swap，**仅在需要睡眠的时候设置硬盘swap**。有swap分区或者swap文件两种方式，前者配置更简单，后者配置稍复杂，但是更加灵活。这里采用交换文件的方式。
 
 ```
 SWAP大小参考
-    	内存  				不需要休眠    				需要休眠    不建议超过
+       内存  		      不需要睡眠          需要睡眠   不建议超过
        1GB              1GB                 2GB        2GB
        2GB              2GB                 3GB        4GB
        3GB              3GB                 5GB        6GB
@@ -324,38 +331,51 @@ btrfs filesystem mkswapfile --size 64g --uuid clear /mnt/swap/swapfile
 swapon /mnt/swap/swapfile
 ```
 
-## 生成fstab文件
+### 生成fstab文件
+
+这可以让系统自动完成挂载
+
 ```
 genfstab -U /mnt > /mnt/etc/fstab
+
+genfstab（生成文件系统表）
+-U 用uuid指定分区
+ > 大于号代表输出结果覆盖写入到有右边的文件里，>>两个大于号代表追加写入
 ```
 
-## change root
+### change root
+
+进入刚刚安装的系统
 
 ```
 arch-chroot /mnt
 ```
 
+此时根目录从U盘的live环境变成了/mnt
+
 ### 设置时间和时区
+
 ```
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
-#ln 是link的缩写，-s代表跨文件系统的软链接，-f代表强制执行，所以这条命令的意思是创建一个Shanghai的链接，取名为localtime。zoneinfo里面包含了所有可用时区的文件，localtime是系统确认时间的依据。
+#ln 是link的缩写，-s代表跨文件系统的软链接，-f代表强制执行，所以这条命令的意思是在/etc/目录下创建/usr/.../Shanghai这个文件的链接，取名为localtime。zoneinfo里面包含了所有可用时区的文件，localtime是系统确认时间的依据。
 ```
 ```
-hwclock --systohc
+hwclock --systohc #系统时钟写入主板硬件时钟
 ```
 
 ### 本地化设置
 ```
 vim /etc/locale.gen
 
-取消en_US.UTF-8 UTF-8和zh_CN.UTF-8的注释
+左斜杠键进行搜索，取消en_US.UTF-8 UTF-8和zh_CN.UTF-8的注释
 ```
 ```
 locale-gen
 ```
 ```
 vim /etc/locale.conf
+
 写入 LANG=en_US.UTF-8
 ```
 
@@ -387,11 +407,9 @@ vim /etc/default/grub
 
   1. GRUB_DEFAULT=0改成saved，再取消GRUB_SAVEDEFAULT=true的注释。这一步是记住开机的选择。
 
-  2. GRUB_CMDLINE_LINUX_DEFAULT里面去掉quiet以显示开机日志，loglevel设置日志等级为5。再添加nowatchdog modprobe.blacklist=sp5100_tco，禁用watchdog，intelcpu用户把sp5100_tco换成iTCO_wdt。
+  2. GRUB_CMDLINE_LINUX_DEFAULT里面去掉quiet以显示开机日志，loglevel设置日志等级为5。再添加nowatchdog modprobe.blacklist=sp5100_tco，禁用watchdog。intelcpu用户把sp5100_tco换成iTCO_wdt。
 
-     loglevel共7级，5级是一个信息量的平衡点。
-
-     watchdog的目的是在系统死机的时候自动重启系统。这在服务器或者嵌入式上有用，但是对个人用户来说没有意义，禁用以节省系统资源、提高开机和关机速度
+     loglevel共7级，5级是一个信息量的平衡点。watchdog的目的简单来说是在系统死机的时候自动重启系统。这在服务器或者嵌入式上有用，但是对个人用户来说没有意义，禁用以节省系统资源、提高开机和关机速度
 
 3. 手动写入或者取消最后一行GRUB_DISABLE_OS_PROBER=false的注释。这一步让grub使用os-prober生成其他系统的启动项
 
@@ -400,14 +418,17 @@ vim /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-## 完成安装
+### 完成安装
+
 ```
 exit 退出changeroot
 reboot 重启，会自动取消所有的挂载
 ```
-## 启动网络
+如果u盘没拔掉的话记得拔掉
 
-#### 登录root账号
+### 启动网络
+
+登录root账号
 
 - 开启networkmanager服务，注意大小写
 
@@ -459,127 +480,206 @@ cmatrix是代码雨，输入cmatrix回车运行。
 
 
 ## 脚本安装
-（archinstall 更新了，有一些小变化，此处待更新……）
 ### 确认网络连接
-- ip a 查看网络连接
-- ping 一个网址确认网络正常
-* 连接wifi
 ```
-iwctl #开启wifi连接
-station wlan0 connect 【wifi名】 
-在跳出的条目内输入密码
-exit 退出iwctl
-```
-* ping一个网址确认网络正常
-
-### 更新archinstall
-* 更新archlinux-keyring
-```
-pacman -Sy archlinux-keyring
-
-pacman是包管理器，管理软件的安装、卸载之类的
--S代表安装
--Sy代表同步数据库然后安装。
-```
-- 更新archinstall
-```
-pacman -S archinstall
-```
-* archinstall开启安装脚本（脚本内上下左右移动光标，回车选中，tab给括号打勾，/ 左斜杠搜索）
-
-### 设置镜像源
-* mirror选自己所在地区或国家，也可以不手动选，在optional repositories里开启32位源（multilib）玩游戏或者运行windows程序需要32位支持
-
-### 磁盘分区 
-#### 启动分区
-wiki推荐是1GB，所以填入1024MB，小点也行，类型fat32,挂载点是/boot
-#### swap交换分区
-swap与虚拟内存和休眠有关，可以创建swap分区或者swap文件，二选一，前者配置更简单，后者配置稍复杂，但是更加灵活。这里采用交换分区的方式，交换文件的配置方法在手动安装的部分有。
-##### swap分区
-
-[Swap - Manjaro](https://wiki.manjaro.org/index.php/Swap)
-
-```
-SWAP大小参考
-    	内存  				不需要休眠    				需要休眠    不建议超过
-       1GB              1GB                 2GB        2GB
-       2GB              2GB                 3GB        4GB
-       3GB              3GB                 5GB        6GB
-       4GB              4GB                 6GB        8GB
-       5GB              2GB                 7GB       10GB
-       6GB              2GB                 8GB       12GB
-       8GB              3GB                 11GB       16GB
-      12GB              3GB                 15GB        24GB
-      16GB              4GB                 20GB       32GB
-      24GB              5GB                 29GB       48GB
-      32GB              6GB                 38GB       64GB
-      64GB              8GB                 72GB       128GB
-     128GB             11GB                 139GB       256GB
-     256GB             16GB                 272GB       512GB
-     512GB             23GB                 535GB       1TB
-       1TB             32GB                1056GB       2TB
-       2TB             46GB                2094GB       4TB
-       4TB             64GB                4160GB       8TB
-       8TB             91GB                8283GB       16TB
+ip a #确认网络连接
+ping bilibili.com #ping一个网址确认网络正常
 ```
 
-
-
-  创建一个和内存大小相同的硬盘分区，类型选择swap
-
-#### btrfs根分区
-
-将所有剩余空间分到一个分区，类型选择btrfs,设置compress（透明压缩,可以节省磁盘空间），添加子卷（subvolume）。
-- @ 对应 /
-
-- @home 对应 / 
-
-
-##### 可选：swap文件
-
-  创建一个@swap子卷对应 /swap
-  交换文件的创建方法：[Swap - ArchWiki](https://wiki.archlinux.org/title/Swap)
-
+* iwctl工具连接wifi
 ```
-btrfs filesystem mkswapfile --size 4g --uuid clear /swap/swapfile
+iwctl
 ```
 ```
-swapon /swap/swapfile
-```
-```
-vim /etc/fstab
-写入
-/swap/swapfile none swap defaults 0 0
+station wlan0 connect 【wifi名】 #回车后会跳出passwd提示你输入密码
 ```
 
-### 其他
-* bootloader 选择grub，因为主流发行版用的都是grub,配置简单，遇到问题时网上帖子多
+```
+exit #退出iwctl
+```
 
-* 设置root密码
+### 可选：更新archinstall
+1. 更新数据库
 
-* 设置普通用户，添加管理员权限
+   ```
+   pacman -Sy
+   
+   #pacman是包管理器，管理软件的安装、卸载之类的
+   #-S代表安装
+   #-Sy代表同步数据库
+   ```
 
-* profile可以预装桌面环境，有需要的自行选择，选择桌面之后还可以选择安装显卡驱动（驱动选择看：[AMDGPU](https://wiki.archlinux.org/title/AMDGPU)、[NVIDIAGPU](https://wiki.archlinux.org/title/NVIDIA)）
+2. 更新密钥
 
-* 内核（kernel）台式机选zen,笔记本用linux（注意不同内核的显卡驱动不一样）
+   ```
+   pacman -S archlinux-keyring
+   ```
 
-* networ configuration选择第三项networkmanager，因为主流桌面环境默认与这个集成
+3. 更新archinstall脚本
 
-* additional pakages 里面选一个文本编辑器（通常用vim）和os-prober（双系统相关）
+   ```
+   pacman -S archinstall
+   ```
 
-* 设置时区
+### 开启archinstall
 
-* install安装
+```
+archinstall
+```
+
+第一项是脚本语言，第二项是系统本地化，保持英文就行，改了会乱码，直接看第三项。
+
+### Mirrors and repositories 设置镜像源
+
+1. 选择第一项Select regions设置自己的所在地。加载会比较慢，耐心等一等。
+2. 选择第三项optional repositories回车激活multilib。这是32位程序的源。
+
+### Disk configuration 磁盘分区 
+
+选择partitioning进入磁盘分区
+
+- 情况一：整块空闲硬盘安装arch
+
+  1. 选择第一项进行自动分区 > 要使用的硬盘 > btrfs（这是文件系统） > yes（这里是问你是否使用推荐子卷布局） > ues compression（透明压缩）
+  2. 选择btrfs snapshots（这是快照软件） >  Snapper 
+
+  选择back返回
+
+- 情况二：和其他系统共享同一块硬盘
+
+  选择第二项手动分区 > 要使用的硬盘 
+
+  1. 创建启动分区
+
+      选中要使用的空闲空间 > Size（分区大小）1024MB > Filesystem（文件系统）FAT32 > Mountpoint（挂载点）/boot
+
+  2. 创建swap分区
+
+     **如果你不需要睡眠功能的话跳过这一步**。睡眠指的是把系统当前状态写入硬盘，然后电脑完全断电，下一次开机恢复到睡眠前的状态。
+
+     swap交换空间与虚拟内存和睡眠有关。建议设置zram作为日常swap，**仅在需要睡眠的时候设置硬盘swap**。有swap分区或者swap文件两种方式，前者配置更简单，后者配置稍复杂，但是更加灵活。这里采用交换文件的方式。
+
+     ```
+     SWAP大小参考
+            内存  			  不需要睡眠    		 需要睡眠   不建议超过
+            1GB              1GB                 2GB        2GB
+            2GB              2GB                 3GB        4GB
+            3GB              3GB                 5GB        6GB
+            4GB              4GB                 6GB        8GB
+            5GB              2GB                 7GB       10GB
+            6GB              2GB                 8GB       12GB
+            8GB              3GB                 11GB       16GB
+           12GB              3GB                 15GB        24GB
+           16GB              4GB                 20GB       32GB
+           24GB              5GB                 29GB       48GB
+           32GB              6GB                 38GB       64GB
+           64GB              8GB                 72GB       128GB
+          128GB             11GB                 139GB       256GB
+          256GB             16GB                 272GB       512GB
+          512GB             23GB                 535GB       1TB
+            1TB             32GB                1056GB       2TB
+            2TB             46GB                2094GB       4TB
+            4TB             64GB                4160GB       8TB
+            8TB             91GB                8283GB       16TB
+     ```
+
+     Size参考上面的表 > linux-swap
+
+  3. 创建root分区
+
+     Size部分直接回车分配全部空间 > btrfs >
+
+     选中刚刚创建的btrfs，回车。选择Mark/Unmark as compressed设置透明压缩；再选择Set subvolumes（创建子卷）> Add subvolume 
+
+     至少需要创建root子卷和home子卷，Subvolume name设置成 @，对应Subvolume mountpoint是 / ； @home 对应 /home
+
+     confirm and exit > confirm and exit > back 退出出硬盘分区
+
+### Swap（zram交换空间）
+
+这一步是自动帮你配置zram交换空间，yes开启即可。
+
+### Bootloader引导系统
+
+最常用的是Grub，选Grub就行。有其他需求可以自己网上查找。
+
+### Hostname主机名
+
+不用改
+
+### Authentication身份认证
+
+- Root password设置管理员密码
+
+- User account > Add a user 创建普通用户
+
+  Should "" be a superuser(sudo)是问你要不要给这个用户管理员权限，选yes就行。
+
+- U2F login setup这个是物理密钥，有需要的自行设置
+
+### Profile
+
+这里可以选择自动安装桌面、最小化安装等等。都选择用archinstall自动安装系统那，那就顺便自动安装一下桌面吧。如果不知道自己想安装哪个就从Gnome和KDE Plasma里随便选一个。KDE更符合windows用户的直觉，系统占用更低，个性化起来更方便，多显示器支持更好。Gnome的中文输入法体验更好，更符合mac用户的直觉，外观更好看，更流畅，更简洁，更稳定。
+
+- Type > Desktop > 想安装的桌面环境或者窗口管理器
+
+- Graphics driver（自动安装显卡驱动）
+
+  amd选AMD/ATi (opensource)
+
+  nvidia去[CodeNames · freedesktop.org](https://nouveau.freedesktop.org/CodeNames.html)这个页面搜索你的显卡型号，确认对应的NV family；NV160以后的显卡选Nvidia (open kernel module ...)；NV110~NV160的选Nvidia (proprietary)，再往前的选Nvidia (open-source nouveau ...)
+
+### Applications（蓝牙和音视频）
+
+- Bluetooth > Yes 自动安装蓝牙
+
+- Audio > pipewire 自动安装音视频服务
+
+  pipewire是新技术，兼容旧的pulseautio等服务，选pipewire就行了。
+
+### Kernel（系统内核）
+
+tab键选择。要续航选linux，要性能选linux-zen，其他选项有兴趣可以自己查询。
+
+### Network configuration （网络配置）
+
+选第三项 NetworkManager，因为跟Gnome和KDE Plasma深度集成。有别的需求自行查找。
+
+### Additional packages（自定义安装其他软件包）
+
+/左斜杠键进行搜索，tab键选择。
+
+必须安装：vim（任意文本编辑器）、os-prober（双系统需要）
+
+可选安装中文字体：wqy-zenhei（文泉驿字体）、noto-fonts（谷歌开源字体）、noto-fonts-emoji（表情）
+
+### Timezone（时区）
+
+左斜杠键搜索Shanghai
+
+### Automatic time sync (NTP) （自动启用网络时间同步）
+
+默认开启，不用修改
+
+### Install
+
+选择install安装
 
 ### 双系统
 
-1.  选择exit archinstall，推出archinstall
+安装完成后配置windows和linux的双系统。
+
+1.  选择exit archinstall，退出archinstall
 
 2. 挂载windwos的启动分区
 
    ```
    lsblk -pf 列出当前分区情况
-   找到ntfs上面的fat分区，通常是nvme1n1p1或者0n1p1。或者用fdisk -l 小写字母l，查看更详细的信息。找到后挂载到mnt下的任意一个目录，比如winboot。
+   ```
+
+   找到ntfs上面的fat分区，通常是nvme1n1p1或者0n1p1。可以用fdisk -l （小写字母l）查看更详细的分区信息。找到后挂载到/mnt下的任意一个目录，比如/mnt/winboot。
+
+   ```
    mount /dev/nvme1n1p1 /mnt/winboot 
    ```
 
@@ -626,6 +726,12 @@ vim /etc/fstab
 7. reboot 重启
 
 8. 更改bios启动项
+
+### 接下来看[桌面环境](#桌面环境)部分
+
+---
+
+
 
 # 安装桌面环境前的准备
 
@@ -676,10 +782,16 @@ vim /etc/pacman.conf
 pacman -Sy
 ```
 
-## 中文字体
+## 字体
 
 ```
-sudo pacman -S wqy-zenhei
+sudo pacman -S wqy-zenhei noto-fonts noto-fonts-emoji
+```
+
+```
+wqy-zenhei是文泉驿的中文字体
+noto-fonts是谷歌字体，包含多个国家的语言
+noto-fonts-emoji是emoji
 ```
 
 ## 显卡驱动和硬件编解码
@@ -725,7 +837,7 @@ linux替换为自己的内核，比如zen内核是linux-zen-headers
 
 * amd
 
-  已经安装
+  自带
 
 * 重启激活显卡驱动和字体
 
@@ -735,9 +847,15 @@ linux替换为自己的内核，比如zen内核是linux-zen-headers
 
 ## 桌面环境 
 
-### [KDE](#KDE)和[GNOME](#GNOME) 自己选择一个安装 点击即可跳转
+### [KDE Plasma](#KDE)和[GNOME](#GNOME) 自己选择一个安装 点击即可跳转
 
-kde和gnome的区别可以自行去网上搜索
+kde和gnome的区别可以自行网上搜索，简单来说：
+
+KDE更符合windows用户的直觉，系统占用更低，个性化起来更方便，多显示器和缩放支持更好。
+
+Gnome的中文输入法体验更好，更符合mac用户的直觉，外观更好看，动画更流畅，设计更简洁，运行更稳定。
+
+值得一提的是，Debian、Ubuntu、Fedora这样的主流发行版都默认使用Gnome。
 
 ##  GNOME
 
@@ -748,12 +866,12 @@ pacman -S gnome-desktop gdm ghostty gnome-control-center gnome-software flatpak
 jack选择pipewire-jack
 
 ```
-#gnome-desktop最小化安装gnome
-#gdm是显示管理器(gnome display manager)
-#ghostty是一个可高度自定义的终端模拟器（terminal emulator)
-#gnome-control-center是设置中心
-#software和flatpak是软件商城
-#flatpak是flathub软件
+gnome-desktop 最小化安装gnome
+gdm 是显示管理器(gnome display manager)
+ghostty 是一个可高度自定义的终端模拟器（terminal emulator)
+gnome-control-center 是设置中心
+gnome-software 是软件商城
+flatpak 是flatpak软件，这是一种全发行版通用的软件打包形式，通常flatpak软件是最好用的
 ```
 
 * 临时开启GDM
@@ -765,8 +883,10 @@ systemctl start gdm
 * 正常开启后设置gdm开机自启
 
 ```
-systemctl enable gdm
+sudo systemctl enable gdm
 ```
+
+sudo，全称substitute userid and do something，希望我没有记错，功能是以管理员身份运行命令。
 
 ### 生成home下目录（如果没有的话）
 
@@ -787,7 +907,7 @@ sudo vim /etc/locale.gen
 ```
 
 ```
-取消zh_CN.UTF-8的注释
+左斜杠键搜索，取消zh_CN.UTF-8的注释
 ```
 
 ```
@@ -836,24 +956,17 @@ sudo systemctl enable --now bluetooth
 sudo pacman -S --needed network-manager-applet dnsmasq
 ```
 
-* 设置跃点
-
-```
-启动安装的软件或终端输入nm-connection-editor
-跃点需手动设置为100,默认的-999会导致网络速率异常
-```
-
 ### 安装yay
 
 yay是aur助手，可以从aur安装软件（paru也是一个aur助手，但是会出现有些软件无法安装的情况，所以建议还是用yay）
 
-- 方法一：直接从archlinuxcn安装
+- 方法一：直接从archlinuxcn源安装
 
   ```
   sudo vim /etc/pacman.conf
   ```
 
-  文件底部写入：
+  文件底部写入（ctrl+shift+V粘贴）：
 
   ```
   [archlinuxcn]
@@ -880,10 +993,10 @@ yay是aur助手，可以从aur安装软件（paru也是一个aur助手，但是�
   [GitHub - Jguer/yay: Yet another Yogurt - An AUR Helper written in Go](https://github.com/Jguer/yay)
 
   ```
-  sudo pacman -S git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+  sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
   ```
 
-  这条命令有四步，每步之间用&&隔开。第一步用pacman安装git和base-devel。这是git管理工具和编译软件需要的包。第二步git clone把链接里的文件下载到本地。第三步cd 进入yay目录。第四步makepkg编译包。
+  这条命令有四步，每步之间用&&隔开。第一步用pacman安装git和base-devel，这是git管理工具和编译软件需要的包。第二步git clone把连接里的文件下载到本地。第三步cd命令进入yay目录。第四步makepkg编译包。
 
 - 方法三：从cachyos源安装
 
@@ -895,7 +1008,86 @@ yay是aur助手，可以从aur安装软件（paru也是一个aur助手，但是�
 
 ### 安装输入法
 
-[ibus](#ibus-rime)和[fcitx5](#fcitx5)，按喜好选择。fcitx5跟gnome的兼容性一般，但是功能更强大。
+[ibus](#ibus-rime)和[fcitx5](#fcitx5)，按喜好选择。fcitx5跟gnome的兼容性一般，但是功能更强大，推荐使用。
+
+#### fcitx5
+
+已知问题：在某些应用里面会吞字，或者某个按键没能被输入法获取直接变成英文字母输入。
+
+```
+sudo pacman -S fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
+```
+
+```
+fcitx5-im 包含了fcitx5的基本包
+fcitx5-mozc是开源谷歌日语输入法
+fcitx5-rime是输入法引擎
+rime-ice-pinyin-git是雾凇拼音输入法
+```
+
+- 打开fcitx 5 configuration添加rime和mozc输入法，没有的话登出一次
+
+- 编辑rime的配置文件设置输入法方案为雾凇拼音，如果没有文件夹和文件的话自己创建文件夹，然后编辑配置文件
+
+```
+vim ~/.local/share/fcitx5/rime/default.custom.yaml 
+```
+
+```
+patch:
+  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
+  __include: rime_ice_suggestion:/
+```
+
+- 商店搜索extension，安装蓝色的extensionmanager
+
+- 安装扩展：input method panel
+  https://extensions.gnome.org/extension/261/kimpanel/
+
+- 编辑环境变量
+
+```
+sudo vim /etc/environment
+```
+
+```
+XIM="fcitx" #解决wechat用不了输入法的问题
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
+```
+
+- 美化
+
+1. 关闭“Input Method Panel”扩展
+
+2. 浏览器搜索fcitx5 themes，下载自己喜欢的，存放路径为：~/.local/share/fcitx5/themes
+
+3. 打开fcitx配置 选择附组件，点击“经典用户界面”右边的扳手螺丝刀图标，设置主题。这里有一大堆自定义的选项，自己研究吧。
+
+
+- 卸载fcitx5
+
+1. 删除包
+
+   ```
+   sudo pacman -Rns fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
+   ```
+
+2. 删除残留文件
+
+   ```
+   sudo rm -rfv ~/.config/fcitx5 ~/.local/fcitx5
+   ```
+
+3. 清理环境变量
+
+   ```
+   sudo vim /etc/environment
+   ```
+
+4. 如果之前禁用过系统设置里的打字快捷键记得恢复
 
 #### ibus-rime
 
@@ -973,88 +1165,6 @@ ibus-mozc是日语输入法
 
 4. 登出
 
-#### fcitx5
-
-已知问题：在某些应用里面会吞字，或者某个按键没能被输入法获取直接变成英文字母输入。
-
-```
-sudo pacman -S fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
-```
-
-```
-fcitx5-im 包含了fcitx5的基本包
-fcitx5-mozc是开源谷歌日语输入法
-fcitx5-rime是输入法引擎
-rime-ice-pinyin-git是雾凇拼音输入法
-```
-
-- 打开fcitx 5 configuration添加rime和mozc输入法，没有的话登出一次
-
-- 编辑rime的配置文件设置输入法方案为雾凇拼音，如果没有文件夹和文件的话自己创建文件夹，然后编辑配置文件
-
-```
-vim ~/.local/share/fcitx5/rime/default.custom.yaml 
-```
-
-```
-patch:
-  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
-  __include: rime_ice_suggestion:/
-```
-
-- 商店搜索extension，安装蓝色的extensionmanager
-
-- 安装扩展：input method panel
-  https://extensions.gnome.org/extension/261/kimpanel/
-
-- 编辑环境变量
-
-```
-sudo vim /etc/environment
-```
-
-```
-XIM="fcitx" #解决wechat用不了输入法的问题
-GTK_IM_MODULE=fcitx
-QT_IM_MODULE=fcitx
-XMODIFIERS=@im=fcitx
-XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
-```
-
-
-
-- 美化
-
-1. 关闭“Input Method Panel”扩展
-
-2. 浏览器搜索fcitx5 themes，下载自己喜欢的，存放路径为：~/.local/share/fcitx5/themes
-
-3. 打开fcitx配置 选择附组件，点击“经典用户界面”右边的扳手螺丝刀图标，设置主题。这里有一大堆自定义的选项，自己研究吧。
-
-   
-
-- 卸载fcitx5
-
-1. 删除包
-
-   ```
-   sudo pacman -Rns fcitx5-im fcitx5-mozc fcitx5-rime rime-ice-pinyin-git
-   ```
-
-2. 删除残留文件
-
-   ```
-   sudo rm -rfv ~/.config/fcitx5 ~/.local/fcitx5
-   ```
-
-3. 清理环境变量
-
-   ```
-   sudo vim /etc/environment
-   ```
-
-4. 如果之前禁用过系统设置里的打字快捷键记得恢复
-
 ### 自定义安装软件
 
 这是我会安装的，你可以按自己的需求安装
@@ -1064,63 +1174,60 @@ XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
 - pacman
 
   ```
-  sudo pacman -S --needed mission-center gnome-text-editor gnome-disk-utility gnome-font-viewer gnome-clocks gnome-weather gnome-calculator loupe snapshot baobab celluloid fragments file-roller foliate zen-browser zen-browser-i18n-zh-cn gst-plugin-pipewire gst-plugins-good pacman-contrib decibels wofi gnome-font-viewer
+  sudo pacman -S --needed mission-center gnome-text-editor gnome-disk-utility gnome-font-viewer gnome-clocks gnome-weather gnome-calculator loupe snapshot baobab celluloid fragments file-roller foliate firefox gst-plugin-pipewire gst-plugins-good pacman-contrib decibels
   ```
 
   ```
-  mission-center 类似win11的任务管理器
-  gnome-text-editor记事本
-  gnome-disk-utility磁盘管理器
+  mission-center 类似win11的任务管理器，强烈推荐
+  gnome-text-editor gnome标配记事本
+  gnome-disk-utility 磁盘管理工具，可以调节分区大小和格式化分区等等
   gnome-font-viewer 方便安装和查看字体
-  gnome-clocks时钟工具，可以设置闹钟和计时
-  gnome-weather天气
-  gnome-calculator计算器
-  loupe图片查看工具
-  snapshot相机，摄像头
-  baobab磁盘使用情况分析工具
-  celluloid是基于mpv的视频播放器
-  fragments是符合gnome设计理念的种子下载器
-  file-roller压缩解压缩
+  gnome-clocks 时钟工具，可以设置闹钟和计时
+  gnome-weather 天气，设置地区之后可以在系统托盘里显示天气，安装扩展后可以在时间边上显示天气组件
+  gnome-calculator 计算器
+  loupe 图片查看工具
+  snapshot 相机，摄像头
+  baobab 磁盘使用情况分析工具
+  celluloid 是基于mpv的视频播放器
+  fragments 是符合gnome设计理念的种子下载器，或者安装qtbittorrent
+  file-roller 压缩解压缩
   foliate 电子书阅读器
-  zen-browser zen浏览器，也可以安装firefox或者商店搜索你想要用的浏览器，但是linux上表现最好的浏览器是firefox。zen浏览器一定要在设置>zen模组里面安装transparent zen模组，可以获得特别流畅的动画效果
-  zen-browser-i18n-zh-cn是zen的中文语言包
-  gst-plugin-pipewire gst-plugins-good是gnome截图工具自带的录屏，需登出一次
+  firefox linux上性能表现最佳的浏览器，需要别的可以商店自行搜索安装
+  gst-plugin-pipewire gst-plugins-good 是gnome截图工具自带的录屏，需登出一次
   pacman-contrib 提供pacman的一些额外功能，比如checkupdates用来检查更新
-  decibels是音频播放器，我一般在网页上听音乐，所以就装个轻量化的。其实用celluloid也能放音频，但是这个软件可以显示波形，很酷。本地播放音乐的话推荐amberol。
-  #wofi 这是一个快捷搜索工具
+  decibels 是可以显示波形的音频播放器，这只是个音频播放器，不是音乐播放器
   ```
-
+  
 - 从aur安装常用软件
 
   [WPS Office - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/WPS_Office)
 
   ```
-  yay -S linuxqq-appimage wechat-appimage wps-office-cn wps-office-mui-zh-cn typora-free gpu-screen-recorder
+  yay -S linuxqq-appimage wechat-appimage wps-office-cn wps-office-mui-zh-cn typora-free
   ```
 
   ```
-  linuxqq-appimage是appimgae版qq
-  wechat-appimage是appimage版微信
-  wps-office-cn是wps
-  wps-office-mui-zh-cn是wps的中文语言包
-  typora-free是markdown编辑器
-  gpu-screen-recorder 是类似win上nvidiaapp那样的录制/回放软件
+  linuxqq-appimage 是appimgae版qq
+  wechat-appimage 是appimage版微信
+  wps-office-cn 是wps
+  wps-office-mui-zh-cn 是wps的中文语言包
+  typora-free 是markdown编辑器
   ```
-
+  
   - 关于字体
-
+  
     从网上搜索常用办公字体，下载解压后存放到```~/.local/share/fonts```里面（在这个目录下新建文件夹整理字体文件）。放进去之后刷新字体缓存 。
-
+  
     ```
     fc-cache --force
     ```
-
+  
 - flatpak
 
   这里都是些有趣或者实用的工具，可以从商店搜索安装，也可以用命令
 
   ```
-  flatpak install flathub be.alexandervanhee.gradia io.github.Predidit.Kazumi io.gitlab.theevilskeleton.Upscaler com.github.unrud.VideoDownloader io.github.ilya_zlobintsev.LACT xyz.ketok.Speedtest com.geeks3d.furmark com.google.Chrome io.github.flattool.Warehouse com.github.tchx84.Flatseal
+  flatpak install flathub be.alexandervanhee.gradia io.github.Predidit.Kazumi io.gitlab.theevilskeleton.Upscaler com.github.unrud.VideoDownloader io.github.ilya_zlobintsev.LACT com.geeks3d.furmark io.github.flattool.Warehouse com.github.tchx84.Flatseal
   ```
 
   ```
@@ -1129,13 +1236,11 @@ XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
   upscaler图片超分
   video downloader下载youtube/bilibili 144p～8k视频
   LACT 显卡超频、限制功率、风扇控制等等
-  speedtest 测试网速
   furmark 显卡烤鸡
-  chrome 浏览器。有些网站或者浏览器功能在firefox下无法正常运行，所以装一个chromium的浏览器做备用
   Warehouse 用来管理flatpak的源、软件、属性、用户数据之类的
   Flatseal 管理flatpak应用的权限、环境变量之类的
   ```
-
+  
   - gradia可以对截图进行一些简单的添加文字、马赛克、图表、背景之类的操作
 
     使用方法：
@@ -1145,14 +1250,14 @@ XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
     ```
     flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
     ```
-
+  
 - 如果flatpak没速度或者加载不出来的话更换flatpak国内源，这里举例的是上交大的
 
   ```
   sudo flatpak remote-modify flathub --url=https://mirror.sjtu.edu.cn/flathub
   ```
 
-#### 视频播放器开启硬件编解码
+### 视频播放器开启硬件编解码
 
 - 方法一：配置文件
 
@@ -1219,7 +1324,7 @@ XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
 
 2025.9.7已知问题：ibus输入法只能在gtk应用中使用，qt应用中无法使用。
 
-由于特殊国情，星火应用商店里的应用可能比aur上的都好用，建议安装。
+由于特殊国情，星火应用商店里的应用可能比aur上的都好用，建议安装。amber-ce是一个debian容器，可以让你在arch上快捷安装deb包。
 
 1. 安装ace容器
 
@@ -1273,7 +1378,7 @@ yay -Rns amber-ce-trixie
 
 **快照相当于存档，每次做自己不了解的事情之前都存个档**
 
-timeshift操作简单，但是速度很慢，建议用snapper
+timeshift操作简单，但是速度很慢且容易出bug，建议用snapper
 
 #### 方法一：snapper
 
@@ -1303,7 +1408,7 @@ sudo systemctl enable --now grub-btrfsd
 
 ##### 具体使用方法
 
-打开btrfs assistant，切换到snapper settings页面。我们创建子卷的时候创建了一个@（root）子卷和一个@home（home）子卷，所以需要两个config（配置）。创建一个root配置，再创建一个home配置。然后到snapper页面下的New/Delete页面就可以新建和管理快照了，Browse/Restore页面选中快照后点restore可以恢复到那个快照的状态。如果你要同时快照root和home的话就分别创建一个root快照和home快照，恢复的时候各自恢复就行了。
+打开btrfs assistant，切换到snapper settings页面。我们创建子卷的时候至少创建了一个@子卷和一个@home子卷，所以需要两个config（配置）。创建一个root配置，再创建一个home配置。然后到snapper页面下的New/Delete页面就可以新建和管理快照了，Browse/Restore页面选中快照后点restore可以恢复到那个快照的状态。如果你要同时快照root和home的话就分别创建一个root快照和home快照，恢复的时候各自恢复就行了。
 
 #### 方法二：[timeshift](#timeshift)
 
@@ -1322,8 +1427,7 @@ sudo systemctl enable --now grub-btrfsd
   btrfs文件系统已经足够稳定，“不作死就不会死”。使用时遵循以下几点：
 
   1. **别第一时间更新，别长时间不更新，密钥单独更新，重要程序更新前创建快照**
-
-  2. **明白自己的行为会造成怎样的后果，做不了解的事情前创建快照**
+2. **非必要不修改，明白自己的行为会造成怎样的后果，做不了解的事情前创建快照**
 
 ### open in any terminal
 
@@ -1439,7 +1543,7 @@ ctrl+alt+S gnome-control-center
 
 ### 功能性扩展
 
-#### ⚠️ 警告：扩展在gnome桌面环境大版本更新的时候大概率会大面积失效，如果出现gnome桌面环境的更新，一定要先关闭所有扩展，谨慎行事
+#### ⚠️ 警告：扩展在gnome桌面环境大版本更新的时候大概率会大面积失效，如果出现gnome桌面环境的大版本更新，一定要先关闭所有扩展，谨慎行事
 
 - 从商店安装蓝色的扩展管理器
 
@@ -1473,11 +1577,15 @@ flatpak install flathub com.mattjakeman.ExtensionManager
 
 - color picker 
 
-  对自定义非常有用
+  获取屏幕上的颜色，对自定义非常有用
 
 - Arch Linux Updates Indicator
 
-  在面板上显示一个和arch更新相关的图标。要安装pacman-contrib。设置取消始终显示，高级设置里命令改成ghostty -e sudo pacman -Syu
+  在面板上显示一个和arch更新相关的图标。要安装pacman-contrib。设置取消始终显示，高级设置里命令改成
+
+  ```
+  ghostty -e sudo pacman -Syu
+  ```
 
 - quick settings tweaks
 
@@ -1501,31 +1609,33 @@ flatpak install flathub com.mattjakeman.ExtensionManager
 
 - dask to dock 
 
-  把概览里的快捷栏放到桌面上
+  把概览里的快捷栏放到桌面上。如果要用windows布局的话不要装这个。
 
 其他有用扩展见[其他有用的扩展](#其他有用的扩展)和[实现windows布局](#实现windows布局)
 
-### 调节外界屏幕亮度
+### 调节外接屏幕亮度
 
-gnome默认没法调节外界屏幕亮度，通过ddcutil+扩展可以进行调节。
+[ddcutil-service](https://github.com/digitaltrails/ddcutil-service)
 
-```
-sudo pacman -S ddcutil
-```
+gnome默认没法调节外接屏幕亮度，通过ddcutil+扩展可以进行调节。
 
 ```
-sudo usermod -aG i2c $USER
+yay -S ddcutil-service
 ```
+
+```
+sudo gpasswd -d $USER i2c
+```
+
+安装扩展display ajustment
 
 ```
 reboot
 ```
 
-安装扩展brightness control using ddcutil，设置里botton location选system menu
+### 睡眠到硬盘
 
-### 休眠到硬盘
-
-硬盘上必须有交换空间才能休眠到硬盘
+硬盘上必须有交换空间才能睡眠到硬盘
 
 - 添加hook
 
@@ -1549,7 +1659,7 @@ sudo mkinitcpio -P
 reboot
 ```
 
-- 使用命令进行休眠
+- 使用命令进行睡眠
 
 ```
 systemctl hibernate
@@ -1559,10 +1669,6 @@ systemctl hibernate
 
 性能模式切换，有三个档位，performance性能、balance平衡、powersave节电。一般平衡档位就够用了，也不需要调节风扇什么的。
 
-不建议使用tlp或者auto-cpufreq，意义不大，这个易用而且足够。如果想折腾的话可以看附录[TLP相关](#TLP相关)。
-
-tlp和auto-cpufreq都有对应的gnome扩展，但未经验证，不保证能用。
-
 ```
 sudo pacman -S power-profiles-daemon
 ```
@@ -1571,13 +1677,13 @@ sudo pacman -S power-profiles-daemon
 sudo systemctl enable --now power-profiles-daemon 
 ```
 
+不建议使用tlp或者auto-cpufreq，意义不大，这个易用而且足够。如果想折腾的话可以看附录[TLP相关](#TLP相关)。tlp和auto-cpufreq都有对应的gnome扩展，但未经验证，不保证能用。
+
 #### 实用插件扩展
 
-```
-power tracker #显示电池充放电
-auto power profile #配合powerProfilesDaemon使用，可以自动切换模式
-power profile indicator # 配合powerProfilesDaemon使用，面板显示当前模式
-```
+power tracker 显示电池充放电
+auto power profile 配合powerProfilesDaemon使用，可以自动切换模式
+power profile indicator  配合powerProfilesDaemon使用，面板显示当前模式
 
 ### 设置充电阈值 
 
@@ -1607,11 +1713,11 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
 - blur my shell 
 
-  透明度美化。
+  透明度美化
 
 - hide top bar 
 
-  隐藏顶栏。设置里激活sensitivity的第一个。intellihide取消激活第二项。
+  隐藏面板（panel，顶部的那个面板，win叫任务栏）。设置里激活sensitivity的第一个。intellihide取消激活第二项。
 
 - user themes 
 
@@ -1619,11 +1725,11 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
 - logo menu 
 
-  在面板（panel，任务栏）显示一个logo，好玩
+  在面板显示一个logo，好玩。设置里更换gnome extension为extension manager；终端换ghostty；systemmonitor换missioncenter；取消激活show activities button
 
 - desktop cube 
 
-  把工作区切换从平铺变成一个可以旋转的方块的面。设置的overview里把透明度（opacity）都改成50%，超级酷！
+  桌面端用户强烈推荐。把工作区切换从平铺变成一个可以旋转的方块的面。设置的overview里把透明度（opacity）都改成50%，超级酷！
 
 - rounded window corners reborn 
 
@@ -1637,7 +1743,7 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
    - app icons taskbar
 
-     实现windows那样的任务栏。和hide top bar冲突。如果关闭了在所有显示器上显示就无法智能隐藏，原因不明。
+     实现windows那样的任务栏。和hide top bar、dash to dock冲突。如果关闭了在所有显示器上显示就无法智能隐藏，原因不明。
 
    - desktop icons ng
 
@@ -1649,7 +1755,7 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
    - 可选：just perfection
 
-     功能强大的自定义扩展，可以设置gnome各个元素的开关。不过根据gnome版本的不同能设置的选项会有所不同。
+     功能强大的自定义扩展，可以设置gnome各个元素的开关。不过根据gnome版本的不同能设置的选项会有所不同，稳定性堪忧。
 
    - 可选：用dash to panel 替换app icons taskbar
 
@@ -1687,7 +1793,6 @@ power profile indicator # 配合powerProfilesDaemon使用，面板显示当前�
 
      取消激活显示个人文件夹、回收站图标
 
-   （待施工…………）
 
 
 #### 光标主题
@@ -1708,7 +1813,7 @@ https://www.gnome-look.org/browse?cat=134&ord=latest
 
 #### shell美化
 
-##### 更换终端为fish，想用ZSH可以看附录：[zsh](#zsh)
+##### 更换终端为fish，想用zsh可以看附录：[zsh](#zsh)
 
 - 安装终端字体
 
@@ -1763,40 +1868,24 @@ https://starship.rs/presets/
 
 #### ghostty美化
 
-- 下载catppuccin颜色配置，粘贴到~/.config/ghostty/themes/
-
-```
-https://github.com/catppuccin/ghostty?tab=readme-ov-file
-```
+- 下载[catppuccin](https://github.com/catppuccin/ghostty?tab=readme-ov-file)颜色配置，或者找一个你喜欢的，粘贴到~/.config/ghostty/themes/
 
 - 修改~/.config/ghostty/conf 配置文件，例如下载的是frappe的话：
 
 ```
+#颜色配置文件路径
 theme = /home/shorin/.config/ghostty/catppuccin-frappe.conf
-```
 
-- 隐藏标题栏
-
-```
+#隐藏标题栏
 window-decoration = none
-```
 
-- 设置透明度
-
-```
+#设置透明度
 background-opacity=0.8
-```
 
-- 设置字体和字体大小
-
-```
+#设置字体和字体大小
 font-family = "Adwaita Mono" 
 font-size = 15
-```
 
-- 边距
-
-```
 #设置左右边距
 window-padding-x=5
 #设置上下边距
@@ -1809,7 +1898,7 @@ window-padding-y=5
 
 
 
-## KDE
+## KDE 
 
 [KED-Archwiki](https://wiki.archlinux.org/title/KDE)
 
@@ -1840,7 +1929,7 @@ systemctl start sddm
 sudo systemctl enable sddm 
 ```
 
-- 卸载用不上的软件
+- 可选：卸载用不上的软件
 
 ```
 sudo pacman -Rdd plasma-welcome plasma-systemmonitor 
@@ -3672,7 +3761,7 @@ sudo systemctl enable --now nvidia-powerd.service
 
 参考资料：
 
-[电源管理/挂起与休眠 - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/%E7%94%B5%E6%BA%90%E7%AE%A1%E7%90%86/%E6%8C%82%E8%B5%B7%E4%B8%8E%E4%BC%91%E7%9C%A0#%E7%A6%81%E7%94%A8_zswap_%E5%86%99%E5%9B%9E%E4%BB%A5%E4%BB%85%E5%B0%86%E4%BA%A4%E6%8D%A2%E7%A9%BA%E9%97%B4%E7%94%A8%E4%BA%8E%E4%BC%91%E7%9C%A0)
+[电源管理/挂起与睡眠 - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/%E7%94%B5%E6%BA%90%E7%AE%A1%E7%90%86/%E6%8C%82%E8%B5%B7%E4%B8%8E%E4%BC%91%E7%9C%A0#%E7%A6%81%E7%94%A8_zswap_%E5%86%99%E5%9B%9E%E4%BB%A5%E4%BB%85%E5%B0%86%E4%BA%A4%E6%8D%A2%E7%A9%BA%E9%97%B4%E7%94%A8%E4%BA%8E%E4%BC%91%E7%9C%A0)
 
 [zswap - ArchWiki](https://wiki.archlinux.org/title/Zswap)
 
@@ -3692,7 +3781,7 @@ zswap依托于swap运行，是硬盘swap的缓存，还是会有硬盘读写，�
 
 zram是把内存的一部分动态地作为swap交换空间，和硬盘swap一样都是swap设备。zram占满前完全不会有硬盘swap的读写。
 
-### 不需要休眠的话删除硬盘swap后开启zram
+### 不需要睡眠的话删除硬盘swap后开启zram
 
 1. 关闭swap
 
@@ -4339,5 +4428,11 @@ setopt EXTENDED_HISTORY
 
 ```
 source ~/.zshrc
+```
+
+## zen浏览器
+
+```
+sudo pacman -S zen-browser zen-browser-i18n-zh-cn
 ```
 
