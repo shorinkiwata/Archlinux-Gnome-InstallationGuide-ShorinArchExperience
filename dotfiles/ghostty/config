@@ -10,3 +10,7 @@ background-opacity=0.8
 font-family = "Adwaita Mono" 
 font-size = 15
 
+#设置左右边距
+window-padding-x=5
+#设置上下边距
+window-padding-y=5
