@@ -648,9 +648,11 @@ username替换为自己的用户名（不需要输入<>符号）
 passwd <username>
 ```
 * 编辑权限
+
 ```
-EDITOR=vim visudo
+vim /etc/sudoers
 ```
+
 * 搜索 wheel，取消注释
 ```
 %wheel ALL=（ALL：ALL） ALL
@@ -1457,7 +1459,7 @@ flatpak install flathub com.mattjakeman.ExtensionManager
 
   装kazimieras.vaina的那个。osd显示大写锁定和小键盘锁定。设置里把指示器风格改成show/hide cap-locks only
 
-- GNOME Fuzzy App Search 
+- Fuzzy Application Search
 
   模糊搜索
 
