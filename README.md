@@ -4142,7 +4142,7 @@ sudo pacman -Rns $(pacman -Qdt)
 sudo pacman -Rdd
 ```
 
-## cpu资源优先级
+## ananicy cpu资源调用优化
 （没感觉到区别，故弃用。）
 ```
 yay -S ananicy-cpp cachyos-ananicy-rules
@@ -4247,7 +4247,7 @@ font_size 14
 
 ## appimagelauncher
 
-（appimgae文件依旧足够方便了，这个意义不大且容易出bug，故弃用）
+（appimgae文件已经足够方便了，这个意义不大且容易出bug，故弃用）
 
 appimage是一个下载即用、无需安装的文件。需要确认安装了fuse才能运行appimage。
 
