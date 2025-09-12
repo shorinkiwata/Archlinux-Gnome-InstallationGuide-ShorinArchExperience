@@ -35,7 +35,7 @@
 1. [安装前的准备](#安装前的准备)
 2. [手动安装系统](#手动安装)
 3. [脚本安装系统](#脚本安装)
-4. [配置系统（创建用户、显卡驱动）](#配置系统)
+4. [安装桌面环境前的准备（创建用户、显卡驱动）](#安装桌面环境前的准备)
 5. [GNOME桌面安装](#GNOME)
 6. [GNOME美化](#GNOME美化)
 7. [KDE桌面安装](#KDE)
@@ -68,7 +68,7 @@ esc 退出编辑模式
 ## 解决双系统安装后时间错乱
 
 参考链接：
-[双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)s
+[双系统时间同步-CSDN博客](https://blog.csdn.net/zhouchen1998/article/details/108893660)
 
 windows下管理员身份打开powershell 运行
 ```
@@ -627,7 +627,7 @@ vim /etc/fstab
 
 8. 更改bios启动项
 
-# 配置系统
+# 安装桌面环境前的准备
 
 ## 创建普通用户
 
@@ -718,7 +718,7 @@ linux替换为自己的内核，比如zen内核是linux-zen-headers
  - nvidia
 
    ```
-   suodo pacman -S libva-nvidia-driver
+   sudo pacman -S libva-nvidia-driver
    ```
 
 * amd
@@ -893,13 +893,13 @@ yay是aur助手，可以从aur安装软件（paru也是一个aur助手，但是�
 
 ### 安装输入法
 
-[ibus](#ibus-rime)和[fcitx5](#fcitx5)，按喜好选择。fcitx5跟gnome的兼容性一般。
+[ibus](#ibus-rime)和[fcitx5](#fcitx5)，按喜好选择。fcitx5跟gnome的兼容性一般，但是功能更强大。
 
 #### ibus-rime
 
 参考：[Rime - Arch Linux 中文维基](https://wiki.archlinuxcn.org/zh-hant/Rime) | [可选配置（基础篇） | archlinux 简明指南](https://arch.icekylin.online/guide/advanced/optional-cfg-1#%F0%9F%8D%80%EF%B8%8F-%E8%BE%93%E5%85%A5%E6%B3%95) | [RIME · GitHub](https://github.com/rime)
 
-已知问题：amber-ce-bookworm（后面星火应用商店的部分会用到）里安装的qt应用无法使用ibus输入法
+已知问题：amber-ce（后面星火应用商店的部分会用到）里安装的qt应用无法使用ibus输入法
 
 1. 安装ibus-rime
 
@@ -995,8 +995,6 @@ vim ~/.local/share/fcitx5/rime/default.custom.yaml
 ```
 
 ```
-写入：
-
 patch:
   # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
   __include: rime_ice_suggestion:/
@@ -1095,7 +1093,7 @@ XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
   [WPS Office - Arch Linux 中文维基](https://wiki.archlinuxcn.org/wiki/WPS_Office)
 
   ```
-  yay -S linuxqq-appimage wechat-appimage wps-office-cn wps-office-mui-zh-cn typora-free
+  yay -S linuxqq-appimage wechat-appimage wps-office-cn wps-office-mui-zh-cn typora-free gpu-screen-recorder
   ```
 
   ```
@@ -1104,6 +1102,7 @@ XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
   wps-office-cn是wps
   wps-office-mui-zh-cn是wps的中文语言包
   typora-free是markdown编辑器
+  gpu-screen-recorder 是类似win上nvidiaapp那样的录制/回放软件
   ```
 
   - 关于字体
@@ -1262,7 +1261,7 @@ XDG_CURRENT_DESKTOP=GNOME #解决某些软件里面输入法吞字的问题
 
 #### 卸载
 
-使用ace bookworm软件卸载器卸载软件，或者sudo apt remove 【包名】，或者直接删除整个容器，删除容器之后里面的所有东西都不会留下。
+使用ace 软件卸载器卸载软件，或者sudo apt remove 【包名】，或者直接删除整个容器，删除容器之后里面的所有东西都不会留下。
 
 ```
 yay -Rns amber-ce-trixie
@@ -1290,6 +1289,10 @@ btrfs-assistant 是图形化管理btrfs和快照的软件
 
 ```
 sudo pacman -S grub-btrfs inotify-tools
+```
+
+```
+reboot
 ```
 
 ```
@@ -1409,6 +1412,7 @@ ctrl+alt+A #交互式截图
 super+Q #关闭窗口
 super+F #切换最大化
 super+alt+F #切换全屏
+alt+F #激活窗口菜单
 ```
 
 * 系统
@@ -1423,11 +1427,12 @@ super+G #显示全部应用
 ```
 super+B   zen
 super+T   ghostty
-ctrl+alt+S    missioncenter
+super+`    missioncenter
 super+E   nautilus
 super+shift+S   flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
 super+R wofi --show drun
 super+M gnome-text-editor
+ctrl+alt+S gnome-control-center
 ```
 
 ### 功能性扩展
@@ -1450,7 +1455,7 @@ flatpak install flathub com.mattjakeman.ExtensionManager
 
 - lock keys 
 
-  osd显示大写锁定和小键盘锁定。设置里把指示器风格改成show/hide cap-locks only
+  装kazimieras.vaina的那个。osd显示大写锁定和小键盘锁定。设置里把指示器风格改成show/hide cap-locks only
 
 - GNOME Fuzzy App Search 
 
@@ -1462,7 +1467,7 @@ flatpak install flathub com.mattjakeman.ExtensionManager
 
 - tiling shell 
 
-  窗口平铺，tilingshell是用布局平铺,另一个叫forge是hyprland那种自动平铺但是很卡。推荐用tilingshell，记得自定义快捷键，我快捷键是super+w/a/s/d对应上下左右移动窗口，Super+Alt+w/a/s/d对应上下左右扩展窗口，super+c取消平铺。
+  窗口平铺，tilingshell是用布局平铺,另一个叫forge是hyprland那种自动平铺但是很卡。推荐用tilingshell，记得自定义快捷键，我快捷键是super+w/a/s/d对应上下左右移动窗口，Super+Alt+w/a/s/d对应上下左右扩展窗口，super+Z取消平铺，super+C把窗口移动到屏幕中心
 
 - color picker 
 
@@ -1498,9 +1503,23 @@ flatpak install flathub com.mattjakeman.ExtensionManager
 
 其他有用扩展见[其他有用的扩展](#其他有用的扩展)和[实现windows布局](#实现windows布局)
 
-### 电源管理
+### 调节外界屏幕亮度
 
-[Power management/Suspend and hibernate - ArchWiki](https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate)
+gnome默认没法调节外界屏幕亮度，通过ddcutil+扩展可以进行调节。
+
+```
+sudo pacman -S ddcutil
+```
+
+```
+sudo usermod -aG i2c $USER
+```
+
+```
+reboot
+```
+
+安装扩展brightness control using ddcutil，设置里botton location选system menu
 
 ### 休眠到硬盘
 
@@ -1534,8 +1553,6 @@ reboot
 systemctl hibernate
 ```
 
-
-
 ### 性能模式切换工具 power-profiles-daemon
 
 性能模式切换，有三个档位，performance性能、balance平衡、powersave节电。一般平衡档位就够用了，也不需要调节风扇什么的。
@@ -1552,13 +1569,19 @@ sudo pacman -S power-profiles-daemon
 sudo systemctl enable --now power-profiles-daemon 
 ```
 
-### 实用插件扩展
+#### 实用插件扩展
 
 ```
 power tracker #显示电池充放电
 auto power profile #配合powerProfilesDaemon使用，可以自动切换模式
 power profile indicator # 配合powerProfilesDaemon使用，面板显示当前模式
 ```
+
+### 设置充电阈值 
+
+未经验证，不一定生效。
+
+安装扩展：Battery Health Charging，然后在设置里面安装polkit。在系统快捷设置面板里面可以快速调节充电阈值。
 
 ---
 
@@ -1703,10 +1726,6 @@ sudo pacman -S fish
 chsh -s /usr/bin/fish
 ```
 
-```
-reboot 
-```
-
 编辑配置文件去掉默认的启动文字
 
 ```
@@ -1772,6 +1791,17 @@ background-opacity=0.8
 font-family = "Adwaita Mono" 
 font-size = 15
 ```
+
+- 边距
+
+```
+#设置左右边距
+window-padding-x=5
+#设置上下边距
+window-padding-y=5
+```
+
+## GNOME接着看[显卡切换](#显卡切换)
 
 ---
 
@@ -1986,7 +2016,7 @@ XMODIFIERS=@im=fcitx
 - 安装后没显示图标的话登出一次
 
 ```
-sudo pacman -S --needed mission-center zen-browser zen-browser-i18n-zh-cn ark gwenview kcalc kate pacman-contrib gnome-disk-utility baobab haruna
+sudo pacman -S --needed mission-center zen-browser zen-browser-i18n-zh-cn ark gwenview kcalc kate pacman-contrib gnome-disk-utility baobab haruna 
 ```
 
 ```
@@ -2002,10 +2032,10 @@ baobab磁盘使用情况分析工具
 haruna是基于mpv的视频播放器
 ```
 
-- qq、微信、wps
+- aur
 
 ```
-yay -S linuxqq-appimage wechat-appimage wps-office-cn wps-office-mui-zh-cn
+yay -S linuxqq-appimage wechat-appimage wps-office-cn wps-office-mui-zh-cn typora-free gpu-screen-recorder
 ```
 
 ```
@@ -2013,12 +2043,8 @@ linuxqq-appimage是appimgae版qq
 wechat-appimage是appimage版微信
 wps-office-cn是wps
 wps-office-mui-zh-cn是wps的中文语言包
-```
-
-- markdown编辑器
-
-```
-yay -S typora-free
+typora-free是markdown编辑器
+gpu-screen-recorder 是类似win上nvidiaapp那样的录制/回放软件
 ```
 
 - flathub
@@ -2091,6 +2117,32 @@ sudo flatpak remote-modify flathub --url=https://mirror.sjtu.edu.cn/flathub
    [Spark Store](https://www.spark-app.store/)
 
 4. 打开ace（蓝色图标）
+
+   如果打不开的话
+
+   ```
+   kate $(which trixie-run)
+   ```
+
+   找到
+
+   ```
+   non_root_user=$(who  | awk '{print $1}' | head -n 1)
+   uid=$(id -u $non_root_user)
+   ```
+
+   上面这两行内容替换为
+
+   ```
+   uid=$(id -u)
+   ```
+
+   然后在BIND_DIRS=()里面添加这两行：
+
+   ```
+       "--ro-bind /etc/passwd /etc/passwd"     
+       "--ro-bind /etc/group /etc/group"
+   ```
 
 5. 安装星火应用商店
 
@@ -2460,7 +2512,7 @@ yay -S plasma6-applets-wallpaper-effects
 
 ## 显卡切换
 
-linux由于没有厂家专门做显卡切换工具，只能用通用工具，所以功能通常不完整，可能只能做到从混合模式切换到核显模式。以下是几个常用的工具，可以自己试试看能不能用。建议安装时处在混合模式。从混合切到独显直连要动bios，所以大概率会失败，谨慎操作。
+linux由于没有厂家专门做显卡切换工具，只能用通用工具，所以功能通常不完整，尤其在wayland下可能只能做到从混合模式切换到核显模式。以下是几个常用的工具，可以自己试试看能不能用。建议安装时处在混合模式。从混合切到独显直连要动bios，所以大概率会失败，谨慎操作。
 
 ### supergfxctl
 
@@ -2556,6 +2608,22 @@ sudo systemctl enable --now vmware-usbarbitrator.service
 ```
 
 4. 重启电脑
+
+## winboat
+
+[winboat](https://github.com/TibixDev/winboat)
+
+以docker容器为基础的windows虚拟机，rdp连接，自动化配置winapps，可以与linux无缝集成，但beta版无缝集成的效果不是很好。只是用windows虚拟机做轻量的活的话可以用这个，安装很简单，缺点是资源占用比kvm/qemu虚拟机要高一些。
+
+`````````````````````````````````````
+sudo pacman -S docker docker-compose
+sudo systemctl enable --now docker.service
+sudo usermod -aG docker $USER
+echo -e "ip_tables\niptable_nat" | sudo tee /etc/modules-load.d/iptables.conf
+reboot
+`````````````````````````````````````
+
+[winboat-realease](https://github.com/TibixDev/winboat/releases)这个页面下载appimage文件，右键设置执行权限，双击运行，然后按照指引安装windows就行了。
 
 ## KVM/QEMU虚拟机
 
@@ -3258,7 +3326,7 @@ yay -S lsfg-vk-git
    steam右键想要运行的游戏，启动参数填入刚刚的环境变量LSFG_PROCESS="miyu"，空格， %command%。比如：
 
    ```
-   prime-run gamemoderun mangohud LSFG_PROCESS="miyu" %command%
+   LSFG_PROCESS="miyu" %command%
    ```
 
 3. 其他
@@ -3312,6 +3380,98 @@ vim ~/.steam/steam/steam_dev.cfg
 sudo pacman -R steam
 sudo rm -rfv ~/.steam ~/.local/share/Steam
 ```
+
+#### 可选：为steam创建专门的btrfs子卷
+
+我不想快照复制steam游戏，因为这会占用大量的硬盘空间，可以创建一个和@home平级的@steamgames字卷让创建@home快照的时候排除steam的游戏。
+
+1. 挂载根分区硬盘到/mnt下任意位置
+
+   ```
+   sudo mount --mkdir -o subvolid=5 /dev/nvme1n1p2 /mnt/btrfs_root #记得替换为自己对于的硬盘名称
+   ```
+
+2. 创建@steamgames子卷
+
+   ```
+   sudo btrfs subvolume create /mnt/btrfs_root/@steamgames
+   ```
+
+3. 禁用子卷的写时复制
+
+   ```
+   sudo chattr +C /mnt/btrfs_root/@steamgames
+   ```
+
+4. 取消挂载
+
+   ```
+   sudo umount /mnt/btrfs_root
+   ```
+
+5. 移动并备份现有steamapps文件夹
+
+   ```
+   mv ~/.local/share/Steam/steamapps ~/.local/share/Steam/steamapps.bak
+   ```
+
+6. 创建新的steamapps文件夹作为挂载点
+
+   ```
+   mkdir -p ~/.local/share/Steam/steamapps
+   ```
+
+7. 配置fstab文件
+
+   ```
+   sudo vim /etc/fstab
+   ```
+
+8. 复制粘贴fstab里面根分区的那一行
+
+   ```
+   # /dev/nvme1n1p2
+   UUID=92a83c41-105d-4983-9536-2492d024bb52       /               btrfs           rw,relatime,compress=zstd:3,ssd,discard=async,space_cache=v2,subvol=/@  0 0
+   ```
+
+   粘贴到底部，把 / 修改为steamapps的路径```/home/shorin/.local/share/Steam/steamapps```，把subvol=/@改成subvol=/@steamgames。修改后是这样的：
+
+   ```
+   # steamgames subvolume
+   UUID=92a83c41-105d-4983-9536-2492d024bb52       /home/shorin/.local/share/Steam/steamapps     btrfs           rw,relatime,compress=zstd:3,ssd,discard=async,space_cache=v2,subvol=/@steamgames  0 0
+   ```
+
+9. 刷新systemd缓存
+
+   ```
+   sudo systemctl daemon-reload
+   ```
+
+10. 手动挂载fstab新条目
+
+    ```
+    sudo mount -a
+    ```
+
+11. 修改权限（记得替换成自己的用户名）
+
+    ```
+    sudo chown shorin ~/.local/share/Steam/steamapps/
+    ```
+
+11. 把刚刚备份的文件移回原位
+
+    ```
+    mv ~/.local/share/Steam/steamapps.bak/* ~/.local/share/Steam/steamapps/
+    ```
+
+12. 清理残留
+
+    ```
+    rm -r ~/.local/share/Steam/steamapps.bak
+    ```
+
+现在创建home目录的快照就不会记录steam的游戏库了。对lutris也可以进行同样的操作。如果被识别成外部设备出现在文档管理器的挂载列表里面，就在fstab的那一连串逗号隔开的参数里添加```x-gvfs-hide```
 
 ## 玩minecraft
 
@@ -3450,7 +3610,7 @@ wine、proton这些兼容层有一大特点叫prefix，相当于一个虚拟的c
 
 lutris是一个专为玩游戏设计的管理工具，可以完全取代steam的“添加非steam游戏”功能。当然也可以用来管理普通软件。
 
-- 安装（kde桌面要重启一次）
+- 安装
 ```
 sudo pacman -S lutris
 ```
@@ -3563,8 +3723,8 @@ sudo vim  /etc/systemd/zram-generator.conf
 ```
 ```
 [zram0]
-zram-size = "ram*3" #设置zram大小，可以设置为内存（ram）的3倍，保守是一半
-compression-algorithm = zstd #重视cpu开销和速度选择lz4
+zram-size = "ram*3" 
+compression-algorithm = zstd 
 ```
 3. 禁用zswap
 
@@ -3759,6 +3919,19 @@ shotcut
 # issues
 
 这里是我使用过程中遇到的问题以及对应的解决方案
+
+## kde开机会卡住，必须重启sddm才好
+
+显卡驱动没加载完sddm就加载导致的卡死。让sddm晚2s加载就可以解决。
+
+```
+sudo systemctl edit sddm.service
+```
+
+```
+[Service]
+ExecStartPre=/bin/sleep 2
+```
 
 ## 磁盘占用异常
 
