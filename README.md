@@ -1227,7 +1227,7 @@ ibus-mozc是日语输入法
   这里都是些有趣或者实用的工具，可以从商店搜索安装，也可以用命令
 
   ```
-  flatpak install flathub be.alexandervanhee.gradia io.github.Predidit.Kazumi io.gitlab.theevilskeleton.Upscaler com.github.unrud.VideoDownloader io.github.ilya_zlobintsev.LACT com.geeks3d.furmark io.github.flattool.Warehouse com.github.tchx84.Flatseal
+  flatpak install flathub be.alexandervanhee.gradia io.github.Predidit.Kazumi io.gitlab.theevilskeleton.Upscaler com.github.unrud.VideoDownloader io.github.ilya_zlobintsev.LACT com.geeks3d.furmark io.github.flattool.Warehouse com.github.tchx84.Flatseal com.dec05eba.gpu_screen_recorder
   ```
 
   ```
@@ -1239,14 +1239,15 @@ ibus-mozc是日语输入法
   furmark 显卡烤鸡
   Warehouse 用来管理flatpak的源、软件、属性、用户数据之类的
   Flatseal 管理flatpak应用的权限、环境变量之类的
+  gpu_screen_recorder 类似nvidiaApp的录屏软件
   ```
   
   - gradia可以对截图进行一些简单的添加文字、马赛克、图表、背景之类的操作
-
+  
     使用方法：
-
+  
     设置自定义快捷键的时候命令写
-
+  
     ```
     flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE
     ```
@@ -1592,6 +1593,10 @@ flatpak install flathub com.mattjakeman.ExtensionManager
   让右上角的快速设置面板变得更合理。包括把通知从时间面板移动到快速设置面板，缩小时间面板的占地面积，免打扰模式开关按钮移动到快速设置面板，允许调整单个应用的声音大小等等。
 
   扩展设置的menu页面的两项可以激活，第一项让声音调整菜单以悬浮的方式显示出来，第二项给这个功能增加动画，很酷。
+  
+- clipboard indicator 
+
+  剪贴板历史。设置里设置super+v切换菜单
 
 可选：使用鼠标的用户建议安装的扩展
 
@@ -1814,6 +1819,8 @@ https://www.gnome-look.org/browse?cat=134&ord=latest
 #### shell美化
 
 ##### 更换终端为fish，想用zsh可以看附录：[zsh](#zsh)
+
+更换为fishshell之后amber-ce可能无法正常运行，解决办法看：[解决amber-ce无法在主机使用fish shell时正常运行的问题](#解决amber-ce无法在主机使用fish shell时正常运行的问题)
 
 - 安装终端字体
 
@@ -2261,6 +2268,8 @@ sudo apt install fcitx5-frontend-gtk2 fcitx5-frontend-gtk3 fcitx5-frontend-gtk4 
 yay -Rns amber-ce-trixie
 ```
 
+
+
 ### 快照
 
 **快照相当于恢复点，每次试验什么之前最好都创建一下快照**
@@ -2516,6 +2525,8 @@ yay -S catppuccin-konsole-colorscheme-frappe-git
 
 #### 更换终端为fish
 
+注意：更换为fishshell之后amber-ce可能无法正常运行，解决办法看：[解决amber-ce无法在主机使用fish shell时正常运行的问题](#解决amber-ce无法在主机使用fish shell时正常运行的问题)
+
 想用ZSH可以看附录：[zsh](#zsh)
 
 - 安装终端字体
@@ -2550,9 +2561,7 @@ vim ~/.config/fish/config.fish
 set fish_greeting ""
 ```
 
-
-
-starship Shell主题
+#### starship Shell主题
 
 [Starship](https://starship.rs/)
 
@@ -4011,6 +4020,42 @@ shotcut
 
 这里是我使用过程中遇到的问题以及对应的解决方案
 
+## 解决amber-ce无法在主机使用fish shell时正常运行的问题
+
+1. 把本机shell从fish改成bash
+
+   ```
+   chsh -s /usr/bin/bash
+   ```
+
+2. 在ace容器里安装fish
+
+   ```
+   sudo apt install fish
+   ```
+
+3. 安装starship
+
+   ```
+   curl -sS https://starship.rs/install.sh | sh
+   ```
+
+   如果这条命令安装失败的话，点击[下载starship安装脚本](https://starship.rs/install.sh)，右键属性设置可执行权限，然后在ace里面
+
+   ```
+   sudo 把安装脚本文件拖拽进来
+   ```
+
+4. starship安装完成后登出
+
+5. 把主机shell切换回fish
+
+   ```
+   chsh -s /usr/bin/fish
+   ```
+
+   
+
 ## kde开机会卡住，必须重启sddm才好
 
 显卡驱动没加载完sddm就加载导致的卡死。让sddm晚2s加载就可以解决。
@@ -4265,10 +4310,6 @@ yay -S appimagelauncher
 - desktop widgets （desktop clock）
 
   在桌面上显示一个时钟组件
-
-- clipboard indicator 
-
-  剪贴板历史
 
 - lock screen background 
 
