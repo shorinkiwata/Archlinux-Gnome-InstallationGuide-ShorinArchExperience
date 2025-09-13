@@ -2716,6 +2716,38 @@ sudo systemctl enable --now vmware-usbarbitrator.service
 
 以docker容器为基础的windows虚拟机，rdp连接，自动化配置winapps，可以与linux无缝集成，但beta版无缝集成的效果不是很好。只是用windows虚拟机做轻量的活的话可以用这个，安装很简单，缺点是资源占用比kvm/qemu虚拟机要高一些。
 
+1. 安装docker
+
+   ```
+   sudo pacman -S docker docker-compose
+   ```
+
+2. 开启服务
+
+   ```
+   sudo systemctl enable --now docker.service
+   ```
+
+3. 添加docker组
+
+   ```
+   sudo usermod -aG docker $USER
+   ```
+
+4. 开启iptables功能
+
+   ```
+   echo -e "ip_tables\niptable_nat" | sudo tee /etc/modules-load.d/iptables.conf
+   ```
+
+5. 重启电脑
+
+   ```
+   reboot
+   ```
+
+合起来：
+
 `````````````````````````````````````
 sudo pacman -S docker docker-compose
 sudo systemctl enable --now docker.service
