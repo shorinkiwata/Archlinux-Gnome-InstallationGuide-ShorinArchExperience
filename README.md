@@ -52,6 +52,7 @@
 17. [专业软件平替](#专业软件平替)
 18. [issues](#issues)
 15. [附录](#附录)
+15. [许可证信息](#许可证(License) )
 
 ## vim基础操作
 i 键进入编辑模式
@@ -4190,9 +4191,9 @@ sudo pacman -Rdd
 ```
 
 ## ananicy cpu资源调用优化
-（没感觉到区别，故弃用。）
+（会导致steam下载速度异常，故弃用。）
 ```
-yay -S ananicy-cpp cachyos-ananicy-rules
+yay -S ananicy-cpp cachyos-ananicy-rules-git
 ```
 ```
 sudo systemctl enable --now ananicy-cpp.service
@@ -4479,3 +4480,104 @@ source ~/.zshrc
 sudo pacman -S zen-browser zen-browser-i18n-zh-cn
 ```
 
+## distrobox
+
+[distrobox.it](https://distrobox.it/)
+
+disrobox是一个在linux上无缝运行其他linux发行版的项目，使用podman、docker或者lilipod创建容器。有了这个项目就可以安装别的发行版的包了。建议使用podman，这个更轻量化更简洁。
+
+```
+sudo pacman -S distrobox podman
+```
+
+选项选crun，podman和crun都是红帽主导开发的比docker和runc更新更简洁的程序。
+
+### 创建容器
+
+podman兼容docker镜像，可以去docker hub上搜索镜像对应的字符
+
+比如说我想装一个debian stable
+
+```
+distrobox create -n debian -i debian:stable
+```
+
+```
+#distrobox create 创建容器
+#-n 指定容器名
+#-i 指定镜像
+```
+
+默认会共享主机的home目录，使用--home（简写是-H）给容器指定单独的目录存放home目录下的文件，避免搞乱本机的home目录。
+
+```
+distrobox create -n debian -i debian:stable --home ~/Distroboxhome/debian
+```
+
+加上--nvidia可以共享本机的n卡驱动
+
+```
+distrobox create -n debian -i debian:stable --home ~/Distroboxhome/debian --nvidia
+```
+
+创建之后应用程序里会出现快捷方式，也可以在命令行用distrobox enter命令进入。第一次会安装各种基本包。
+
+```
+distrobox enter debian
+```
+
+创建容器时下载下来的镜像会存放在```/home/shorin/.local/share/containers/storage```目录下
+
+#### 常用的发行版
+
+- debian:stable
+
+  ```
+  distrobox create -n debian -i debian:stable --home ~/Distroboxhome/debian --nvidia
+  ```
+
+- archlinux:latest
+
+  ```
+  distrobox create -n arch -i archlinux:latest --home ~/Distroboxhome/arch --nvidia
+  ```
+
+- fedora
+
+  ```
+  distrobox create -n fedora -i fedora:latest --home ~/Distroboxhome/fedora --nvidia
+  ```
+
+### 在主机创建容器内程序的快捷方式
+
+用distrobox-exprot --app命令在主机```~/.loacl/share/applications```目录下创建对应程序的.desktop文件，比如我安装了星火应用商店
+
+```
+distrobox-exprot --app spark-store
+```
+
+想删除的话加上--delete
+
+```
+distrobox-exprot --app spark-store --delete
+```
+
+删除容器的时候也会连着这个快捷方式一起删除
+
+### 删除容器
+
+使用distrobox rm命令
+
+```
+distrobox rm debian
+```
+
+然后手动删除home目录下的残留
+
+
+
+---
+
+## 许可证(License) 
+
+本文档的所有内容均采用 [知识共享 署名-相同方式共享 4.0 国际 许可协议](http://creativecommons.org/licenses/by-sa/4.0/) 进行许可。
