@@ -1820,7 +1820,7 @@ https://www.gnome-look.org/browse?cat=134&ord=latest
 
 ##### 更换终端为fish，想用zsh可以看附录：[zsh](#zsh)
 
-更换为fishshell之后amber-ce可能无法正常运行，解决办法看：[解决amber-ce无法在主机使用fish shell时正常运行的问题](#解决amber-ce无法在主机使用fish shell时正常运行的问题)
+更换为fish之后amber-ce的星火商店无法正常运行，解决办法看：[解决amber-ce无法在主机使用fish shell时正常运行的问题](#解决amber-ce无法在主机使用fish shell时正常运行的问题)
 
 - 安装终端字体
 
