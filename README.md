@@ -1820,7 +1820,7 @@ https://www.gnome-look.org/browse?cat=134&ord=latest
 
 ##### 更换终端为fish，想用zsh可以看附录：[zsh](#zsh)
 
-更换为fish之后amber-ce的星火商店无法正常运行，解决办法看：[解决amber-ce无法在主机使用fish shell时正常运行的问题](#解决amber-ce无法在主机使用fish shell时正常运行的问题)
+更换为fishshell之后amber-ce可能无法正常运行，解决办法看：[解决amber-ce无法在主机使用fish shell时正常运行的问题](#解决amber-ce无法在主机使用fish shell时正常运行的问题)
 
 - 安装终端字体
 
@@ -2525,7 +2525,7 @@ yay -S catppuccin-konsole-colorscheme-frappe-git
 
 #### 更换终端为fish
 
-注意：更换为fishshell之后amber-ce可能无法正常运行，解决办法看：[解决amber-ce无法在主机使用fish shell时正常运行的问题](#解决amber-ce无法在主机使用fish shell时正常运行的问题)
+注意：更换为fishshell之后amber-ce可能无法正常运行，解决办法看：[解决amber-ce无法在主机使用fish shell时正常运行的问题](#星火商店在fish下的问题)
 
 想用ZSH可以看附录：[zsh](#zsh)
 
@@ -4020,7 +4020,7 @@ shotcut
 
 这里是我使用过程中遇到的问题以及对应的解决方案
 
-## 解决amber-ce无法在主机使用fish shell时正常运行的问题
+## 星火商店在fish下的问题
 
 （这是临时的解决办法，重启电脑之后桌面快捷方式还是会消失，如果要用星火商店的话还是换zsh吧 T_T
 
